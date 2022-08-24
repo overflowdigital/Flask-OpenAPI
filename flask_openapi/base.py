@@ -30,7 +30,7 @@ try:
 except ImportError:
     RequestParser = None
 import jsonschema
-from flask_openapi.utils.auth import AuthHelper
+from flask_openapi.new_utils.auth import AuthHelper
 from mistune import markdown
 
 from . import __version__

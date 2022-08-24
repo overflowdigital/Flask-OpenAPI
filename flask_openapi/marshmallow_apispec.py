@@ -58,7 +58,7 @@ class APISpec(BaseAPISpec):
         if Schema is None:
             raise RuntimeError('Please install marshmallow and apispec')
 
-        return flask_openapi.utils.apispec_to_template(
+        return flask_openapi.new_utils.apispec_to_template(
             app,
             self,
             definitions=definitions,
@@ -102,7 +102,7 @@ class SwaggerView(MethodView):
             definitions = {}
             specs.update(convert_schemas(specs, definitions))
             specs['definitions'] = definitions
-            flask_openapi.utils.validate(
+            flask_openapi.new_utils.validate(
                 specs=specs, validation_function=self.validation_function,
                 validation_error_handler=self.validation_error_handler
             )
