@@ -30,6 +30,7 @@ try:
 except ImportError:
     RequestParser = None
 import jsonschema
+from flask_openapi.utils.auth import AuthHelper
 from mistune import markdown
 
 from . import __version__
@@ -67,6 +68,8 @@ class APIDocsView(MethodView):
         The data under /apidocs
         json or Swagger UI
         """
+        AuthHelper(self.config).do_auth()
+
         base_endpoint = self.config.get('endpoint', 'flask_openapi')
         specs = [
             {
@@ -103,7 +106,8 @@ class APIDocsView(MethodView):
             )
             data['swagger_ui_bundle_js'] = self.config.get(
                 'swagger_ui_bundle_js',
-                url_for('flask_openapi.static', filename='swagger-ui-bundle.js')
+                url_for('flask_openapi.static',
+                        filename='swagger-ui-bundle.js')
             )
             data['swagger_ui_standalone_preset_js'] = self.config.get(
                 'swagger_ui_standalone_preset_js',
@@ -128,6 +132,7 @@ class OAuthRedirect(MethodView):
     """
     The OAuth2 redirect HTML for Swagger UI standard/implicit flow
     """
+
     def get(self):
         return render_template(
             ['flask_openapi/oauth2-redirect.html', 'flask_openapi/o2c.html'],
@@ -169,6 +174,9 @@ class Swagger(object):
 
     DEFAULT_ENDPOINT = 'apispec_1'
     DEFAULT_CONFIG = {
+        "PAGE_AUTH": False,
+        "PAGE_AUTH_USERNAME": "",
+        "PAGE_AUTH_PASSWORD": "",
         "headers": [
         ],
         "specs": [
