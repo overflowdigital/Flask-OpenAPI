@@ -9,6 +9,7 @@ we add the endpoint to swagger specification output
 import codecs
 import os
 import re
+from typing import Optional
 
 import yaml
 
@@ -24,13 +25,13 @@ from flask import (abort, Blueprint, current_app, jsonify, Markup, redirect,
                    render_template, request, Response, url_for)
 from flask.json import JSONEncoder
 from flask.views import MethodView
+from werkzeug.datastructures import Authorization
 
 try:
     from flask_restful.reqparse import RequestParser
 except ImportError:
     RequestParser = None
 import jsonschema
-from flask_openapi.new_utils.auth import AuthHelper
 from mistune import markdown
 
 from . import __version__
@@ -68,64 +69,78 @@ class APIDocsView(MethodView):
         The data under /apidocs
         json or Swagger UI
         """
-        AuthHelper(self.config).do_auth()
 
-        base_endpoint = self.config.get('endpoint', 'flask_openapi')
-        specs = [
-            {
-                "url": url_for(".".join((base_endpoint, spec['endpoint']))),
-                "title": spec.get('title', 'API Spec 1'),
-                "name": spec.get('name', None),
-                "version": spec.get("version", '0.0.1'),
-                "endpoint": spec.get('endpoint')
+        do_auth: bool = self.config.get('PAGE_AUTH', False)
+        is_auth: bool = True
+
+        if do_auth:
+            request_auth: Optional[Authorization] = request.authorization
+            username: str = self.config.get('PAGE_AUTH_USERNAME', '')
+            password: str = self.config.get('PAGE_AUTH_PASSWORD', '')
+            is_auth = (request_auth and request_auth.type == 'basic') and (request_auth.username != username and request_auth.password != password)
+
+        if is_auth:
+            base_endpoint = self.config.get('endpoint', 'flask_openapi')
+            specs = [
+                {
+                    "url": url_for(".".join((base_endpoint, spec['endpoint']))),
+                    "title": spec.get('title', 'API Spec 1'),
+                    "name": spec.get('name', None),
+                    "version": spec.get("version", '0.0.1'),
+                    "endpoint": spec.get('endpoint')
+                }
+                for spec in self.config.get('specs', [])
+            ]
+            urls = [
+                {
+                    "name": spec["name"],
+                    "url": spec["url"]
+                }
+                for spec in specs if spec["name"]
+            ]
+            data = {
+                "specs": specs,
+                "urls": urls,
+                "title": self.config.get('title', 'Flasgger')
             }
-            for spec in self.config.get('specs', [])
-        ]
-        urls = [
-            {
-                "name": spec["name"],
-                "url": spec["url"]
-            }
-            for spec in specs if spec["name"]
-        ]
-        data = {
-            "specs": specs,
-            "urls": urls,
-            "title": self.config.get('title', 'Flasgger')
-        }
-        if request.args.get('json'):
-            # calling with ?json returns specs
-            return jsonify(data)
-        else:  # pragma: no cover
-            data['flasgger_config'] = self.config
-            data['json'] = json
-            data['flasgger_version'] = __version__
-            data['favicon'] = self.config.get(
-                'favicon',
-                url_for('flask_openapi.static', filename='favicon-32x32.png')
-            )
-            data['swagger_ui_bundle_js'] = self.config.get(
-                'swagger_ui_bundle_js',
-                url_for('flask_openapi.static',
-                        filename='swagger-ui-bundle.js')
-            )
-            data['swagger_ui_standalone_preset_js'] = self.config.get(
-                'swagger_ui_standalone_preset_js',
-                url_for('flask_openapi.static',
-                        filename='swagger-ui-standalone-preset.js')
-            )
-            data['jquery_js'] = self.config.get(
-                'jquery_js',
-                url_for('flask_openapi.static', filename='lib/jquery.min.js')
-            )
-            data['swagger_ui_css'] = self.config.get(
-                'swagger_ui_css',
-                url_for('flask_openapi.static', filename='swagger-ui.css')
-            )
-            return render_template(
-                'flask_openapi/index.html',
-                **data
-            )
+            if request.args.get('json'):
+                # calling with ?json returns specs
+                return jsonify(data)
+            else:  # pragma: no cover
+                data['flasgger_config'] = self.config
+                data['json'] = json
+                data['flasgger_version'] = __version__
+                data['favicon'] = self.config.get(
+                    'favicon',
+                    url_for('flask_openapi.static',
+                            filename='favicon-32x32.png')
+                )
+                data['swagger_ui_bundle_js'] = self.config.get(
+                    'swagger_ui_bundle_js',
+                    url_for('flask_openapi.static',
+                            filename='swagger-ui-bundle.js')
+                )
+                data['swagger_ui_standalone_preset_js'] = self.config.get(
+                    'swagger_ui_standalone_preset_js',
+                    url_for('flask_openapi.static',
+                            filename='swagger-ui-standalone-preset.js')
+                )
+                data['jquery_js'] = self.config.get(
+                    'jquery_js',
+                    url_for('flask_openapi.static',
+                            filename='lib/jquery.min.js')
+                )
+                data['swagger_ui_css'] = self.config.get(
+                    'swagger_ui_css',
+                    url_for('flask_openapi.static', filename='swagger-ui.css')
+                )
+                return render_template(
+                    'flask_openapi/index.html',
+                    **data
+                )
+        else:
+            return ('Unauthorized', 401, {'WWW-Authenticate': 'Basic realm="OpenAPI Documentation"'})
+
 
 
 class OAuthRedirect(MethodView):
@@ -174,9 +189,9 @@ class Swagger(object):
 
     DEFAULT_ENDPOINT = 'apispec_1'
     DEFAULT_CONFIG = {
-        "PAGE_AUTH": False,
-        "PAGE_AUTH_USERNAME": "",
-        "PAGE_AUTH_PASSWORD": "",
+        "PAGE_AUTH": True,
+        "PAGE_AUTH_USERNAME": "cado",
+        "PAGE_AUTH_PASSWORD": "cado",
         "headers": [
         ],
         "specs": [
@@ -251,6 +266,7 @@ class Swagger(object):
         """
         Initialize the app with Swagger plugin
         """
+        global auth
         self.decorators = decorators or self.decorators
         self.app = app
         self.app.add_url_rule = swag_annotation(self.app.add_url_rule)
