@@ -189,9 +189,6 @@ class Swagger(object):
 
     DEFAULT_ENDPOINT = 'apispec_1'
     DEFAULT_CONFIG = {
-        "PAGE_AUTH": True,
-        "PAGE_AUTH_USERNAME": "cado",
-        "PAGE_AUTH_PASSWORD": "cado",
         "headers": [
         ],
         "specs": [
