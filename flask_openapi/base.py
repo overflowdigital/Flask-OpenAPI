@@ -71,13 +71,13 @@ class APIDocsView(MethodView):
         json or Swagger UI
         """
 
-        do_auth: bool = self.config.get('PAGE_AUTH', False)
+        do_auth: bool = self.config.get('pageProtection', False)
         is_auth: bool = True
 
         if do_auth:
             request_auth: Optional[Authorization] = request.authorization
-            username: str = self.config.get('PAGE_AUTH_USERNAME', '')
-            password: str = self.config.get('PAGE_AUTH_PASSWORD', '')
+            username: str = self.config.get('pageUsername', '')
+            password: str = self.config.get('pagePassword', '')
             is_auth = (request_auth and request_auth.type == 'basic' and request_auth.username == username and request_auth.password == password)
 
         if is_auth:
