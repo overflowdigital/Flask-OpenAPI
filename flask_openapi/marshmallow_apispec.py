@@ -1,15 +1,14 @@
 # coding: utf-8
 import inspect
 
-from flask.views import MethodView
-
 import flask_openapi
+from flask.views import MethodView
 
 try:
     import marshmallow
-    from marshmallow import fields
-    from apispec.ext.marshmallow import openapi
     from apispec import APISpec as BaseAPISpec
+    from apispec.ext.marshmallow import openapi
+    from marshmallow import fields
 
     # Note that openapi_converter is initialized with trivial
     #   schema_name_resolver. Resolving circular reference is not
@@ -58,7 +57,7 @@ class APISpec(BaseAPISpec):
         if Schema is None:
             raise RuntimeError('Please install marshmallow and apispec')
 
-        return flask_openapi.new_utils.apispec_to_template(
+        return flask_openapi.utils.apispec_to_template(
             app,
             self,
             definitions=definitions,
@@ -102,7 +101,7 @@ class SwaggerView(MethodView):
             definitions = {}
             specs.update(convert_schemas(specs, definitions))
             specs['definitions'] = definitions
-            flask_openapi.new_utils.validate(
+            flask_openapi.utils.validate(
                 specs=specs, validation_function=self.validation_function,
                 validation_error_handler=self.validation_error_handler
             )

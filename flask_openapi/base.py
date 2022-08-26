@@ -7,6 +7,7 @@ we add the endpoint to swagger specification output
 
 """
 import codecs
+import logging
 import os
 import re
 from typing import Optional
@@ -77,7 +78,7 @@ class APIDocsView(MethodView):
             request_auth: Optional[Authorization] = request.authorization
             username: str = self.config.get('PAGE_AUTH_USERNAME', '')
             password: str = self.config.get('PAGE_AUTH_PASSWORD', '')
-            is_auth = (request_auth and request_auth.type == 'basic') and (request_auth.username != username and request_auth.password != password)
+            is_auth = (request_auth and request_auth.type == 'basic' and request_auth.username == username and request_auth.password == password)
 
         if is_auth:
             base_endpoint = self.config.get('endpoint', 'flask_openapi')
