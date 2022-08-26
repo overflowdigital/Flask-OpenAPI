@@ -1,15 +1,14 @@
 # coding: utf-8
 import inspect
 
-from flask.views import MethodView
-
 import flask_openapi
+from flask.views import MethodView
 
 try:
     import marshmallow
-    from marshmallow import fields
-    from apispec.ext.marshmallow import openapi
     from apispec import APISpec as BaseAPISpec
+    from apispec.ext.marshmallow import openapi
+    from marshmallow import fields
 
     # Note that openapi_converter is initialized with trivial
     #   schema_name_resolver. Resolving circular reference is not

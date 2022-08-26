@@ -7,7 +7,9 @@ __email__ = 'team@overflow.digital'
 
 
 from jsonschema import ValidationError  # noqa
-from .base import Swagger, Flasgger, NO_SANITIZER, BR_SANITIZER, MK_SANITIZER, LazyJSONEncoder  # noqa
-from .utils import swag_from, validate, apispec_to_template, LazyString  # noqa
-from .marshmallow_apispec import APISpec, SwaggerView, Schema, fields  # noqa
+
+from .base import (BR_SANITIZER, Flasgger, LazyJSONEncoder,  # noqa
+                   MK_SANITIZER, NO_SANITIZER, Swagger)
 from .constants import OPTIONAL_FIELDS  # noqa
+from .marshmallow_apispec import APISpec, fields, Schema, SwaggerView  # noqa
+from .utils import apispec_to_template, LazyString, swag_from, validate  # noqa
