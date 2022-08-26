@@ -29,7 +29,7 @@ def grep(attrname):
 
 
 setup(
-    name='Flask-OpenAPI',
+    name='Flask-OpenAPI3-UI',
     version=grep('__version__'),
     url='https://github.com/overflowdigital/Flask-OpenAPI/',
     license='MIT',
