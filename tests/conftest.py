@@ -3,7 +3,7 @@ import random
 
 import pytest
 from flask_openapi import Swagger
-from flask_openapi.new_utils import get_examples
+from flask_openapi.utils import get_examples
 
 from flask import Flask
 

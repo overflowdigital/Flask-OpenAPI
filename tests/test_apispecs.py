@@ -1,10 +1,8 @@
-#!/usr/bin/python3
-import pytest
-import sys
-import flask_openapi
-import flask
 import json
-from collections import defaultdict
+
+import flask
+import flask_openapi
+
 
 def test_client():
     class FakeJson():
