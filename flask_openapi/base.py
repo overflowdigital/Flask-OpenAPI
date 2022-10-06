@@ -476,7 +476,7 @@ class Swagger(object):
 
                 if type(update_schemas) == list and type(update_schemas[0]) == dict:
                     # pop, assert single element
-                    update_schemas, = update_schemas 
+                    update_schemas, = update_schemas
                 definitions.update(update_schemas)
                 defs = []  # swag.get('definitions', [])
                 defs += extract_definitions(
@@ -640,17 +640,16 @@ class Swagger(object):
             return view
 
         if self.config.get('swagger_ui', True):
-            uiversion = self.config.get('uiversion', 3)
             blueprint = Blueprint(
                 self.config.get('endpoint', 'flask_openapi'),
                 __name__,
                 url_prefix=self.config.get('url_prefix', None),
                 subdomain=self.config.get('subdomain', None),
                 template_folder=self.config.get(
-                    'template_folder', 'ui{0}/templates'.format(uiversion)
+                    'template_folder', 'ui/templates'
                 ),
                 static_folder=self.config.get(
-                    'static_folder', 'ui{0}/static'.format(uiversion)
+                    'static_folder', 'ui/static'
                 ),
                 static_url_path=self.config.get('static_url_path', None)
             )
@@ -665,13 +664,8 @@ class Swagger(object):
                 ))
             )
 
-            if uiversion < 3:
-                redirect_default = specs_route + '/o2c.html'
-            else:
-                redirect_default = "/oauth2-redirect.html"
-
             blueprint.add_url_rule(
-                self.config.get('oauth_redirect', redirect_default),
+                self.config.get('oauth_redirect', "/oauth2-redirect.html"),
                 'oauth_redirect',
                 view_func=wrap_view(OAuthRedirect().as_view(
                     'oauth_redirect'

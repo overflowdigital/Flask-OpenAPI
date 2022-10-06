@@ -1,20 +1,11 @@
 include *.md LICENSE
 
 recursive-include flask_openapi *
-recursive-include flask_openapi/ui2 *
-recursive-include flask_openapi/ui2/static *
-recursive-include flask_openapi/ui2/static/css *
-recursive-include flask_openapi/ui2/static/fonts *
-recursive-include flask_openapi/ui2/static/images *
-recursive-include flask_openapi/ui2/static/lang *
-recursive-include flask_openapi/ui2/static/lib *
-recursive-include flask_openapi/ui2/templates *
-recursive-include flask_openapi/ui2/templates/flask_openapi *
-recursive-include flask_openapi/ui3 *
-recursive-include flask_openapi/ui3/static *
-recursive-include flask_openapi/ui3/static/lib *
-recursive-include flask_openapi/ui3/templates *
-recursive-include flask_openapi/ui3/templates/flask_openapi *
+recursive-include flask_openapi/ui *
+recursive-include flask_openapi/ui/static *
+recursive-include flask_openapi/ui/static/lib *
+recursive-include flask_openapi/ui/templates *
+recursive-include flask_openapi/ui/templates/flask_openapi *
 recursive-include etc *
 recursive-include tests *
 
