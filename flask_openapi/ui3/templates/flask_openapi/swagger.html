@@ -79,9 +79,13 @@ window.onload = function() {
     
     )
 
-    let auth_config = {{ flasgger_config.get("auth") | safe }};
+    {% if flasgger_config.oauth %}
+    ui.initOAuth({{ json.dumps(flasgger_config['oauth']) | safe }})
+    {%- endif %}
 
-    ui.initOAuth(auth_config);
+    {% if flasgger_config.auth %}
+    let auth_config = {{ flasgger_config.get("auth") | safe }}
+    {%- endif %}
 
     window.ui = ui
 
