@@ -7,28 +7,24 @@ import inspect
 import os
 import re
 import sys
-import jsonschema
-import yaml
-from six import string_types, text_type
+from collections import defaultdict, OrderedDict
 from copy import deepcopy
 from functools import wraps
 from importlib import import_module
-from collections import OrderedDict, defaultdict
-from flask import Response
-from flask import abort
-from flask import current_app
-from flask import request
+
+import jsonschema
+import yaml
+from flask import abort, current_app, request, Response
 from flask.views import MethodView
+from six import string_types, text_type
 
 try:
     from flask_mongorest import methods as fmr_methods
 except ImportError:
     fmr_methods = None
 
-from .constants import OPTIONAL_FIELDS, DEFAULT_FIELDS
-from .marshmallow_apispec import SwaggerView
-from .marshmallow_apispec import convert_schemas
-from .marshmallow_apispec import Schema
+from .constants import DEFAULT_FIELDS, OPTIONAL_FIELDS
+from .marshmallow_apispec import convert_schemas, Schema, SwaggerView
 
 
 def merge_specs(target, source):
@@ -164,18 +160,9 @@ def get_specs(rules, ignore_verbs, optional_fields, sanitizer,
 
                 swagged = True
 
+            # HACK: If the doc_dir doesn't quite match the filepath we take the doc_dir and the current filepath without the /tmp
             if doc_dir:
-                if view_class:
-                    file_path = os.path.join(
-                        doc_dir, endpoint.__name__, method.__name__ + '.yml')
-                else:
-                    file_path = os.path.join(
-                        doc_dir, endpoint.__name__ + '.yml')
-                if os.path.isfile(file_path):
-                    func = method.__func__ \
-                        if hasattr(method, '__func__') else method
-                    setattr(func, 'swag_type', 'yml')
-                    setattr(func, 'swag_path', file_path)
+                get_filepath(doc_dir, view_class, endpoint, method, 1)
 
             doc_summary, doc_description, doc_swag = parse_docstring(
                 method, sanitizer, endpoint=rule.endpoint, verb=verb)
@@ -1067,3 +1054,20 @@ def extract_schema(spec: dict) -> defaultdict:
                         ).get('schemas', defaultdict(dict))
     else:  # openapi2
         return spec.get('definitions', defaultdict(dict))
+
+def get_filepath(doc_dir: str, view_class: any, endpoint: any, method: any, i: int=0):
+    if view_class:
+        file_path = os.path.join(
+            doc_dir, endpoint.__name__, method.__name__ + '.yml')
+    else:
+        file_path = os.path.join(
+            doc_dir, endpoint.__name__ + '.yml')
+    if os.path.isfile(file_path):
+        func = method.__func__ \
+            if hasattr(method, '__func__') else method
+        setattr(func, 'swag_type', 'yml')
+        setattr(func, 'swag_path', file_path)
+    elif i==0:
+        regex = re.compile(r"(api.+)")
+        this_is_a_hack = doc_dir + regex.search(file_path)[0]
+        get_filepath(this_is_a_hack, view_class, endpoint, method, 1)
