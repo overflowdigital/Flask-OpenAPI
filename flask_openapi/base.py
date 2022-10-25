@@ -433,6 +433,12 @@ class Swagger(object):
         # technically only responses is non-optional
         optional_fields = self.config.get('optional_fields') or OPTIONAL_FIELDS
 
+        specs = get_specs(
+            self.get_url_mappings(spec.get('rule_filter')), ignore_verbs,
+            optional_fields, self.sanitizer,
+            openapi_version=openapi_version,
+            doc_dir=self.config.get('doc_dir'))
+
         for name, def_model in self.get_def_models(
                 spec.get('definition_filter')).items():
             description, swag = parse_definition_docstring(
@@ -441,12 +447,6 @@ class Swagger(object):
                 if description:
                     swag.update({'description': description})
                 definitions[name].update(swag)
-
-        specs = get_specs(
-            self.get_url_mappings(spec.get('rule_filter')), ignore_verbs,
-            optional_fields, self.sanitizer,
-            openapi_version=openapi_version,
-            doc_dir=self.config.get('doc_dir'))
 
         def merge_sub_component(dest, key, source):
             if len(source) > 0 and dest.get(key) is None:
