@@ -4,6 +4,7 @@ import codecs
 import copy
 import importlib
 import inspect
+import logging
 import os
 import re
 import sys
@@ -160,12 +161,11 @@ def get_specs(rules, ignore_verbs, optional_fields, sanitizer,
 
                 swagged = True
 
-            # HACK: If the doc_dir doesn't quite match the filepath we take the doc_dir and the current filepath without the /tmp
             if doc_dir:
-                get_filepath(doc_dir, view_class, endpoint, method, 1)
+                swag_path = get_swag_path_from_doc_dir(method, view_class, doc_dir, endpoint)
 
             doc_summary, doc_description, doc_swag = parse_docstring(
-                method, sanitizer, endpoint=rule.endpoint, verb=verb)
+                method, sanitizer, endpoint=rule.endpoint, verb=verb, swag_path=swag_path)
 
             if is_openapi3(openapi_version):
                 swag.setdefault('components', {})['schemas'] = swag_def
@@ -611,14 +611,15 @@ def detect_by_bom(path, default='utf-8'):
     return default
 
 
-def parse_docstring(obj, process_doc, endpoint=None, verb=None):
+def parse_docstring(obj, process_doc, endpoint=None, verb=None, swag_path=None):
     """
     Gets swag data for method/view docstring
     """
     first_line, other_lines, swag = None, None, None
 
     full_doc = None
-    swag_path = getattr(obj, 'swag_path', None)
+    if not swag_path:
+        swag_path = getattr(obj, 'swag_path', None)
     swag_type = getattr(obj, 'swag_type', 'yml')
     swag_paths = getattr(obj, 'swag_paths', None)
     root_path = get_root_path(obj)
@@ -683,7 +684,7 @@ def get_root_path(obj):
     return os.path.dirname(filename)
 
 
-def parse_definition_docstring(obj, process_doc):
+def parse_definition_docstring(obj, process_doc, doc_dir=None):
     """
     Gets swag data from docstring for class based definitions
     """
@@ -1055,19 +1056,33 @@ def extract_schema(spec: dict) -> defaultdict:
     else:  # openapi2
         return spec.get('definitions', defaultdict(dict))
 
-def get_filepath(doc_dir: str, view_class: any, endpoint: any, method: any, i: int=0):
+def get_swag_path_from_doc_dir(method: any, view_class: any, doc_dir: str, endpoint: any):
+    file_path = ''
+    func = method.__func__ \
+        if hasattr(method, '__func__') else method
     if view_class:
         file_path = os.path.join(
             doc_dir, endpoint.__name__, method.__name__ + '.yml')
     else:
         file_path = os.path.join(
             doc_dir, endpoint.__name__ + '.yml')
-    if os.path.isfile(file_path):
-        func = method.__func__ \
-            if hasattr(method, '__func__') else method
+    if file_path and os.path.isfile(file_path):
+        logging.info(f"swag_path: {file_path}")
         setattr(func, 'swag_type', 'yml')
         setattr(func, 'swag_path', file_path)
-    elif i==0:
-        regex = re.compile(r"(api.+)")
-        this_is_a_hack = doc_dir + regex.search(file_path)[0]
-        get_filepath(this_is_a_hack, view_class, endpoint, method, 1)
+    else:
+        # HACK: If the doc_dir doesn't quite match the filepath we take the doc_dir 
+        # and the current filepath without the /tmp
+        file_path = getattr(func, 'swag_path', None)
+        if file_path:
+            regex = re.compile(r"(api.+)")
+            try:
+                file_path = doc_dir + regex.search(file_path)[0]
+                if os.path.isfile(file_path):
+                    logging.info(f"swag_path: {file_path}")
+                    setattr(func, 'swag_type', 'yml')
+                    setattr(func, 'swag_path', file_path)
+            except Exception:
+                logging.exception(f"{file_path} is not a file")
+    
+    return file_path
