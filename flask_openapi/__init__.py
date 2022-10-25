@@ -1,5 +1,5 @@
 
-__version__ = '1.1.1'
+__version__ = '1.2.0'
 __author__ = 'Overflow Digital'
 __email__ = 'team@overflow.digital'
 
