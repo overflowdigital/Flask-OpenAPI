@@ -4,6 +4,7 @@ import codecs
 import copy
 import importlib
 import inspect
+import logging
 import os
 import re
 import sys
@@ -160,9 +161,33 @@ def get_specs(rules, ignore_verbs, optional_fields, sanitizer,
 
                 swagged = True
 
-            # HACK: If the doc_dir doesn't quite match the filepath we take the doc_dir and the current filepath without the /tmp
             if doc_dir:
-                get_filepath(doc_dir, view_class, endpoint, method, 1)
+                func = method.__func__ \
+                    if hasattr(method, '__func__') else method
+                if view_class:
+                    file_path = os.path.join(
+                        doc_dir, endpoint.__name__, method.__name__ + '.yml')
+                else:
+                    file_path = os.path.join(
+                        doc_dir, endpoint.__name__ + '.yml')
+                if file_path and os.path.isfile(file_path):
+                    logging.info(f"swag_path: {file_path}")
+                    setattr(func, 'swag_type', 'yml')
+                    setattr(func, 'swag_path', file_path)
+                else:
+                    # HACK: If the doc_dir doesn't quite match the filepath we take the doc_dir 
+                    # and the current filepath without the /tmp
+                    file_path = getattr(func, 'swag_path', None)
+                    if file_path:
+                        regex = re.compile(r"(api.+)")
+                        try:
+                            file_path = doc_dir + regex.search(file_path)[0]
+                            if os.path.isfile(file_path):
+                                logging.info(f"swag_path: {file_path}")
+                                setattr(func, 'swag_type', 'yml')
+                                setattr(func, 'swag_path', file_path)
+                        except Exception:
+                            logging.exception(f"{file_path} is not a file")
 
             doc_summary, doc_description, doc_swag = parse_docstring(
                 method, sanitizer, endpoint=rule.endpoint, verb=verb)
@@ -1054,20 +1079,3 @@ def extract_schema(spec: dict) -> defaultdict:
                         ).get('schemas', defaultdict(dict))
     else:  # openapi2
         return spec.get('definitions', defaultdict(dict))
-
-def get_filepath(doc_dir: str, view_class: any, endpoint: any, method: any, i: int=0):
-    if view_class:
-        file_path = os.path.join(
-            doc_dir, endpoint.__name__, method.__name__ + '.yml')
-    else:
-        file_path = os.path.join(
-            doc_dir, endpoint.__name__ + '.yml')
-    if os.path.isfile(file_path):
-        func = method.__func__ \
-            if hasattr(method, '__func__') else method
-        setattr(func, 'swag_type', 'yml')
-        setattr(func, 'swag_path', file_path)
-    elif i==0:
-        regex = re.compile(r"(api.+)")
-        this_is_a_hack = doc_dir + regex.search(file_path)[0]
-        get_filepath(this_is_a_hack, view_class, endpoint, method, 1)
