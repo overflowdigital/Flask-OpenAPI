@@ -1074,7 +1074,7 @@ def get_swag_path_from_doc_dir(method: any, view_class: any, doc_dir: str, endpo
         # HACK: If the doc_dir doesn't quite match the filepath we take the doc_dir 
         # and the current filepath without the /tmp
         file_path = getattr(func, 'swag_path', None)
-        if file_path:
+        if file_path and not os.path.isfile(file_path):
             regex = re.compile(r"(api.+)")
             try:
                 file_path = doc_dir + regex.search(file_path)[0]
@@ -1084,5 +1084,5 @@ def get_swag_path_from_doc_dir(method: any, view_class: any, doc_dir: str, endpo
                     setattr(func, 'swag_path', file_path)
             except Exception:
                 logging.exception(f"{file_path} is not a file")
-    
+
     return file_path
