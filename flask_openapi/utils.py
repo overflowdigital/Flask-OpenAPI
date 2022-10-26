@@ -161,6 +161,7 @@ def get_specs(rules, ignore_verbs, optional_fields, sanitizer,
 
                 swagged = True
 
+            swag_path = None
             if doc_dir:
                 swag_path = get_swag_path_from_doc_dir(method, view_class, doc_dir, endpoint)
 
