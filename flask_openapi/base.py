@@ -7,7 +7,6 @@ we add the endpoint to swagger specification output
 
 """
 import codecs
-import logging
 import os
 import re
 from typing import Optional
