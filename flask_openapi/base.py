@@ -7,6 +7,7 @@ we add the endpoint to swagger specification output
 
 """
 import codecs
+import logging
 import os
 import re
 from typing import Optional
@@ -78,7 +79,8 @@ class APIDocsView(MethodView):
             request_auth: Optional[Authorization] = request.authorization
             username: str = self.config.get('pageUsername', '')
             password: str = self.config.get('pagePassword', '')
-            is_auth = (request_auth and request_auth.type == 'basic' and request_auth.username == username and request_auth.password == password)
+            is_auth = (request_auth and request_auth.type == 'basic' and request_auth.username ==
+                       username and request_auth.password == password)
 
         if is_auth:
             base_endpoint = self.config.get('endpoint', 'flask_openapi')
@@ -141,7 +143,6 @@ class APIDocsView(MethodView):
                 )
         else:
             return ('Unauthorized', 401, {'WWW-Authenticate': 'Basic realm="OpenAPI Documentation"'})
-
 
 
 class OAuthRedirect(MethodView):
@@ -454,120 +455,130 @@ class Swagger(object):
             if len(source) > 0 and len(dest[key]) >= 0:
                 dest[key].update(source)
 
-        http_methods = ['get', 'post', 'put', 'delete']
-        for rule, verbs in specs:
-            operations = dict()
-            for verb, swag in verbs:
+        def get_operations(swag):
+            if is_openapi3(openapi_version):
+                source_components = swag.get('components', {})
+                update_schemas = source_components.get('schemas', {})
+                # clone list so we can modify
+                active_sub_components = OAS3_SUB_COMPONENTS[:]
+                # schemas are handled separately, so remove them here
+                active_sub_components.remove("schemas")
+                for subcomponent in OAS3_SUB_COMPONENTS:
+                    merge_sub_component(data['components'], subcomponent,
+                                        source_components.get(subcomponent,
+                                        {}))
+            else:  # openapi2
+                update_schemas = swag.get('definitions', {})
 
-                if is_openapi3(openapi_version):
-                    source_components = swag.get('components', {})
-                    update_schemas = source_components.get('schemas', {})
-                    # clone list so we can modify
-                    active_sub_components = OAS3_SUB_COMPONENTS[:]
-                    # schemas are handled separately, so remove them here
-                    active_sub_components.remove("schemas")
-                    for subcomponent in OAS3_SUB_COMPONENTS:
-                        merge_sub_component(data['components'], subcomponent,
-                                            source_components.get(subcomponent,
-                                            {}))
-                else:  # openapi2
-                    update_schemas = swag.get('definitions', {})
+            if type(update_schemas) == list and type(update_schemas[0]) == dict:
+                # pop, assert single element
+                update_schemas, = update_schemas
+            definitions.update(update_schemas)
+            defs = []  # swag.get('definitions', [])
+            defs += extract_definitions(
+                defs, endpoint=rule.endpoint, verb=verb,
+                prefix_ids=prefix_ids,
+                openapi_version=openapi_version
+            )
 
-                if type(update_schemas) == list and type(update_schemas[0]) == dict:
-                    # pop, assert single element
-                    update_schemas, = update_schemas 
-                definitions.update(update_schemas)
-                defs = []  # swag.get('definitions', [])
-                defs += extract_definitions(
-                    defs, endpoint=rule.endpoint, verb=verb,
+            params = swag.get('parameters', [])
+            if verb in swag.keys():
+                verb_swag = swag.get(verb)
+                if len(params) == 0 and verb.lower() in http_methods:
+                    params = verb_swag.get('parameters', [])
+
+            defs += extract_definitions(params,
+                                        endpoint=rule.endpoint,
+                                        verb=verb,
+                                        prefix_ids=prefix_ids,
+                                        openapi_version=openapi_version)
+
+            request_body = swag.get('requestBody')
+            if request_body:
+                content = request_body.get("content", {})
+                extract_definitions(
+                    list(content.values()),
+                    endpoint=rule.endpoint,
+                    verb=verb,
                     prefix_ids=prefix_ids,
                     openapi_version=openapi_version
                 )
 
-                params = swag.get('parameters', [])
-                if verb in swag.keys():
-                    verb_swag = swag.get(verb)
-                    if len(params) == 0 and verb.lower() in http_methods:
-                        params = verb_swag.get('parameters', [])
+            callbacks = swag.get("callbacks", {})
+            if callbacks:
+                callbacks = {
+                    str(key): value
+                    for key, value in callbacks.items()
+                }
+                extract_definitions(
+                    list(callbacks.values()),
+                    endpoint=rule.endpoint,
+                    verb=verb,
+                    prefix_ids=prefix_ids,
+                    openapi_version=openapi_version
+                )
 
-                defs += extract_definitions(params,
-                                            endpoint=rule.endpoint,
-                                            verb=verb,
-                                            prefix_ids=prefix_ids,
-                                            openapi_version=openapi_version)
-
-                request_body = swag.get('requestBody')
-                if request_body:
-                    content = request_body.get("content", {})
-                    extract_definitions(
-                        list(content.values()),
+            responses = None
+            if 'responses' in swag:
+                responses = swag.get('responses', {})
+                responses = {
+                    str(key): value
+                    for key, value in responses.items()
+                }
+                if responses is not None:
+                    defs = defs + extract_definitions(
+                        responses.values(),
                         endpoint=rule.endpoint,
                         verb=verb,
                         prefix_ids=prefix_ids,
                         openapi_version=openapi_version
                     )
+                for definition in defs:
+                    if 'id' not in definition:
+                        definitions.update(definition)
+                        continue
+                    def_id = definition.pop('id')
+                    if def_id is not None:
+                        definitions[def_id].update(definition)
 
-                callbacks = swag.get("callbacks", {})
-                if callbacks:
-                    callbacks = {
-                        str(key): value
-                        for key, value in callbacks.items()
-                    }
-                    extract_definitions(
-                        list(callbacks.values()),
-                        endpoint=rule.endpoint,
-                        verb=verb,
-                        prefix_ids=prefix_ids,
-                        openapi_version=openapi_version
-                    )
+            operation = {}
+            if swag.get('summary'):
+                operation['summary'] = swag.get('summary')
+            if swag.get('description'):
+                operation['description'] = swag.get('description')
+            if request_body:
+                operation['requestBody'] = request_body
+            if callbacks:
+                operation['callbacks'] = callbacks
+            if responses:
+                operation['responses'] = responses
+            # parameters - swagger ui dislikes empty parameter lists
+            if len(params) > 0:
+                operation['parameters'] = params
+            # other optionals
+            for key in optional_fields:
+                if key in swag:
+                    value = swag.get(key)
+                    if key in ('produces', 'consumes'):
+                        if not isinstance(value, (list, tuple)):
+                            value = [value]
 
-                responses = None
-                if 'responses' in swag:
-                    responses = swag.get('responses', {})
-                    responses = {
-                        str(key): value
-                        for key, value in responses.items()
-                    }
-                    if responses is not None:
-                        defs = defs + extract_definitions(
-                            responses.values(),
-                            endpoint=rule.endpoint,
-                            verb=verb,
-                            prefix_ids=prefix_ids,
-                            openapi_version=openapi_version
-                        )
-                    for definition in defs:
-                        if 'id' not in definition:
-                            definitions.update(definition)
-                            continue
-                        def_id = definition.pop('id')
-                        if def_id is not None:
-                            definitions[def_id].update(definition)
+                    operation[key] = value
+            operations[verb] = operation
 
-                operation = {}
-                if swag.get('summary'):
-                    operation['summary'] = swag.get('summary')
-                if swag.get('description'):
-                    operation['description'] = swag.get('description')
-                if request_body:
-                    operation['requestBody'] = request_body
-                if callbacks:
-                    operation['callbacks'] = callbacks
-                if responses:
-                    operation['responses'] = responses
-                # parameters - swagger ui dislikes empty parameter lists
-                if len(params) > 0:
-                    operation['parameters'] = params
-                # other optionals
-                for key in optional_fields:
-                    if key in swag:
-                        value = swag.get(key)
-                        if key in ('produces', 'consumes'):
-                            if not isinstance(value, (list, tuple)):
-                                value = [value]
-
-                        operation[key] = value
-                operations[verb] = operation
+        http_methods = ['get', 'post', 'put', 'delete', 'patch']
+        for rule, verbs in specs:
+            operations = dict()
+            for verb, swag in verbs:
+                if swag.get('paths'):
+                    logging.info("KAT PATHS")
+                    for path in swag.get('paths'): # /projects/{project_id}/alarms:
+                        logging.info(f"KAT PATH: {path}")
+                        for path_verb in swag.get('paths').get(path): # get:
+                            logging.info(f"KAT PATH VERB: {path_verb}")
+                            get_operations(swag.get('paths').get(path).get(path_verb))
+                else:
+                    get_operations(swag)
 
             if len(operations):
                 try:
