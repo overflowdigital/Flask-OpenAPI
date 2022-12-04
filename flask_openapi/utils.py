@@ -1070,7 +1070,6 @@ def get_swag_path_from_doc_dir(method: any, view_class: any, doc_dir: str, endpo
         file_path = os.path.join(
             doc_dir, endpoint.__name__ + '.yml')
     if file_path and os.path.isfile(file_path):
-        logging.info(f"swag_path: {file_path}")
         setattr(func, 'swag_type', 'yml')
         setattr(func, 'swag_path', file_path)
     else:
@@ -1082,7 +1081,6 @@ def get_swag_path_from_doc_dir(method: any, view_class: any, doc_dir: str, endpo
             try:
                 file_path = doc_dir + regex.search(file_path)[0]
                 if os.path.isfile(file_path):
-                    logging.info(f"swag_path: {file_path}")
                     setattr(func, 'swag_type', 'yml')
                     setattr(func, 'swag_path', file_path)
             except Exception:

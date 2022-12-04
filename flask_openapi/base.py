@@ -455,7 +455,7 @@ class Swagger(object):
             if len(source) > 0 and len(dest[key]) >= 0:
                 dest[key].update(source)
 
-        def get_operations(swag):
+        def get_operations(swag, path_verb = None):
             if is_openapi3(openapi_version):
                 source_components = swag.get('components', {})
                 update_schemas = source_components.get('schemas', {})
@@ -564,19 +564,19 @@ class Swagger(object):
                             value = [value]
 
                     operation[key] = value
-            operations[verb] = operation
+            if path_verb:
+                operations[path_verb] = operation
+            else:
+                operations[verb] = operation
 
         http_methods = ['get', 'post', 'put', 'delete', 'patch']
         for rule, verbs in specs:
             operations = dict()
             for verb, swag in verbs:
                 if swag.get('paths'):
-                    logging.info("KAT PATHS")
                     for path in swag.get('paths'): # /projects/{project_id}/alarms:
-                        logging.info(f"KAT PATH: {path}")
                         for path_verb in swag.get('paths').get(path): # get:
-                            logging.info(f"KAT PATH VERB: {path_verb}")
-                            get_operations(swag.get('paths').get(path).get(path_verb))
+                            get_operations(swag.get('paths').get(path).get(path_verb), path_verb)
                 else:
                     get_operations(swag)
 
