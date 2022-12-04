@@ -163,7 +163,8 @@ def get_specs(rules, ignore_verbs, optional_fields, sanitizer,
 
             swag_path = None
             if doc_dir:
-                swag_path = get_swag_path_from_doc_dir(method, view_class, doc_dir, endpoint)
+                swag_path = get_swag_path_from_doc_dir(
+                    method, view_class, doc_dir, endpoint)
 
             doc_summary, doc_description, doc_swag = parse_docstring(
                 method, sanitizer, endpoint=rule.endpoint, verb=verb, swag_path=swag_path)
@@ -1057,6 +1058,7 @@ def extract_schema(spec: dict) -> defaultdict:
     else:  # openapi2
         return spec.get('definitions', defaultdict(dict))
 
+
 def get_swag_path_from_doc_dir(method: any, view_class: any, doc_dir: str, endpoint: any):
     file_path = ''
     func = method.__func__ \
@@ -1068,11 +1070,10 @@ def get_swag_path_from_doc_dir(method: any, view_class: any, doc_dir: str, endpo
         file_path = os.path.join(
             doc_dir, endpoint.__name__ + '.yml')
     if file_path and os.path.isfile(file_path):
-        logging.info(f"swag_path: {file_path}")
         setattr(func, 'swag_type', 'yml')
         setattr(func, 'swag_path', file_path)
     else:
-        # HACK: If the doc_dir doesn't quite match the filepath we take the doc_dir 
+        # HACK: If the doc_dir doesn't quite match the filepath we take the doc_dir
         # and the current filepath without the /tmp
         file_path = getattr(func, 'swag_path', None)
         if file_path and not os.path.isfile(file_path):
@@ -1080,7 +1081,6 @@ def get_swag_path_from_doc_dir(method: any, view_class: any, doc_dir: str, endpo
             try:
                 file_path = doc_dir + regex.search(file_path)[0]
                 if os.path.isfile(file_path):
-                    logging.info(f"swag_path: {file_path}")
                     setattr(func, 'swag_type', 'yml')
                     setattr(func, 'swag_path', file_path)
             except Exception:
