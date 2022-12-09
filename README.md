@@ -8,7 +8,7 @@ Next generation OpenAPI v3 Integration for Flask based APIs. Based on Flasgger.
 
 ## Install
 ```
-pip install pip install Flask-OpenAPI3-UI
+pip install Flask-OpenAPI3-UI
 ```
 
 ## Usage
