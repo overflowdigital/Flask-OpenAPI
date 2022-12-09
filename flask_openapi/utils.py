@@ -599,6 +599,8 @@ def load_from_file(swag_path, swag_type='yml', root_path=None):
             swag_path = os.path.join(site_package, os.sep.join(path[1:]))
             with open(swag_path) as yaml_file:
                 return yaml_file.read()
+    except TypeError:
+        logging.warning(f"File path {swag_path} is either doesnt exist or is in the wrong type")
 
 
 def detect_by_bom(path, default='utf-8'):

@@ -7,6 +7,7 @@ we add the endpoint to swagger specification output
 
 """
 import codecs
+import logging
 import os
 import re
 from typing import Optional
@@ -573,9 +574,12 @@ class Swagger(object):
             operations = dict()
             for verb, swag in verbs:
                 if swag.get('paths'):
-                    for path in swag.get('paths'): # /projects/{project_id}/alarms:
-                        for path_verb in swag.get('paths').get(path): # get:
-                            get_operations(swag.get('paths').get(path).get(path_verb), path_verb)
+                    try:
+                        for path in swag.get('paths'): # /projects/{project_id}/alarms:
+                            for path_verb in swag.get('paths').get(path): # get:
+                                get_operations(swag.get('paths').get(path).get(path_verb), path_verb)
+                    except AttributeError:
+                        logging.exception(f'Swagger doc not in the correct format. {swag}')
                 else:
                     get_operations(swag)
 
