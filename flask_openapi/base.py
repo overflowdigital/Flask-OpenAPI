@@ -455,7 +455,7 @@ class Swagger(object):
             if len(source) > 0 and len(dest[key]) >= 0:
                 dest[key].update(source)
 
-        def get_operations(swag, path_verb = None):
+        def get_operations(swag, path_verb=None):
 
             if is_openapi3(openapi_version):
                 source_components = swag.get('components', {})
@@ -576,8 +576,8 @@ class Swagger(object):
             for verb, swag in verbs:
                 if swag.get('paths'):
                     try:
-                        for path in swag.get('paths'): # /projects/{project_id}/alarms:
-                            for path_verb in swag.get('paths').get(path): # get:
+                        for path in swag.get('paths'):  # /projects/{project_id}/alarms:
+                            for path_verb in swag.get('paths').get(path):  # get:
                                 if path_verb == verb:
                                     get_operations(swag.get('paths').get(path).get(path_verb), path_verb)
                     except AttributeError:
