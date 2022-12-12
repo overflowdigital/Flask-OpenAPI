@@ -17,5 +17,7 @@ pylint
 readme_renderer
 setuptools
 build
+types-PyYAML
+types-six
 -e .
 -e etc/flask_openapi_package
