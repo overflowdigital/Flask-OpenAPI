@@ -1,7 +1,6 @@
 name: Continuous Integration
 on:
     push:
-    pull_request:
     schedule:
         - cron: '00 09 * * *'
 jobs:
