@@ -456,6 +456,7 @@ class Swagger(object):
                 dest[key].update(source)
 
         def get_operations(swag, path_verb = None):
+
             if is_openapi3(openapi_version):
                 source_components = swag.get('components', {})
                 update_schemas = source_components.get('schemas', {})
@@ -577,7 +578,8 @@ class Swagger(object):
                     try:
                         for path in swag.get('paths'): # /projects/{project_id}/alarms:
                             for path_verb in swag.get('paths').get(path): # get:
-                                get_operations(swag.get('paths').get(path).get(path_verb), path_verb)
+                                if path_verb == verb:
+                                    get_operations(swag.get('paths').get(path).get(path_verb), path_verb)
                     except AttributeError:
                         logging.exception(f'Swagger doc not in the correct format. {swag}')
                 else:
