@@ -26,7 +26,7 @@ jobs:
               run: pip3 install -r requirements-dev.txt
             - name: Compile and Install
               run: sudo python3 setup.py develop
-            - name: Run Codescan Checks
+            - name: Perform Static Codescan Checks
               run: ci/codescan.sh
             - name: Initialize Runtime Code Analysis
               uses: github/codeql-action/init@v2
@@ -34,6 +34,18 @@ jobs:
                   languages: ${{ matrix.language }}
             - name: Perform Runtime Code Analysis
               uses: github/codeql-action/analyze@v2
+            - name: Perfom Secure Code Analysis (Vulnerabilities)
+              uses: snyk/actions/python@master
+              env:
+                  SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+              with:
+                  command: test
+            - name: Perform Secure Code Analysis (Secrets)
+              uses: trufflesecurity/trufflehog@main
+              with:
+                  path: ./
+                  base: ${{ github.ref_name }}
+                  head: HEAD
             - name: Run Unit Tests
               run: ci/test.sh
             - name: Upload release to PyPI
