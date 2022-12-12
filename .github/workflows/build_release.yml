@@ -20,12 +20,10 @@ jobs:
         runs-on: ubuntu-latest
         steps:
             - uses: actions/checkout@v3
+            - name: Setup Worker
+              run: ci/setup_worker.sh
             - name: Increment Version Number
               run: ci/new_version.sh ${{inputs.versionNumber}}
-            - name: Install Dependencies
-              run: pip3 install -r requirements-dev.txt
-            - name: Compile and Install
-              run: sudo python3 setup.py develop
             - name: Perform Static Codescan Checks
               run: ci/codescan.sh
             - name: Initialize Runtime Code Analysis
