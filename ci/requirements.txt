@@ -1,4 +1,3 @@
-# optional (for dev)
 marshmallow
 apispec
 apispec-webframeworks
@@ -13,12 +12,10 @@ decorator
 wheel
 flask-jwt
 twine
+mypy
 pylint
-
-# for pypi markdown support
 readme_renderer
 setuptools
-
-# install Flask-OpenAPI itself as editable
+build
 -e .
 -e etc/flask_openapi_package

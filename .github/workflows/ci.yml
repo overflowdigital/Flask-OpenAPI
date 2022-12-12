@@ -17,10 +17,8 @@ jobs:
         runs-on: ubuntu-latest
         steps:
             - uses: actions/checkout@v3
-            - name: Install Dependencies
-              run: pip3 install -r requirements-dev.txt
-            - name: Compile and Install
-              run: sudo python3 setup.py develop
+            - name: Setup Worker
+              run: ci/setup_worker.sh
             - name: Perform Static Codescan Checks
               run: ci/codescan.sh
             - name: Initialize Runtime Code Analysis
