@@ -13,11 +13,7 @@ import re
 from typing import Optional
 
 import yaml
-
-try:
-    import simplejson as json
-except ImportError:
-    import json
+import json
 
 from collections import defaultdict
 from functools import partial, wraps
