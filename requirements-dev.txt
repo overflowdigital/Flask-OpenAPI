@@ -13,6 +13,7 @@ decorator
 wheel
 flask-jwt
 twine
+pylint
 
 # for pypi markdown support
 readme_renderer
