@@ -1,26 +1,34 @@
-name: CI
-
+name: Continuous Integration
 on:
-  push:
-  pull_request:
-    branches: [ "master" ]
-
+    push:
+    pull_request:
+    schedule:
+        - cron: '00 09 * * *'
 jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v3
-    - name: Install dependencies
-      run: pip3 install -r requirements.txt
-    - name: Install
-      run: sudo python3 setup.py develop 
-      
-    # - name: Run pep8 Checks
-    #   run: make pep8
-      
-    # - name: Run Flake8 Checks
-    #   run: make flake8
-      
-    # - name: Run Tests
-    #   run: make test
-  
+    continuous_integration:
+        name: Continuous Integration
+        permissions:
+            actions: read
+            contents: read
+            security-events: write
+        strategy:
+            fail-fast: false
+            matrix:
+                language: [ 'python' ]
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v3
+            - name: Install Dependencies
+              run: pip3 install -r requirements-dev.txt
+            - name: Compile and Install
+              run: sudo python3 setup.py develop
+            - name: Run Static CodeScan Checks
+              run: ci/codescan.sh
+            - name: Initialize Runtime Code Analysis
+              uses: github/codeql-action/init@v2
+              with:
+                  languages: ${{ matrix.language }}
+            - name: Perform Runtime Code Analysis
+              uses: github/codeql-action/analyze@v2
+            - name: Run Unit Tests
+              run: ci/test.sh
