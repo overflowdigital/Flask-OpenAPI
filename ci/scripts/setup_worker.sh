@@ -8,6 +8,6 @@ REPO=$(dirname "$SCRIPTPATH../")
 
 sudo apt-get update && sudo apt-get upgrade -y
 python3 -m pip install --upgrade pip
-python3 -m pip install -r ci/requirements.txt
-python3 -m pip install -r requirements.txt
+python3 -m pip install -r $REPO/ci/config/requirements.txt
+python3 -m pip install -r $REPO/requirements.txt
 sudo python3 -m setup develop
