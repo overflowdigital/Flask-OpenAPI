@@ -1,5 +1,5 @@
-
-__version__ = '1.3.2'  # DO NOT CHANGE MANUALLY. THIS IS HANDLED BY THE RELEASE PIPELINE!
+# DO NOT CHANGE MANUALLY THIS IS CHANGED IN THE PIPELINES
+__version__ = "1.3.2"
 __author__ = 'Overflow Digital'
 __email__ = 'team@overflow.digital'
 
