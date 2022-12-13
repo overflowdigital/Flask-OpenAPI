@@ -17,8 +17,7 @@ app.config['SWAGGER'] = {
 }
 swag = Swagger(
     app,
-    template_file=os.path.join(
-        os.getcwd(), 'examples', 'docs', 'template.yml'),
+    template_file=os.path.join( os.getcwd(), 'ci','tests', 'suite', 'docs', 'template.yml'),
     parse=True)
 
 
