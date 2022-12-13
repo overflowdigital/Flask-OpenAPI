@@ -3,6 +3,9 @@ First line is the summary
 All following lines until the hyphens is added to description
 the format of the first lines until 3 hyphens will be not yaml compliant
 but everything below the 3 hyphens should be.
+YAML files are Unicode - UTF-16 or UTF-8 (default) encoded.
+This line contains a UTF-8-encoded character: ☮
+There are also UTF-8-encoded characters in the following spec.
 ---
 tags:
   - users
@@ -13,7 +16,7 @@ parameters:
     required: true
 responses:
   200:
-    description: A single user item
+    description: A single user item (um único usuário)
     schema:
       id: rec_username
       properties:

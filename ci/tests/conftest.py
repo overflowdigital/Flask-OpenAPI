@@ -1,11 +1,13 @@
 import json
+import os
 import random
+from importlib import import_module
 
 import pytest
 from flask_openapi import Swagger
-from flask_openapi.utils import get_examples
 
 from flask import Flask
+from flask_openapi.utils import is_python_file, remove_suffix
 
 
 def get_specs_data(mod):
@@ -47,6 +49,24 @@ def get_specs_data(mod):
         specs_data[url] = json.loads(decoded)
 
     return specs_data
+
+
+def pathify(basenames, examples_dir="examples/"):  # pragma: no cover
+    """*nix to python module path"""
+    example = examples_dir.replace("/", ".")
+    return [example + basename for basename in basenames]
+
+
+def get_examples(examples_dir="examples/"):  # pragma: no cover
+    """All example modules"""
+    all_files = os.listdir(examples_dir)
+    python_files = [f for f in all_files if is_python_file(f)]
+    basenames = [remove_suffix(f) for f in python_files]
+    modules = [import_module(module) for module in pathify(basenames)]
+    return [
+        module for module in modules
+        if getattr(module, 'app', None) is not None
+    ]
 
 
 def get_test_metadata(mod):

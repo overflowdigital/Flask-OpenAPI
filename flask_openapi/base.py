@@ -196,7 +196,7 @@ class Swagger(object):
                 "model_filter": lambda tag: True,  # all in
             }
         ],
-        "static_url_path": "/flasgger_static",
+        "static_url_path": "/flask_openapi_static",
         # "static_folder": "static",  # must be set by user
         "swagger_ui": True,
         "specs_route": "/apidocs/"
