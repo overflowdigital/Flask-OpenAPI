@@ -19,7 +19,7 @@ jobs:
             - uses: actions/checkout@v3
             - name: Setup Worker
               run: ci/scripts/setup_worker.sh
-            - name: Perform Static Codescan Checks
+            - name: Perform Static Code Analysis
               run: ci/scripts/codescan.sh
             - name: Initialize Runtime Code Analysis
               uses: github/codeql-action/init@v2
