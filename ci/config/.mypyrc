@@ -3,4 +3,4 @@ show_column_numbers=True
 pretty=True
 ignore_missing_imports=True
 check_untyped_defs=True
-disable-error-code=attr-defined
+disable_error_code=attr-defined
