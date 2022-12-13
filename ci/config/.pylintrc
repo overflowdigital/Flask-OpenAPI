@@ -37,7 +37,7 @@ enable=c-extension-no-member
 [REPORTS]
 evaluation=10.0 - ((float(5 * error + warning + refactor + convention) / statement) * 10)
 output-format=text
-reports=yes
+reports=no
 score=yes
 
 
