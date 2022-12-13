@@ -24,7 +24,7 @@ jobs:
               run: ci/scripts/setup_worker.sh
             - name: Increment Version Number
               run: ci/scripts/new_version.sh ${{inputs.versionNumber}}
-            - name: Perform Static Codescan Checks
+            - name: Perform Static Code Analysis
               run: ci/scripts/codescan.sh
             - name: Initialize Runtime Code Analysis
               uses: github/codeql-action/init@v2
