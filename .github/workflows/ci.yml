@@ -31,8 +31,6 @@ jobs:
               uses: snyk/actions/python@master
               env:
                   SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-              with:
-                  command: test
             - name: Perform Secure Code Analysis (Secrets)
               uses: trufflesecurity/trufflehog@main
               with:
