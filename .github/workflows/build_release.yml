@@ -21,11 +21,11 @@ jobs:
         steps:
             - uses: actions/checkout@v3
             - name: Setup Worker
-              run: ci/setup_worker.sh
+              run: ci/scripts/setup_worker.sh
             - name: Increment Version Number
-              run: ci/new_version.sh ${{inputs.versionNumber}}
+              run: ci/scripts/new_version.sh ${{inputs.versionNumber}}
             - name: Perform Static Codescan Checks
-              run: ci/codescan.sh
+              run: ci/scripts/codescan.sh
             - name: Initialize Runtime Code Analysis
               uses: github/codeql-action/init@v2
               with:
@@ -45,7 +45,7 @@ jobs:
                   base: ${{ github.ref_name }}
                   head: HEAD
             - name: Run Unit Tests
-              run: ci/test.sh
+              run: ci/scripts/test_runner.sh
             - name: Upload release to PyPI
               run: sudo python3 -m twine upload --username=__token__ --password=${{secrets.PYPI_TOKEN}} dist/*
             - name: Create GitHub Release
