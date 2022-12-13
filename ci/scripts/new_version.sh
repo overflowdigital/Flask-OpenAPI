@@ -9,12 +9,12 @@ REPO=$(dirname "$REPO../")
 
 function auto_increment() {
     VERSION=$(python3 $REPO/ci/scripts/increment_version.py)
-    sed 's/__version__ = .*/__version__ = "'$VERSION'"/g' -i $REPO/flask_openapi/__init__.py
+    sed "s/__version__ = .*/__version__ = '"$VERSION"'/g" -i $REPO/flask_openapi/__init__.py
 }
 
 function increment_manually() {
     VERSION=$1
-    sed 's/__version__ = .*/__version__ = "'$VERSION'"/g' -i $REPO/flask_openapi/__init__.py
+    sed "s/__version__ = .*/__version__ = '"$VERSION"'/g" -i $REPO/flask_openapi/__init__.py
 }
 
 
