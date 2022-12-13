@@ -59,3 +59,6 @@ target/
 venv/
 .activate.sh
 .deactivate.sh
+
+.vscode
+.fleet
