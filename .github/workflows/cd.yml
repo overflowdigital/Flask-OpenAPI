@@ -1,14 +1,28 @@
-name: Manually Build Release
+name: Continuous Deployment
 on:
-  workflow_dispatch:
-    inputs:
-      versionNumber:
-        description: "Version number of this release"
-        required: true
-        type: string
+  schedule:
+    - cron: "00 09 * * 1"
 jobs:
+  pre_release_check:
+    name: Pre-release Check
+    permissions:
+      actions: read
+      contents: read
+    runs-on: ubuntu-latest
+    outputs:
+      should_run: ${{ steps.check.outputs.has-new-commits }}
+    steps:
+      - name: Determine if commits have been pushed to master.
+        id: check
+        uses: adriangl/check-new-commits-action@v1
+        with:
+          token: ${{secrets.GH_TOKEN}}
+          seconds: 604800
+          branch: "master"
   build_release:
     name: Build Release
+    needs: pre_release_check
+    if: needs.pre_release_check.outputs.should_run == 'true'
     permissions:
       actions: read
       contents: read
@@ -23,7 +37,7 @@ jobs:
       - name: Setup Worker
         run: ci/scripts/setup_worker.sh
       - name: Increment Version Number
-        run: ci/scripts/new_version.sh ${{inputs.versionNumber}}
+        run: ci/scripts/new_version.sh --auto_increment
       - name: Perform Static Code Analysis
         run: ci/scripts/codescan.sh
       - name: Perform Runtime Code Analysis
@@ -43,7 +57,7 @@ jobs:
       - name: Upload release to PyPI
         run: sudo python3 -m twine upload --username=__token__ --password=${{secrets.PYPI_TOKEN}} dist/*
       - name: Create GitHub Release
-        run: gh release create v${{inputs.versionNumber}} --latest --generate-notes dist/*
+        run: gh release create --latest --generate-notes dist/*
         env:
           GITHUB_TOKEN: ${{secrets.GH_TOKEN}}
       - name: Upload Test Report

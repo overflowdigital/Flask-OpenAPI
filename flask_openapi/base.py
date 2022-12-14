@@ -13,11 +13,7 @@ import re
 from typing import Optional
 
 import yaml
-
-try:
-    import simplejson as json
-except ImportError:
-    import json
+import json
 
 from collections import defaultdict
 from functools import partial, wraps
@@ -79,8 +75,7 @@ class APIDocsView(MethodView):
             request_auth: Optional[Authorization] = request.authorization
             username: str = self.config.get('pageUsername', '')
             password: str = self.config.get('pagePassword', '')
-            is_auth = (request_auth and request_auth.type == 'basic' and request_auth.username ==
-                       username and request_auth.password == password)
+            is_auth = (request_auth and request_auth.type == 'basic' and request_auth.username == username and request_auth.password == password)  # noqa
 
         if is_auth:
             base_endpoint = self.config.get('endpoint', 'flask_openapi')
@@ -201,7 +196,7 @@ class Swagger(object):
                 "model_filter": lambda tag: True,  # all in
             }
         ],
-        "static_url_path": "/flasgger_static",
+        "static_url_path": "/flask_openapi_static",
         # "static_folder": "static",  # must be set by user
         "swagger_ui": True,
         "specs_route": "/apidocs/"
@@ -455,7 +450,7 @@ class Swagger(object):
             if len(source) > 0 and len(dest[key]) >= 0:
                 dest[key].update(source)
 
-        def get_operations(swag, path_verb = None):
+        def get_operations(swag, path_verb=None):
 
             if is_openapi3(openapi_version):
                 source_components = swag.get('components', {})
@@ -576,8 +571,8 @@ class Swagger(object):
             for verb, swag in verbs:
                 if swag.get('paths'):
                     try:
-                        for path in swag.get('paths'): # /projects/{project_id}/alarms:
-                            for path_verb in swag.get('paths').get(path): # get:
+                        for path in swag.get('paths'):  # /projects/{project_id}/alarms:
+                            for path_verb in swag.get('paths').get(path):  # get:
                                 if path_verb == verb:
                                     get_operations(swag.get('paths').get(path).get(path_verb), path_verb)
                     except AttributeError:

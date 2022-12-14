@@ -523,25 +523,6 @@ def is_python_file(fpath):  # pragma: no cover
     """Naive Python module filterer"""
     return fpath.endswith(".py") and "__" not in fpath
 
-
-def pathify(basenames, examples_dir="examples/"):  # pragma: no cover
-    """*nix to python module path"""
-    example = examples_dir.replace("/", ".")
-    return [example + basename for basename in basenames]
-
-
-def get_examples(examples_dir="examples/"):  # pragma: no cover
-    """All example modules"""
-    all_files = os.listdir(examples_dir)
-    python_files = [f for f in all_files if is_python_file(f)]
-    basenames = [remove_suffix(f) for f in python_files]
-    modules = [import_module(module) for module in pathify(basenames)]
-    return [
-        module for module in modules
-        if getattr(module, 'app', None) is not None
-    ]
-
-
 def get_path_from_doc(full_doc):
     """
     If `file:` is provided import the file.
