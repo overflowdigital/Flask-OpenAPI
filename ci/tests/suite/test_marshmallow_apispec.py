@@ -4,8 +4,7 @@ Another example using Marshmallow schemas in SwaggerView (MethodView)
 # coding: utf-8
 
 from flask import Flask, jsonify, request
-
-from flask_openapi import Schema, Swagger, SwaggerView, fields
+from flask_openapi import fields, Schema, Swagger, SwaggerView
 
 app = Flask(__name__)
 app.config['SWAGGER'] = {
@@ -24,7 +23,7 @@ class User(Schema):
 
 class UserPostView(SwaggerView):
 
-    parameters = User
+    parameters = [User]
 
     # parameters = [
     #     {
