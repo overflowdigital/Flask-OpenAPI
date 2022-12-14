@@ -5,10 +5,9 @@ flask_restful.reqparse.RequestParser and validated by jsonschema
 """
 import os
 
-from flask import Flask, request, jsonify, Response
+from flask import Flask, jsonify, request, Response
 from flask.views import MethodView
 from flask_openapi import Swagger
-
 
 app = Flask(__name__)
 app.config['SWAGGER'] = {
@@ -17,7 +16,7 @@ app.config['SWAGGER'] = {
 }
 swag = Swagger(
     app,
-    template_file=os.path.join( os.getcwd(), 'ci','tests', 'suite', 'docs', 'template.yml'),
+    template_file=os.path.join(os.getcwd(), 'ci', 'tests', 'suite', 'docs', 'template.yml'),
     parse=True)
 
 
@@ -26,6 +25,7 @@ class ItemsView(MethodView):
     Flask-OpenAPI will try to load "./examples/docs/items/{method}.yml" as
     swagger document
     """
+
     def get(self):
         """
         If we set "parse" is True in Flask-OpenAPI app, we will get parsed and
@@ -60,6 +60,7 @@ class ItemMethodView(MethodView):
 
 class EmptyView(MethodView):
     """In this view, we do not provide api doc"""
+
     def get(self):
         return Response(status=200)
 
@@ -176,4 +177,5 @@ def test_swag(client, specs_data):
 
 
 if __name__ == '__main__':
+    swag.init_app(app)
     app.run(debug=True)
