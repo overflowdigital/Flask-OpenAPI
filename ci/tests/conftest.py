@@ -48,6 +48,7 @@ def get_specs_data(mod):
         url = spec['url']
         response = client.get(url)
         decoded = response.data.decode("utf-8")
+        print(mod)
         specs_data[url] = json.loads(decoded)
 
     return specs_data
