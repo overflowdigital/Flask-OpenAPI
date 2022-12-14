@@ -5,17 +5,10 @@ try:
     from http import HTTPStatus
 except ImportError:
     import httplib as HTTPStatus
-from flask import Blueprint
-from flask import Flask
-from flask import jsonify
-from flask import request
-from flask_openapi import Schema
-from flask_openapi import Swagger
-from flask_openapi import SwaggerView
-from flask_openapi import fields
-from flask_openapi import swag_from
-from flask_openapi import validate
-from flask_openapi import utils
+
+from flask import Blueprint, Flask, jsonify, request
+from flask_openapi import (fields, Schema, swag_from, Swagger, SwaggerView,
+                           utils, validate)
 
 # Examples include intentionally invalid defaults to demonstrate validation.
 _TEST_META_SKIP_FULL_VALIDATION = True
@@ -145,42 +138,6 @@ def autovalidation_from_spec_dict():
     return jsonify(data)
 
 
-class User(Schema):
-    username = fields.Str(required=True, default="Sirius Black")
-    # wrong default "180" to force validation error
-    age = fields.Int(required=True, min=18, default="180")
-    tags = fields.List(fields.Str(), default=["wizard", "hogwarts", "dead"])
-
-
-class UserPostView(SwaggerView):
-    tags = ['users']
-    parameters = User
-    responses = {
-        200: {
-            'description': 'A single user item',
-            'schema': User
-        }
-    }
-    validation = True
-
-    def post(self):
-        """
-        Example using marshmallow Schema
-        validation=True forces validation of parameters in body
-        ---
-        # This value overwrites the attributes above
-        deprecated: true
-        """
-        return jsonify(request.json)
-
-
-app.add_url_rule(
-    '/schemevalidation',
-    view_func=UserPostView.as_view('schemevalidation'),
-    methods=['POST']
-)
-
-
 # ensure the same works for blueprints
 
 example_blueprint = Blueprint(
@@ -287,36 +244,6 @@ def autovalidation_from_spec_dict_bp():
     """
     data = request.json
     return jsonify(data)
-
-
-class BPUserPostView(SwaggerView):
-    tags = ['users']
-    parameters = User
-    responses = {
-        200: {
-            'description': 'A single user item',
-            'schema': User
-        }
-    }
-    validation = True
-
-    def post(self):
-        """
-        Example using marshmallow Schema
-        validation=True forces validation of parameters in body
-        ---
-        # This value overwrites the attributes above
-        deprecated: true
-        """
-        return jsonify(request.json)
-
-
-example_blueprint.add_url_rule(
-    '/schemevalidation',
-    view_func=BPUserPostView.as_view('schemevalidation'),
-    methods=['POST']
-)
-
 
 app.register_blueprint(example_blueprint)
 
