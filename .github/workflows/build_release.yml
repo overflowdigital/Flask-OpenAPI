@@ -40,6 +40,8 @@ jobs:
           head: HEAD
       - name: Run Unit Tests
         run: ci/scripts/test_runner.sh
+      - name: Build Release
+        run: ci/scripts/build.sh
       - name: Upload release to PyPI
         run: sudo python3 -m twine upload --username=__token__ --password=${{secrets.PYPI_TOKEN}} dist/*
       - name: Create GitHub Release
