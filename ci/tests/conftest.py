@@ -4,9 +4,8 @@ import random
 from importlib import import_module
 
 import pytest
-from flask_openapi import Swagger
-
 from flask import Flask
+from flask_openapi import Swagger
 from flask_openapi.utils import is_python_file, remove_suffix
 
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
@@ -65,7 +64,7 @@ def get_examples(examples_dir=TEST_SUITE):  # pragma: no cover
     all_files = os.listdir(examples_dir)
     python_files = [f for f in all_files if is_python_file(f)]
     basenames = [remove_suffix(f) for f in python_files]
-    modules = [import_module(module) for module in pathify(basenames)]
+    modules = [import_module(f'tests.suite.{module}') for module in basenames]
     return [
         module for module in modules
         if getattr(module, 'app', None) is not None
