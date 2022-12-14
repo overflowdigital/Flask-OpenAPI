@@ -10,23 +10,19 @@ jobs:
             actions: read
             contents: read
             security-events: write
-        strategy:
-            fail-fast: false
-            matrix:
-                language: [ 'python' ]
         runs-on: ubuntu-latest
         steps:
             - uses: actions/checkout@v3
+            - name: Initialize Runtime Code Analysis
+              uses: github/codeql-action/init@v2
+              with:
+                  languages: python
             - name: Setup Worker
               run: ci/scripts/setup_worker.sh
             - name: Run Unit Tests
               run: ci/scripts/test_runner.sh
             - name: Perform Static Code Analysis
               run: ci/scripts/codescan.sh
-            - name: Initialize Runtime Code Analysis
-              uses: github/codeql-action/init@v2
-              with:
-                  languages: ${{ matrix.language }}
             - name: Perform Runtime Code Analysis
               uses: github/codeql-action/analyze@v2
             - name: Perfom Secure Code Analysis (Vulnerabilities)
@@ -40,6 +36,7 @@ jobs:
                   base: ${{ github.ref_name }}
                   head: HEAD
             - name: Upload Test Report
+              if: ${{ always() }}
               uses: actions/upload-artifact@v2
               with:
                   name: unit-test-report
