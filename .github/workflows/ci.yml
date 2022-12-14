@@ -39,3 +39,10 @@ jobs:
                   head: HEAD
             - name: Run Unit Tests
               run: ci/scripts/test_runner.sh
+            - name: Upload Test Report
+              uses: actions/upload-artifact@v2
+              with:
+                  name: unit-test-report
+                  path: /home/runner/work/Flask-OpenAPI/Flask-OpenAPI/ci/tests/report.xml
+                  if-no-files-found: ignore
+                  retention-days: 1

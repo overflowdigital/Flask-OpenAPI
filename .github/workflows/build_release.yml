@@ -50,3 +50,17 @@ jobs:
               run: gh release create v${{inputs.versionNumber}} --latest --generate-notes dist/*
               env:
                   GITHUB_TOKEN: ${{secrets.GH_TOKEN}}
+            - name: Upload Test Report
+              uses: actions/upload-artifact@v2
+              with:
+                  name: unit-test-report
+                  path: /home/runner/work/Flask-OpenAPI/Flask-OpenAPI/ci/tests/report.xml
+                  if-no-files-found: ignore
+                  retention-days: 1
+            - name: Upload Build Artifacts
+              uses: actions/upload-artifact@v2
+              with:
+                  name: Flask-OpenAPI
+                  path: /home/runner/work/Flask-OpenAPI/dist
+                  if-no-files-found: ignore
+                  retention-days: 1
