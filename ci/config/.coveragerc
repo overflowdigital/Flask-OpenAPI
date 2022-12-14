@@ -1,6 +1,6 @@
 [run]
 include =
-  ../flask_openapi/*.py
+  ../../flask_openapi/*.py
 
 [report]
 exclude_lines =
