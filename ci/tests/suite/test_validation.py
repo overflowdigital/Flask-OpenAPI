@@ -267,9 +267,7 @@ def test_swag(client, specs_data):
         '/blueprint/autovalidation',
         '/blueprint/autovalidationfromspecdict',
         '/blueprint/manualvalidation',
-        '/blueprint/schemevalidation',
         '/manualvalidation',
-        '/schemevalidation',
     )
 
     expected_officer_paths = (
