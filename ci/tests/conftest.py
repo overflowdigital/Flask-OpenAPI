@@ -9,6 +9,9 @@ from flask_openapi import Swagger
 from flask import Flask
 from flask_openapi.utils import is_python_file, remove_suffix
 
+REPO_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
+TEST_SUITE = os.path.join(REPO_ROOT, 'ci/tests/suite')
+
 
 def get_specs_data(mod):
     """
@@ -51,13 +54,13 @@ def get_specs_data(mod):
     return specs_data
 
 
-def pathify(basenames, examples_dir="examples/"):  # pragma: no cover
+def pathify(basenames, examples_dir=TEST_SUITE):  # pragma: no cover
     """*nix to python module path"""
     example = examples_dir.replace("/", ".")
     return [example + basename for basename in basenames]
 
 
-def get_examples(examples_dir="examples/"):  # pragma: no cover
+def get_examples(examples_dir=TEST_SUITE):  # pragma: no cover
     """All example modules"""
     all_files = os.listdir(examples_dir)
     python_files = [f for f in all_files if is_python_file(f)]
