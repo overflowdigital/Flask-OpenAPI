@@ -9,4 +9,4 @@ REPO=$(dirname "$REPO../")
 
 cd $REPO
 sudo python3 -m build
-sudo python3 -m twine check
+sudo python3 -m twine check $REPO/dist/*
