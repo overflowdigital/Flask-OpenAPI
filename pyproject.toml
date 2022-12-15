@@ -1,0 +1,62 @@
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "Flask-OpenAPI3-UI"
+dynamic = ["version"]
+license = { file = "LICENSE" }
+requires-python = ">=3.6.1"
+authors = [{ name = "Overflow Digital", email = "team@overflow.digital" }]
+maintainers = [
+    { name = "Katerina Tiddy", email = "katerina@overflow.digital" },
+    { name = "Joshua Thompson-Lindley", email = "joshua@overflow.digital" }
+]
+description = "Next generation OpenAPI v3 Integration for Flask based APIs. Based on Flasgger."
+readme = "README.md"
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.6"
+]
+keywords = ['flask', 'swagger', 'openapi', 'python', 'api', 'rest', 'openapi3']
+dependencies = [
+    "Flask==2.2.2",
+    "PyYAML==6.0",
+    "jsonschema==4.17.3",
+    "mistune==2.0.4",
+    "six==1.16.0"
+]
+
+[project.urls]
+repository = "https://github.com/overflowdigital/Flask-OpenAPI/"
+
+[project.entry-points."flask.commands"]
+generate-api-schema = "flask_openapi.commands:generate_api_schema"
+
+[tools.setuptools]
+platforms = ["any"]
+
+[tools.setuptools.packages.find]
+where = ['src']
+include = ['flask_openapi*']
+
+[tool.setuptools.package-data]
+"*" = [
+    "*.html",
+    "*.js",
+    "*.css",
+    "*.eot",
+    "*.svg",
+    "*.ttf",
+    "*.woff",
+    "*.woff2",
+    "*.gif",
+    "*.ico",
+    "*.png",
+    "*.map"
+]
+
+[tool.setuptools.dynamic]
+version = { attr = "flask_openapi.__version__" }

@@ -38,6 +38,8 @@ jobs:
         run: ci/scripts/setup_worker.sh
       - name: Increment Version Number
         run: ci/scripts/new_version.sh --auto_increment
+      - name: Build Package and Verify
+        run: ci/scripts/build.sh
       - name: Perform Static Code Analysis
         run: ci/scripts/codescan.sh
       - name: Perform Runtime Code Analysis
