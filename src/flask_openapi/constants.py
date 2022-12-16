@@ -43,7 +43,7 @@ DEFAULT_FIELDS = {
     "parameters": []
 }
 
-with current_app.context:
+with current_app.app_context():
     DEFAULT_FAVICON = url_for('flask_openapi.static', filename='favicon-32x32.png')
     DEFAULT_BUNDLE_JS = url_for('flask_openapi.static', filename='swagger-ui-bundle.js')
     DEFAULT_PRESET_JS = url_for('flask_openapi.static', filename='swagger-ui-standalone-preset.js')
