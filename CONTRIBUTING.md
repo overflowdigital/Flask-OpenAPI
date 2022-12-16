@@ -20,6 +20,11 @@ git clone git@github.com:overflowdigital/Flask-OpenAPI.git
 cd Flask-OpenAPI
 ```
 
+To build and install the application run the following commands:
+```
+python3 -m build && python3 setup.py install
+```
+
 And finally create a separate branch to begin work
 ```
 git checkout -b my-new-feature
