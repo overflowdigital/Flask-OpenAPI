@@ -1,0 +1,30 @@
+import codecs
+import json
+import os
+from typing import Any, Callable
+
+from flask import current_app
+
+from flask_openapi.utils import parse_imports
+
+import yaml
+
+
+def load_swagger_file(filename: str) -> Any:
+    loader: Callable = lambda stream: yaml.safe_load(parse_imports(stream.read(), filename))  # noqa
+
+    if not filename.startswith('/'):
+        filename = os.path.join(current_app.root_path, filename)
+
+    if filename.endswith('.json'):
+        loader = json.load
+    else:
+        with codecs.open(filename, 'r', 'utf-8') as f:
+            contents = f.read().strip()
+            if contents[0] in ['{', '[']:
+                loader = json.load
+
+            return loader(f)
+
+    with codecs.open(filename, 'r', 'utf-8') as f:
+        return loader(f)

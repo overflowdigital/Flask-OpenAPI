@@ -7,308 +7,135 @@ we add the endpoint to swagger specification output
 
 """
 import codecs
+import json
 import logging
 import os
 import re
-from typing import Optional
-
-import yaml
-import json
-
 from collections import defaultdict
 from functools import partial, wraps
+from typing import Callable, Optional
 
-from flask import (abort, Blueprint, current_app, jsonify, Markup, redirect,
-                   render_template, request, Response, url_for)
+from flask import (Blueprint, Flask, Markup, abort, current_app, redirect, request, url_for)
 from flask.json import JSONEncoder
-from flask.views import MethodView
-from werkzeug.datastructures import Authorization
+
+from flask_openapi.constants import (OAS3_SUB_COMPONENTS, OPTIONAL_FIELDS,
+                                     OPTIONAL_OAS3_FIELDS, DEFAULT_CONFIG, DEFAULT_ENDPOINT, DEFAULT_FIELDS)
+from flask_openapi.openapi.file import load_swagger_file
+from flask_openapi.utils import (LazyString, extract_definitions, extract_schema,
+                                 get_schema_specs, get_specs, get_vendor_extension_fields,
+                                 is_openapi3, parse_definition_docstring, parse_imports,
+                                 swag_annotation, validate)
+from flask_openapi.views.docs import APIDocsView
+from flask_openapi.views.oauth import OAuthRedirect
+from flask_openapi.views.specs import APISpecsView
+
+import jsonschema
+
+from mistune import markdown
+
+import yaml
+
 
 try:
     from flask_restful.reqparse import RequestParser
 except ImportError:
     RequestParser = None
-import jsonschema
-from mistune import markdown
-
-from . import __version__
-from .constants import (OAS3_SUB_COMPONENTS, OPTIONAL_FIELDS,
-                        OPTIONAL_OAS3_FIELDS)
-from .utils import (extract_definitions, extract_schema, get_schema_specs,
-                    get_specs, get_vendor_extension_fields, is_openapi3,
-                    LazyString, parse_definition_docstring, parse_imports,
-                    swag_annotation, validate)
 
 
-def NO_SANITIZER(text):
+def NO_SANITIZER(text: str) -> str:
     return text
 
 
-def BR_SANITIZER(text):
-    return text.replace('\n', '<br/>') if text else text
+def BR_SANITIZER(text: str) -> str:
+    return text.replace('\n', '<br/>')
 
 
-def MK_SANITIZER(text):
-    return Markup(markdown(text)) if text else text
+def MK_SANITIZER(text: str) -> str:
+    return Markup(markdown(text))
 
 
-class APIDocsView(MethodView):
-    """
-    The /apidocs
-    """
-
-    def __init__(self, *args, **kwargs):
-        view_args = kwargs.pop('view_args', {})
-        self.config = view_args.get('config')
-        super(APIDocsView, self).__init__(*args, **kwargs)
-
-    def get(self):
-        """
-        The data under /apidocs
-        json or Swagger UI
-        """
-
-        do_auth: bool = self.config.get('pageProtection', False)
-        is_auth: bool = True
-
-        if do_auth:
-            request_auth: Optional[Authorization] = request.authorization
-            username: str = self.config.get('pageUsername', '')
-            password: str = self.config.get('pagePassword', '')
-            is_auth = (request_auth and request_auth.type == 'basic' and request_auth.username == username and request_auth.password == password)  # noqa
-
-        if is_auth:
-            base_endpoint = self.config.get('endpoint', 'flask_openapi')
-            specs = [
-                {
-                    "url": url_for(".".join((base_endpoint, spec['endpoint']))),
-                    "title": spec.get('title', 'API Spec 1'),
-                    "name": spec.get('name', None),
-                    "version": spec.get("version", '0.0.1'),
-                    "endpoint": spec.get('endpoint')
-                }
-                for spec in self.config.get('specs', [])
-            ]
-            urls = [
-                {
-                    "name": spec["name"],
-                    "url": spec["url"]
-                }
-                for spec in specs if spec["name"]
-            ]
-            data = {
-                "specs": specs,
-                "urls": urls,
-                "title": self.config.get('title', 'API Docs')
-            }
-            if request.args.get('json'):
-                # calling with ?json returns specs
-                return jsonify(data)
-            else:  # pragma: no cover
-                data['flasgger_config'] = self.config
-                data['json'] = json
-                data['flasgger_version'] = __version__
-                data['favicon'] = self.config.get(
-                    'favicon',
-                    url_for('flask_openapi.static',
-                            filename='favicon-32x32.png')
-                )
-                data['swagger_ui_bundle_js'] = self.config.get(
-                    'swagger_ui_bundle_js',
-                    url_for('flask_openapi.static',
-                            filename='swagger-ui-bundle.js')
-                )
-                data['swagger_ui_standalone_preset_js'] = self.config.get(
-                    'swagger_ui_standalone_preset_js',
-                    url_for('flask_openapi.static',
-                            filename='swagger-ui-standalone-preset.js')
-                )
-                data['jquery_js'] = self.config.get(
-                    'jquery_js',
-                    url_for('flask_openapi.static',
-                            filename='lib/jquery.min.js')
-                )
-                data['swagger_ui_css'] = self.config.get(
-                    'swagger_ui_css',
-                    url_for('flask_openapi.static', filename='swagger-ui.css')
-                )
-                return render_template(
-                    'flask_openapi/index.html',
-                    **data
-                )
-        else:
-            return ('Unauthorized', 401, {'WWW-Authenticate': 'Basic realm="OpenAPI Documentation"'})
-
-
-class OAuthRedirect(MethodView):
-    """
-    The OAuth2 redirect HTML for Swagger UI standard/implicit flow
-    """
-
-    def get(self):
-        return render_template(
-            ['flask_openapi/oauth2-redirect.html', 'flask_openapi/o2c.html'],
-        )
-
-
-class APISpecsView(MethodView):
-    """
-    The /apispec_1.json and other specs
-    """
-
-    def __init__(self, *args, **kwargs):
-        self.loader = kwargs.pop('loader')
-        super(APISpecsView, self).__init__(*args, **kwargs)
-
-    def get(self):
-        """
-        The Swagger view get method outputs to /apispecs_1.json
-        """
-        try:
-            return jsonify(self.loader())
-        except Exception:
-            specs = json.dumps(self.loader())
-            return Response(specs, mimetype='application/json')
-
-
-class SwaggerDefinition(object):
+class SwaggerDefinition:
     """
     Class based definition
     """
 
-    def __init__(self, name, obj, tags=None):
-        self.name = name
-        self.obj = obj
-        self.tags = tags or []
+    def __init__(self, name: str, obj: dict, tags: Optional[list[str]] = None):
+        self.name: str = name
+        self.obj: dict = obj
+        self.tags: list[str] = tags or []
 
 
-class Swagger(object):
+class Swagger:
+    def __init__(
+            self,
+            app: Flask = None,
+            config: dict = {},
+            sanitizer: Optional[Callable] = None,
+            template: str = '',
+            template_file: str = '',
+            decorators: Optional[list] = None,
+            validation_function: Optional[Callable] = None,
+            validation_error_handler: Optional[Callable] = None,
+            parse: bool = False,
+            format_checker: Optional[Callable] = None,
+            merge: bool = False
+    ) -> None:
+        self._configured = False
+        self.endpoints: list[str] = []
+        self.definition_models: list = []
+        self.sanitizer = sanitizer or BR_SANITIZER
 
-    DEFAULT_ENDPOINT = 'apispec_1'
-    DEFAULT_CONFIG = {
-        "headers": [
-        ],
-        "specs": [
-            {
-                "endpoint": DEFAULT_ENDPOINT,
-                "route": '/{}.json'.format(DEFAULT_ENDPOINT),
-                "rule_filter": lambda rule: True,  # all in
-                "model_filter": lambda tag: True,  # all in
-            }
-        ],
-        "static_url_path": "/flask_openapi_static",
-        # "static_folder": "static",  # must be set by user
-        "swagger_ui": True,
-        "specs_route": "/apidocs/"
-    }
-
-    SCHEMA_TYPES = {'string': str, 'integer': int, 'number': float,
-                    'boolean': bool}
-    SCHEMA_LOCATIONS = {'query': 'args', 'header': 'headers',
-                        'formData': 'form', 'body': 'json', 'path': 'path'}
-
-    def _init_config(self, config, merge):
-        """ Initializes self.config. If merge is set to true, then
-        self.config will be set to with config + DEFAULT_CONFIG.
-        """
         if config and merge:
-            self.config = dict(self.DEFAULT_CONFIG.copy(), **config)
+            self.config = dict(DEFAULT_CONFIG.copy(), **config)
         elif config and not merge:
             self.config = config
         elif not config:
-            self.config = self.DEFAULT_CONFIG.copy()
+            self.config = DEFAULT_CONFIG.copy()
         else:  # The above branches must be exhaustive
             raise ValueError
-
-    def __init__(
-            self, app=None, config=None, sanitizer=None, template=None,
-            template_file=None, decorators=None, validation_function=None,
-            validation_error_handler=None, parse=False, format_checker=None,
-            merge=False
-    ):
-        self._configured = False
-        self.endpoints = []
-        self.definition_models = []  # not in app, so track here
-        self.sanitizer = sanitizer or BR_SANITIZER
-
-        self._init_config(config, merge)
 
         self.template = template
         self.template_file = template_file
         self.decorators = decorators
         self.format_checker = format_checker or jsonschema.FormatChecker()
 
-        def default_validation_function(data, schema):
-            return jsonschema.validate(
-                data, schema, format_checker=self.format_checker,
-            )
+        self.default_validation_function = lambda data, schema: jsonschema.validate(data, schema, format_checker=self.format_checker)
+        self.default_error_handler = lambda error, _, __: abort(400, error.message)
 
-        def default_error_handler(e, _, __):
-            return abort(400, e.message)
-
-        self.validation_function = validation_function\
-            or default_validation_function
-
-        self.validation_error_handler = validation_error_handler\
-            or default_error_handler
-        self.apispecs = {}  # cached apispecs
+        self.validation_function = validation_function or self.default_validation_function
+        self.validation_error_handler = validation_error_handler or self.default_error_handler
+        self.apispecs: dict[str, dict] = {}  # cached apispecs
         self.parse = parse
+
         if app:
             self.init_app(app)
 
-    def init_app(self, app, decorators=None):
-        """
-        Initialize the app with Swagger plugin
-        """
-        global auth
+    def init_app(self, app: Flask, decorators: list = None) -> None:
+        """ Initialize the app with Swagger plugin """
         self.decorators = decorators or self.decorators
         self.app = app
-        self.app.add_url_rule = swag_annotation(self.app.add_url_rule)
+        self.app.add_url_rule = swag_annotation(self.app.add_url_rule)  # type: ignore
 
         self.load_config(app)
-        # self.load_apispec(app)
+
         if self.template_file is not None:
-            self.template = self.load_swagger_file(self.template_file)
+            self.template = load_swagger_file(self.template_file)
+
         self.register_views(app)
         self.add_headers(app)
 
-        if self.parse:
+        if self.parse:  # type: ignore
             if RequestParser is None:
                 raise RuntimeError('Please install flask_restful')
-            self.parsers = {}
-            self.schemas = {}
+            self.parsers: dict = {}
+            self.schemas: dict = {}
             self.parse_request(app)
 
         self._configured = True
         app.swag = self
 
-    def load_swagger_file(self, filename):
-        if not filename.startswith('/'):
-            filename = os.path.join(
-                self.app.root_path,
-                filename
-            )
-
-        if filename.endswith('.json'):
-            loader = json.load
-        elif filename.endswith('.yml') or filename.endswith('.yaml'):
-            def loader(stream):
-                return yaml.safe_load(parse_imports(stream.read(), filename))
-        else:
-            with codecs.open(filename, 'r', 'utf-8') as f:
-                contents = f.read()
-                contents = contents.strip()
-                if contents[0] in ['{', '[']:
-                    loader = json.load
-                else:
-                    def loader(stream):
-                        return yaml.safe_load(
-                            parse_imports(stream.read(), filename))
-        with codecs.open(filename, 'r', 'utf-8') as f:
-            return loader(f)
-
     @property
-    def configured(self):
+    def configured(self) -> bool:
         """
         Return if `init_app` is configured
         """
@@ -775,12 +602,11 @@ class Swagger(object):
                 parsed_data['json'] = request.json or {}
             for location, data in parsed_data.items():
                 try:
-                    ret = self.validation_function(data, schemas[location])
-                    print(ret)
+                    self.validation_function(data, schemas[location])
                 except jsonschema.ValidationError as e:
                     self.validation_error_handler(e, data, schemas[location])
 
-            setattr(request, 'parsed_data', parsed_data)
+            setattr(request, 'parsed_data', parsed_data)  # noqa
 
     def update_schemas_parsers(self, doc, schemas, parsers, definitions):
         '''

@@ -1,13 +1,17 @@
 #!/bin/bash
 
-set -e
-set -x
+# set -e
+# set -x
 
 REPO="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
 REPO=$(dirname "$REPO../")
 REPO=$(dirname "$REPO../")
 
-flake8 $REPO/src/flask_openapi --config $REPO/ci/config/.flake8rc || true
-mypy --config-file $REPO/ci/config/.mypyrc $REPO/src/flask_openapi || true
-pylint --rcfile=$REPO/ci/config/.pylintrc $REPO/src/flask_openapi || true
-safety check --full-report
+echo Running flake8
+python3 -m flake8 $REPO/src/flask_openapi --config $REPO/ci/config/.flake8rc || true
+echo Running mypy
+python3 -m mypy --config-file $REPO/ci/config/.mypyrc $REPO/src/flask_openapi || true
+echo Running pylint
+python3 -m pylint --rcfile=$REPO/ci/config/.pylintrc $REPO/src/flask_openapi || true
+echo Running safety
+python3 -m safety check --full-report

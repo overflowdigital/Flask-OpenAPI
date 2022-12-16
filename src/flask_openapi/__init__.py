@@ -1,5 +1,5 @@
 # DO NOT CHANGE MANUALLY THIS IS CHANGED IN THE PIPELINES
-__version__ = '1.3.2'
+__version__ = '1.4.0'
 # Based on works of Bruno Rocha and the Flasgger open source community
 
 

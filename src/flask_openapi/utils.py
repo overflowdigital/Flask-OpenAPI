@@ -8,24 +8,27 @@ import logging
 import os
 import re
 import sys
-from collections import defaultdict, OrderedDict
+from collections import OrderedDict, defaultdict
 from copy import deepcopy
 from functools import wraps
-from importlib import import_module
+from typing import Any
+
+from flask import Response, abort, current_app, request
+from flask.views import MethodView
+
+from flask_openapi.constants import DEFAULT_FIELDS, OPTIONAL_FIELDS
+from flask_openapi.marshmallow_apispec import Schema, SwaggerView, convert_schemas
 
 import jsonschema
-import yaml
-from flask import abort, current_app, request, Response
-from flask.views import MethodView
+
 from six import string_types, text_type
+
+import yaml
 
 try:
     from flask_mongorest import methods as fmr_methods
 except ImportError:
     fmr_methods = None
-
-from .constants import DEFAULT_FIELDS, OPTIONAL_FIELDS
-from .marshmallow_apispec import convert_schemas, Schema, SwaggerView
 
 
 def merge_specs(target, source):
@@ -447,7 +450,7 @@ def validate(
     # Since it main_def exists only in this function
     main_def['definitions'] = definitions
 
-    for key, value in definitions.items():
+    for _, value in definitions.items():
         if 'id' in value:
             del value['id']
 
@@ -522,6 +525,7 @@ def remove_suffix(fpath):  # pragma: no cover
 def is_python_file(fpath):  # pragma: no cover
     """Naive Python module filterer"""
     return fpath.endswith(".py") and "__" not in fpath
+
 
 def get_path_from_doc(full_doc):
     """
@@ -759,7 +763,7 @@ def extract_definitions(alist, level=None, endpoint=None, verb=None,
 
     defs = list()
     for item in alist:
-        if not getattr(item, 'get'):
+        if not getattr(item, 'get'):  # noqa
             raise RuntimeError('definitions must be a list of dicts')
         schema = item.get("schema")
         if schema is not None:
@@ -814,7 +818,7 @@ def has_valid_dispatch_view_docs(endpoint):
     klass = endpoint.__dict__.get('view_class', None)
     return klass and hasattr(klass, 'dispatch_request') \
         and hasattr(endpoint, 'methods') \
-        and getattr(klass, 'dispatch_request').__doc__
+        and getattr(klass, 'dispatch_request').__doc__  # noqa
 
 
 def is_valid_method_view(endpoint):
@@ -1042,7 +1046,7 @@ def extract_schema(spec: dict) -> defaultdict:
         return spec.get('definitions', defaultdict(dict))
 
 
-def get_swag_path_from_doc_dir(method: any, view_class: any, doc_dir: str, endpoint: any):
+def get_swag_path_from_doc_dir(method: Any, view_class: Any, doc_dir: str, endpoint: Any):
     file_path = ''
     func = method.__func__ \
         if hasattr(method, '__func__') else method
@@ -1053,19 +1057,19 @@ def get_swag_path_from_doc_dir(method: any, view_class: any, doc_dir: str, endpo
         file_path = os.path.join(
             doc_dir, endpoint.__name__ + '.yml')
     if file_path and os.path.isfile(file_path):
-        setattr(func, 'swag_type', 'yml')
-        setattr(func, 'swag_path', file_path)
+        setattr(func, 'swag_type', 'yml')  # noqa
+        setattr(func, 'swag_path', file_path)  # noqa
     else:
         # HACK: If the doc_dir doesn't quite match the filepath we take the doc_dir
         # and the current filepath without the /tmp
-        file_path = getattr(func, 'swag_path', None)
+        file_path = getattr(func, 'swag_path', '')  # noqa
         if file_path and not os.path.isfile(file_path):
             regex = re.compile(r"(api.+)")
             try:
                 file_path = doc_dir + regex.search(file_path)[0]
                 if os.path.isfile(file_path):
-                    setattr(func, 'swag_type', 'yml')
-                    setattr(func, 'swag_path', file_path)
+                    setattr(func, 'swag_type', 'yml')  # noqa
+                    setattr(func, 'swag_path', file_path)  # noqa
             except Exception:
                 logging.exception(f"{file_path} is not a file")
 
