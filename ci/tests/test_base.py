@@ -1,6 +1,8 @@
-import pytest
 from flask_openapi.base import Swagger
+from flask_openapi.constants import DEFAULT_CONFIG, DEFAULT_ENDPOINT
+from flask_openapi.openapi.specs import get_apispecs
 
+import pytest
 
 def test_init_config(monkeypatch):
 
@@ -11,12 +13,12 @@ def test_init_config(monkeypatch):
 
     # # Unspecified config will be initialized to dict()
     t = Swagger(config=None, merge=False)
-    assert t.config == Swagger.DEFAULT_CONFIG
+    assert t.config == DEFAULT_CONFIG
 
     # Empty dict passed to arguments will be overriden with default_config
     empty_dict = dict()
     t = Swagger(config=empty_dict, merge=False)
-    assert t.config == Swagger.DEFAULT_CONFIG
+    assert t.config == DEFAULT_CONFIG
     assert t.config is not empty_dict
 
     # Config will be merged
@@ -31,12 +33,12 @@ def test_init_config(monkeypatch):
     # Config will be merged
     t = Swagger(config={"a": 0}, merge=True)
     assert t.config.items() > {"a": 0}.items()
-    assert all( t.config[k] == v for k, v in Swagger.DEFAULT_CONFIG.items() )
+    assert all(t.config[k] == v for k, v in DEFAULT_CONFIG.items())
 
     # Config will be merged
     empty_dict = dict()
     t = Swagger(config=empty_dict, merge=True)
-    assert t.config == Swagger.DEFAULT_CONFIG
+    assert t.config == DEFAULT_CONFIG
 
     # keys in DEFAULT_CONFIG will be overridden
     d = {
@@ -55,17 +57,16 @@ def test_init_config(monkeypatch):
 
 
 def test_get_apispecs_with_invalid_endpoint(app):
-    swagger = Swagger(app)
+    Swagger(app)
 
     with app.app_context():
         with pytest.raises(RuntimeError) as e:
             bad_endpoint = "Bad endpoint"
-            swagger.get_apispecs(bad_endpoint)
+            get_apispecs(bad_endpoint)
             assert bad_endpoint in e
 
 
 def test_get_apispecs_with_valid_endpoint(app):
-    swagger = Swagger(app)
-
+    Swagger(app)
     with app.app_context():
-        assert swagger.get_apispecs(Swagger.DEFAULT_ENDPOINT)
+        assert get_apispecs(DEFAULT_ENDPOINT)

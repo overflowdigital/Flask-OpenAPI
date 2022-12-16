@@ -6,6 +6,7 @@ import click
 from flask import current_app
 from flask.cli import with_appcontext
 
+from flask_openapi.openapi.specs import get_apispecs
 from flask_openapi.utils import is_openapi3
 
 
@@ -19,7 +20,7 @@ def generate_api_schema(file: IO, endpoint: str) -> dict:
         if endpoint is None:
             endpoint = current_app.swag.config["specs"][0]["endpoint"]
 
-        spec = current_app.swag.get_apispecs(endpoint)
+        spec = get_apispecs(endpoint)
     except RuntimeError as e:
         click.echo(e, err=True)
         click.echo(

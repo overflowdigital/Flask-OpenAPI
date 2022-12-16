@@ -84,3 +84,11 @@ SCHEMA_LOCATIONS = {
     'body': 'json',
     'path': 'path'
 }
+
+HTTP_METHODS = [
+    'get',
+    'post',
+    'put',
+    'delete',
+    'patch'
+]

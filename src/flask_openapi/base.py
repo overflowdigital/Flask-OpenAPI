@@ -6,11 +6,6 @@ If a swagger yaml description is found in the docstrings for an endpoint
 we add the endpoint to swagger specification output
 
 """
-import codecs
-import json
-import logging
-import os
-import re
 from collections import defaultdict
 from functools import partial, wraps
 from typing import Callable, Optional
@@ -18,13 +13,10 @@ from typing import Callable, Optional
 from flask import (Blueprint, Flask, Markup, abort, current_app, redirect, request, url_for)
 from flask.json import JSONEncoder
 
-from flask_openapi.constants import (OAS3_SUB_COMPONENTS, OPTIONAL_FIELDS,
-                                     OPTIONAL_OAS3_FIELDS, DEFAULT_CONFIG, DEFAULT_ENDPOINT, DEFAULT_FIELDS)
+from flask_openapi.constants import DEFAULT_CONFIG
 from flask_openapi.openapi.file import load_swagger_file
-from flask_openapi.utils import (LazyString, extract_definitions, extract_schema,
-                                 get_schema_specs, get_specs, get_vendor_extension_fields,
-                                 is_openapi3, parse_definition_docstring, parse_imports,
-                                 swag_annotation, validate)
+from flask_openapi.openapi.specs import get_apispecs
+from flask_openapi.utils import LazyString, extract_schema, get_schema_specs, is_openapi3, swag_annotation, validate
 from flask_openapi.views.docs import APIDocsView
 from flask_openapi.views.oauth import OAuthRedirect
 from flask_openapi.views.specs import APISpecsView
@@ -33,7 +25,7 @@ import jsonschema
 
 from mistune import markdown
 
-import yaml
+from werkzeug.routing import Rule
 
 
 try:
@@ -141,312 +133,23 @@ class Swagger:
         """
         return self._configured
 
-    def get_url_mappings(self, rule_filter=None):
-        """
-        Returns all werkzeug rules
-        """
+    def get_url_mappings(self, rule_filter: Optional[Callable] = None) -> list[Rule]:
+        """ Returns all werkzeug rules """
         rule_filter = rule_filter or (lambda rule: True)
-        app_rules = [
-            rule for rule in current_app.url_map.iter_rules()
+        return [
+            rule
+            for rule in current_app.url_map.iter_rules()
             if rule_filter(rule)
         ]
-        return app_rules
 
-    def get_def_models(self, definition_filter=None):
-        """
-        Used for class based definitions
-        """
-        model_filter = definition_filter or (lambda tag: True)
+    def get_def_models(self, definition_filter: Optional[Callable] = None) -> dict:
+        """ Used for class based definitions """
+        definition_filter = definition_filter or (lambda tag: True)
         return {
             definition.name: definition.obj
             for definition in self.definition_models
-            if model_filter(definition)
+            if definition_filter(definition)
         }
-
-    def get_apispecs(self, endpoint='apispec_1'):
-        if not self.app.debug and endpoint in self.apispecs:
-            return self.apispecs[endpoint]
-
-        spec = None
-        for _spec in self.config['specs']:
-            if _spec['endpoint'] == endpoint:
-                spec = _spec
-                break
-        if not spec:
-            raise RuntimeError(
-                'Can`t find specs by endpoint {},'
-                ' check your flasgger`s config'.format(endpoint))
-
-        data = {
-            # try to get from config['SWAGGER']['info']
-            # then config['SWAGGER']['specs'][x]
-            # then config['SWAGGER']
-            # then default
-            "info": self.config.get('info') or {
-                "version": spec.get(
-                    'version', self.config.get('version', "0.0.1")
-                ),
-                "title": spec.get(
-                    'title', self.config.get('title', "A swagger API")
-                ),
-                "description": spec.get(
-                    'description', self.config.get('description',
-                                                   "powered by Flasgger")
-                ),
-                "termsOfService": spec.get(
-                    'termsOfService', self.config.get('termsOfService',
-                                                      "/tos")
-                ),
-            },
-            "paths": self.config.get('paths') or defaultdict(dict),
-            "definitions": self.config.get('definitions') or defaultdict(dict)
-        }
-
-        openapi_version = self.config.get('openapi')
-
-        # If it's openapi3, #/components/schemas replaces #/definitions
-        if is_openapi3(openapi_version):
-            data.setdefault('components', {})['schemas'] = data['definitions']
-
-        if openapi_version:
-            data["openapi"] = openapi_version
-        else:
-            data["swagger"] = self.config.get('swagger') or self.config.get(
-                'swagger_version', "2.0"
-            )
-
-        # Support extension properties in the top level config
-        top_level_extension_options = get_vendor_extension_fields(self.config)
-        if top_level_extension_options:
-            data.update(top_level_extension_options)
-
-        # if True schemaa ids will be prefized by function_method_{id}
-        # for backwards compatibility with <= 0.5.14
-        prefix_ids = self.config.get('prefix_ids')
-
-        if self.config.get('host'):
-            data['host'] = self.config.get('host')
-        if self.config.get("basePath"):
-            data["basePath"] = self.config.get('basePath')
-        if self.config.get('schemes'):
-            data['schemes'] = self.config.get('schemes')
-        if self.config.get("securityDefinitions"):
-            data["securityDefinitions"] = self.config.get(
-                'securityDefinitions'
-            )
-
-        if is_openapi3(openapi_version):
-            # enable oas3 fields when openapi_version is 3.*.*
-            optional_oas3_fields = self.config.get(
-                'optional_oas3_fields') or OPTIONAL_OAS3_FIELDS
-            for key in optional_oas3_fields:
-                if self.config.get(key):
-                    data[key] = self.config.get(key)
-
-        # set defaults from template
-        if self.template is not None:
-            data.update(self.template)
-
-        paths = data['paths']
-        definitions = extract_schema(data)
-        ignore_verbs = set(
-            self.config.get('ignore_verbs', ("HEAD", "OPTIONS"))
-        )
-
-        # technically only responses is non-optional
-        optional_fields = self.config.get('optional_fields') or OPTIONAL_FIELDS
-
-        specs = get_specs(
-            self.get_url_mappings(spec.get('rule_filter')), ignore_verbs,
-            optional_fields, self.sanitizer,
-            openapi_version=openapi_version,
-            doc_dir=self.config.get('doc_dir'))
-
-        for name, def_model in self.get_def_models(
-                spec.get('definition_filter')).items():
-            description, swag = parse_definition_docstring(
-                def_model, self.sanitizer)
-            if name and swag:
-                if description:
-                    swag.update({'description': description})
-                definitions[name].update(swag)
-
-        def merge_sub_component(dest, key, source):
-            if len(source) > 0 and dest.get(key) is None:
-                dest[key] = {}
-            if len(source) > 0 and len(dest[key]) >= 0:
-                dest[key].update(source)
-
-        def get_operations(swag, path_verb=None):
-
-            if is_openapi3(openapi_version):
-                source_components = swag.get('components', {})
-                update_schemas = source_components.get('schemas', {})
-                # clone list so we can modify
-                active_sub_components = OAS3_SUB_COMPONENTS[:]
-                # schemas are handled separately, so remove them here
-                active_sub_components.remove("schemas")
-                for subcomponent in OAS3_SUB_COMPONENTS:
-                    merge_sub_component(data['components'], subcomponent,
-                                        source_components.get(subcomponent,
-                                        {}))
-            else:  # openapi2
-                update_schemas = swag.get('definitions', {})
-
-            if type(update_schemas) == list and type(update_schemas[0]) == dict:
-                # pop, assert single element
-                update_schemas, = update_schemas
-            definitions.update(update_schemas)
-            defs = []  # swag.get('definitions', [])
-            defs += extract_definitions(
-                defs, endpoint=rule.endpoint, verb=verb,
-                prefix_ids=prefix_ids,
-                openapi_version=openapi_version
-            )
-
-            params = swag.get('parameters', [])
-            if verb in swag.keys():
-                verb_swag = swag.get(verb)
-                if len(params) == 0 and verb.lower() in http_methods:
-                    params = verb_swag.get('parameters', [])
-
-            defs += extract_definitions(params,
-                                        endpoint=rule.endpoint,
-                                        verb=verb,
-                                        prefix_ids=prefix_ids,
-                                        openapi_version=openapi_version)
-
-            request_body = swag.get('requestBody')
-            if request_body:
-                content = request_body.get("content", {})
-                extract_definitions(
-                    list(content.values()),
-                    endpoint=rule.endpoint,
-                    verb=verb,
-                    prefix_ids=prefix_ids,
-                    openapi_version=openapi_version
-                )
-
-            callbacks = swag.get("callbacks", {})
-            if callbacks:
-                callbacks = {
-                    str(key): value
-                    for key, value in callbacks.items()
-                }
-                extract_definitions(
-                    list(callbacks.values()),
-                    endpoint=rule.endpoint,
-                    verb=verb,
-                    prefix_ids=prefix_ids,
-                    openapi_version=openapi_version
-                )
-
-            responses = None
-            if 'responses' in swag:
-                responses = swag.get('responses', {})
-                responses = {
-                    str(key): value
-                    for key, value in responses.items()
-                }
-                if responses is not None:
-                    defs = defs + extract_definitions(
-                        responses.values(),
-                        endpoint=rule.endpoint,
-                        verb=verb,
-                        prefix_ids=prefix_ids,
-                        openapi_version=openapi_version
-                    )
-                for definition in defs:
-                    if 'id' not in definition:
-                        definitions.update(definition)
-                        continue
-                    def_id = definition.pop('id')
-                    if def_id is not None:
-                        definitions[def_id].update(definition)
-
-            operation = {}
-            if swag.get('summary'):
-                operation['summary'] = swag.get('summary')
-            if swag.get('description'):
-                operation['description'] = swag.get('description')
-            if request_body:
-                operation['requestBody'] = request_body
-            if callbacks:
-                operation['callbacks'] = callbacks
-            if responses:
-                operation['responses'] = responses
-            # parameters - swagger ui dislikes empty parameter lists
-            if len(params) > 0:
-                operation['parameters'] = params
-            # other optionals
-            for key in optional_fields:
-                if key in swag:
-                    value = swag.get(key)
-                    if key in ('produces', 'consumes'):
-                        if not isinstance(value, (list, tuple)):
-                            value = [value]
-
-                    operation[key] = value
-            if path_verb:
-                operations[path_verb] = operation
-            else:
-                operations[verb] = operation
-
-        http_methods = ['get', 'post', 'put', 'delete', 'patch']
-        for rule, verbs in specs:
-            operations = dict()
-            for verb, swag in verbs:
-                if swag.get('paths'):
-                    try:
-                        for path in swag.get('paths'):  # /projects/{project_id}/alarms:
-                            for path_verb in swag.get('paths').get(path):  # get:
-                                if path_verb == verb:
-                                    get_operations(swag.get('paths').get(path).get(path_verb), path_verb)
-                    except AttributeError:
-                        logging.exception(f'Swagger doc not in the correct format. {swag}')
-                else:
-                    get_operations(swag)
-
-            if len(operations):
-                try:
-                    # Add reverse proxy prefix to route
-                    prefix = self.template['swaggerUiPrefix']
-                except (KeyError, TypeError):
-                    prefix = ''
-                srule = '{0}{1}'.format(prefix, rule)
-
-                try:
-                    # handle basePath
-                    base_path = self.template['basePath']
-
-                    if base_path:
-                        if base_path.endswith('/'):
-                            base_path = base_path[:-1]
-                        if base_path:
-                            # suppress base_path from srule if needed.
-                            # Otherwise we will get definitions twice...
-                            if srule.startswith(base_path):
-                                srule = srule[len(base_path):]
-                except (KeyError, TypeError):
-                    pass
-
-                # old regex '(<(.*?\:)?(.*?)>)'
-                for arg in re.findall('(<([^<>]*:)?([^<>]*)>)', srule):
-                    srule = srule.replace(arg[0], '{%s}' % arg[2])
-
-                for key, val in operations.items():
-                    if srule not in paths:
-                        paths[srule] = {}
-                    if key in paths[srule]:
-                        paths[srule][key].update(val)
-                    else:
-                        paths[srule][key] = val
-        self.apispecs[endpoint] = data
-
-        if is_openapi3(openapi_version):
-            del data['definitions']
-
-        return data
 
     def definition(self, name, tags=None):
         """
@@ -534,7 +237,7 @@ class Swagger:
                 view_func=wrap_view(APISpecsView.as_view(
                     spec['endpoint'],
                     loader=partial(
-                        self.get_apispecs, endpoint=spec['endpoint'])
+                        get_apispecs, endpoint=spec['endpoint'])
                 ))
             )
         app.register_blueprint(blueprint)
@@ -577,7 +280,7 @@ class Swagger:
                 doc = None
                 definitions = None
                 for spec in self.config['specs']:
-                    apispec = self.get_apispecs(endpoint=spec['endpoint'])
+                    apispec = get_apispecs(endpoint=spec['endpoint'])
                     if path in apispec['paths']:
                         if request.method.lower() in apispec['paths'][path]:
                             doc = apispec['paths'][path][
