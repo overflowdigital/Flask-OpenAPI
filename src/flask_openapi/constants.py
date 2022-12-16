@@ -1,4 +1,4 @@
-from flask import url_for
+from flask import current_app, url_for
 
 OPTIONAL_FIELDS = [
     'tags',
@@ -43,15 +43,12 @@ DEFAULT_FIELDS = {
     "parameters": []
 }
 
-DEFAULT_FAVICON = url_for('flask_openapi.static', filename='favicon-32x32.png')
-
-DEFAULT_BUNDLE_JS = url_for('flask_openapi.static', filename='swagger-ui-bundle.js')
-
-DEFAULT_PRESET_JS = url_for('flask_openapi.static', filename='swagger-ui-standalone-preset.js')
-
-DEFAULT_JQUERY = url_for('flask_openapi.static', filename='lib/jquery.min.js')
-
-DEFAULT_CSS = url_for('flask_openapi.static', filename='swagger-ui.css')
+with current_app.context:
+    DEFAULT_FAVICON = url_for('flask_openapi.static', filename='favicon-32x32.png')
+    DEFAULT_BUNDLE_JS = url_for('flask_openapi.static', filename='swagger-ui-bundle.js')
+    DEFAULT_PRESET_JS = url_for('flask_openapi.static', filename='swagger-ui-standalone-preset.js')
+    DEFAULT_JQUERY = url_for('flask_openapi.static', filename='lib/jquery.min.js')
+    DEFAULT_CSS = url_for('flask_openapi.static', filename='swagger-ui.css')
 
 DEFAULT_ENDPOINT = 'apispec_1'
 
