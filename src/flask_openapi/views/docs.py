@@ -32,11 +32,11 @@ def enrich_context(data: dict, config: dict) -> dict:
     data['flask_openapi_config'] = config
     data['json'] = json
     data['flask_openapi_version'] = __version__
-    data['favicon'] = config.get('favicon', DEFAULT_FAVICON)
-    data['swagger_ui_bundle_js'] = config.get('swagger_ui_bundle_js', DEFAULT_BUNDLE_JS)
-    data['swagger_ui_standalone_preset_js'] = config.get('swagger_ui_standalone_preset_js', DEFAULT_PRESET_JS)
-    data['jquery_js'] = config.get('jquery_js', DEFAULT_JQUERY)
-    data['swagger_ui_css'] = config.get('swagger_ui_css', DEFAULT_CSS)
+    data['favicon'] = config.get('favicon', url_for('flask_openapi.static', filename=DEFAULT_FAVICON))
+    data['swagger_ui_bundle_js'] = config.get('swagger_ui_bundle_js', url_for('flask_openapi.static', filename=DEFAULT_BUNDLE_JS))
+    data['swagger_ui_standalone_preset_js'] = config.get('swagger_ui_standalone_preset_js', url_for('flask_openapi.static', filename=DEFAULT_PRESET_JS))
+    data['jquery_js'] = config.get('jquery_js', url_for('flask_openapi.static', filename=DEFAULT_JQUERY))
+    data['swagger_ui_css'] = config.get('swagger_ui_css', url_for('flask_openapi.static', filename=DEFAULT_CSS))
 
     return data
 
