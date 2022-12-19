@@ -1,4 +1,22 @@
+from collections import OrderedDict
+from copy import deepcopy
+
 from six import text_type
+
+
+def ordered_dict_to_dict(d: dict) -> dict:
+    """
+    Converts inner OrderedDict to bare dict
+    """
+    ret = {}
+    new_d = deepcopy(d)
+    for k, v in new_d.items():
+        if isinstance(v, OrderedDict):
+            v = dict(v)
+        if isinstance(v, dict):
+            v = ordered_dict_to_dict(v)
+        ret[k] = v
+    return ret
 
 
 class StringLike(object):

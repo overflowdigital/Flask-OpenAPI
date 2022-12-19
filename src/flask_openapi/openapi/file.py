@@ -5,7 +5,7 @@ from typing import Any, Callable
 
 from flask import current_app
 
-from flask_openapi.utils import parse_imports
+from flask_openapi.openapi.parsers import parse_imports
 
 import yaml
 

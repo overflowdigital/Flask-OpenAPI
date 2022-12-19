@@ -14,16 +14,17 @@ from flask import (Blueprint, Flask, abort, current_app, redirect, request, url_
 
 from flask_openapi.constants import DEFAULT_CONFIG
 from flask_openapi.openapi.file import load_swagger_file
-from flask_openapi.openapi.specs import get_apispecs
-from flask_openapi.utils import extract_schema, get_schema_specs, is_openapi3, swag_annotation, validate
+from flask_openapi.openapi.parsers import extract_schema
+from flask_openapi.openapi.specs import get_apispecs, get_schema_specs
+from flask_openapi.openapi.validator import validate
+from flask_openapi.openapi.version import is_openapi3
+from flask_openapi.utils.decorators import swag_annotation
 from flask_openapi.utils.sanitizers import BR_SANITIZER
 from flask_openapi.views.docs import APIDocsView
 from flask_openapi.views.oauth import OAuthRedirect
 from flask_openapi.views.specs import APISpecsView
 
 import jsonschema
-
-from werkzeug.routing import Rule
 
 
 try:
@@ -119,15 +120,6 @@ class Swagger:
         """
         return self._configured
 
-    def get_url_mappings(self, rule_filter: Optional[Callable] = None) -> list[Rule]:
-        """ Returns all werkzeug rules """
-        rule_filter = rule_filter or (lambda rule: True)
-        return [
-            rule
-            for rule in current_app.url_map.iter_rules()
-            if rule_filter(rule)
-        ]
-
     def get_def_models(self, definition_filter: Optional[Callable] = None) -> dict:
         """ Used for class based definitions """
         definition_filter = definition_filter or (lambda tag: True)
@@ -155,7 +147,7 @@ class Swagger:
 
     def register_views(self, app):
         """
-        Register Flasgger views
+        Register views
         """
 
         # Wrap the views in an arbitrary number of decorators.
@@ -301,7 +293,7 @@ class Swagger:
         '''
         Schemas and parsers would be updated here from doc
         '''
-        if self.is_openapi3():
+        if is_openapi3():
             # 'json' to comply with self.SCHEMA_LOCATIONS's {'body':'json'}
             location = 'json'
             json_schema = None

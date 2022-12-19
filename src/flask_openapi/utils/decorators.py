@@ -1,10 +1,14 @@
 import os
 from functools import wraps
 
-from flask_openapi.utils import get_root_path, validate
+from flask import request
+
+from flask_openapi.compat.marshmallow import Schema
+from flask_openapi.constants import DEFAULT_FIELDS
+from flask_openapi.openapi.validator import validate
+from flask_openapi.utils.files import get_root_path
 
 from six import string_types
-
 
 
 def swag_from(
@@ -108,4 +112,82 @@ def swag_from(
             return function(*args, **kwargs)
         return wrapper
 
+    return decorator
+
+
+def swag_annotation(f):
+    @wraps(f)
+    def wrapper(*args, **kwargs):
+
+        if not kwargs.pop("swag", False):
+            return f(*args, **kwargs)
+
+        function = args[2]
+
+        specs = {}
+        for key, value in DEFAULT_FIELDS.items():
+            specs[key] = kwargs.pop(key, value)
+
+        for variable, annotation in function.__annotations__.items():
+
+            if issubclass(annotation, Schema):
+                annotation = annotation()
+                data = annotation.to_specs_dict()
+
+                for row in data["parameters"]:
+                    specs["parameters"].append(row)
+                specs["definitions"].update(data["definitions"])
+
+                function = validate_annotation(annotation, variable)(function)
+
+            elif issubclass(annotation, int):
+                m = {"name": variable,
+                     "in": "path",
+                     "type": "integer",
+                     "required": True}
+                if ("int(signed=True):" + variable) in args[0]:
+                    m['minimum'] = 0
+                specs["parameters"].append(m)
+
+            elif issubclass(annotation, str):
+                specs["parameters"].append({"name": variable,
+                                            "in": "path",
+                                            "type": "string",
+                                            "required": True})
+
+        function.specs_dict = specs
+        args = list(args)
+        args[2] = function
+        args = tuple(args)
+
+        return f(*args, **kwargs)
+    return wrapper
+
+
+def validate_annotation(an, var):
+    def decorator(f):
+        @wraps(f)
+        def wrapper(*args, **kwargs):
+
+            if an.swag_validate:
+
+                payload = None
+
+                if an.swag_in == "query":
+                    payload = dict(request.args)
+
+                elif an.swag_in == "body" and request.is_json:
+                    payload = request.json
+
+                validate(
+                    payload,
+                    specs=an.to_specs_dict(),
+                    validation_function=an.swag_validation_function,
+                    validation_error_handler=an.swag_validation_error_handler,
+                    require_data=an.swag_require_data
+                    # handle openapiversion later
+                )
+
+            return f(*args, **kwargs, **{var: payload})
+        return wrapper
     return decorator

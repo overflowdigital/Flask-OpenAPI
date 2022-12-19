@@ -1,4 +1,4 @@
-from flask import JSONEncoder
+from json import JSONEncoder
 
 from flask_openapi.utils.types import LazyString
 

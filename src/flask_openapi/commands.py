@@ -7,7 +7,7 @@ from flask import current_app
 from flask.cli import with_appcontext
 
 from flask_openapi.openapi.specs import get_apispecs
-from flask_openapi.utils import is_openapi3
+from flask_openapi.openapi.version import is_openapi3
 
 
 @click.command()

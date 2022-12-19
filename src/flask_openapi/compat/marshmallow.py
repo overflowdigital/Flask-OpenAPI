@@ -7,7 +7,8 @@ from flask import typing as ft
 from flask.views import MethodView
 
 from flask_openapi.constants import OPTIONAL_FIELDS
-from flask_openapi.utils import apispec_to_template, validate
+from flask_openapi.openapi.specs import apispec_to_template
+from flask_openapi.openapi.validator import validate
 
 try:
     from apispec import APISpec as BaseAPISpec
