@@ -63,7 +63,7 @@ class Swagger:
             app: Flask = None,
             config: dict = {},
             sanitizer: Optional[Callable] = None,
-            template: str = '',
+            template: dict = {},
             template_file: str = '',
             decorators: Optional[list] = None,
             validation_function: Optional[Callable] = None,

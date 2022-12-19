@@ -1,15 +1,17 @@
 import logging
 import re
 from collections import defaultdict
-from typing import Union
+from typing import TYPE_CHECKING, Union
 
 from flask import current_app
 
-from flask_openapi.base import Swagger
 from flask_openapi.constants import HTTP_METHODS, OAS3_SUB_COMPONENTS, OPTIONAL_FIELDS, OPTIONAL_OAS3_FIELDS
 from flask_openapi.utils import extract_definitions, extract_schema, get_specs, get_vendor_extension_fields, is_openapi3, parse_definition_docstring
 
 from werkzeug.routing import Rule
+
+if TYPE_CHECKING:
+    from flask_openapi.base import Swagger
 
 
 def get_definitions(data: dict, spec: dict) -> dict:
@@ -35,15 +37,15 @@ def merge_sub_component(dest: dict, key: str, source: dict) -> dict:
     return dest
 
 
-def get_operations(data: dict, spec: dict, rule: Rule, verb: str, optional_fields: list, path_verb: str = '') -> dict:
-    swag: Swagger = current_app.swag
+def get_operations(swag: dict, data: dict, spec: dict, rule: Rule, verb: str, optional_fields: list, path_verb: str = '') -> dict:
+    swagger: 'Swagger' = current_app.swag
 
     definitions: dict = get_definitions(data, spec)
 
-    openapi_version: str = swag.config.get('openapi')
-    prefix_ids: list = swag.config.get('prefix_ids')
+    openapi_version: str = swagger.config.get('openapi', '')
+    prefix_ids: list = swagger.config.get('prefix_ids', [])
     params: list = swag.get('parameters', [])
-    request_body: dict = swag.get('requestBody')
+    request_body: dict = swag.get('requestBody', {})
     callbacks: dict = swag.get("callbacks", {})
     responses: dict = swag.get('responses', {})
 
@@ -71,7 +73,7 @@ def get_operations(data: dict, spec: dict, rule: Rule, verb: str, optional_field
     definitions.update(update_schemas)
 
     if verb in swag.keys():
-        verb_swag = swag.get(verb)
+        verb_swag = swag.get(verb, {})
         if len(params) == 0 and verb.lower() in HTTP_METHODS:
             params = verb_swag.get('parameters', [])
 
@@ -131,25 +133,25 @@ def get_operations(data: dict, spec: dict, rule: Rule, verb: str, optional_field
 
 
 def get_apispecs(endpoint: str = 'apispec_1') -> dict:
-    swag: Swagger = current_app.swag
+    swagger: 'Swagger' = current_app.swag
     spec: dict = {}
-    openapi_version: str = swag.config.get('openapi')
-    ignore_verbs: set[str] = set(swag.config.get('ignore_verbs', ("HEAD", "OPTIONS")))
-    optional_fields: list = swag.config.get('optional_fields') or OPTIONAL_FIELDS
+    openapi_version: str = swagger.config.get('openapi', '')
+    ignore_verbs: set[str] = set(swagger.config.get('ignore_verbs', ("HEAD", "OPTIONS")))
+    optional_fields: list = swagger.config.get('optional_fields') or OPTIONAL_FIELDS
     operations: dict = {}
     specs: list = get_specs(
-        swag.get_url_mappings(spec.get('rule_filter')),
+        swagger.get_url_mappings(spec.get('rule_filter')),
         ignore_verbs,
         optional_fields,
-        swag.sanitizer,
+        swagger.sanitizer,
         openapi_version,
-        doc_dir=swag.config.get('doc_dir')
+        doc_dir=swagger.config.get('doc_dir')
     )
 
-    if not current_app.debug and endpoint in swag.apispecs:
-        return swag.apispecs[endpoint]
+    if not current_app.debug and endpoint in swagger.apispecs:
+        return swagger.apispecs[endpoint]
 
-    for configured_spec in swag.config['specs']:
+    for configured_spec in swagger.config['specs']:
         if configured_spec['endpoint'] == endpoint:
             spec = configured_spec
             break
@@ -158,33 +160,33 @@ def get_apispecs(endpoint: str = 'apispec_1') -> dict:
         raise RuntimeError(f"Can't find specs by endpoint {endpoint}, check your config")
 
     data: dict = {
-        "info": swag.config.get('info') or {
-            "version": spec.get('version', swag.config.get('version', "0.0.1")),
-            "title": spec.get('title', swag.config.get('title', "A swagger API")),
-            "description": spec.get('description', swag.config.get('description', "")),
-            "termsOfService": spec.get('termsOfService', swag.config.get('termsOfService', "/tos"))
+        "info": swagger.config.get('info') or {
+            "version": spec.get('version', swagger.config.get('version', "0.0.1")),
+            "title": spec.get('title', swagger.config.get('title', "A swagger API")),
+            "description": spec.get('description', swagger.config.get('description', "")),
+            "termsOfService": spec.get('termsOfService', swagger.config.get('termsOfService', "/tos"))
         },
-        "paths": swag.config.get('paths') or defaultdict(dict),
-        "definitions": swag.config.get('definitions') or defaultdict(dict)
+        "paths": swagger.config.get('paths') or defaultdict(dict),
+        "definitions": swagger.config.get('definitions') or defaultdict(dict)
     }
 
     if openapi_version:
         data["openapi"] = openapi_version
     else:
-        data["swagger"] = swag.config.get('swagger') or swag.config.get('swagger_version', "2.0")
+        data["swagger"] = swagger.config.get('swagger') or swagger.config.get('swagger_version', "2.0")
 
     # If it's openapi3, #/components/schemas replaces #/definitions
     if is_openapi3(openapi_version):
-        optional_oas3_fields: list = swag.config.get('optional_oas3_fields') or OPTIONAL_OAS3_FIELDS
+        optional_oas3_fields: list = swagger.config.get('optional_oas3_fields') or OPTIONAL_OAS3_FIELDS
 
         data.setdefault('components', {})['schemas'] = data['definitions']
 
         for key in optional_oas3_fields:
-            if swag.config.get(key):
-                data[key] = swag.config.get(key)
+            if swagger.config.get(key):
+                data[key] = swagger.config.get(key)
 
     # Support extension properties in the top level config
-    top_level_extension_options = get_vendor_extension_fields(swag.config)
+    top_level_extension_options = get_vendor_extension_fields(swagger.config)
 
     if top_level_extension_options:
         data.update(top_level_extension_options)
@@ -192,18 +194,18 @@ def get_apispecs(endpoint: str = 'apispec_1') -> dict:
     # if True schemaa ids will be prefized by function_method_{id}
     # for backwards compatibility with <= 0.5.14
 
-    if swag.config.get('host'):
-        data['host'] = swag.config.get('host')
-    if swag.config.get("basePath"):
-        data["basePath"] = swag.config.get('basePath')
-    if swag.config.get('schemes'):
-        data['schemes'] = swag.config.get('schemes')
-    if swag.config.get("securityDefinitions"):
-        data["securityDefinitions"] = swag.config.get('securityDefinitions')
+    if swagger.config.get('host'):
+        data['host'] = swagger.config.get('host')
+    if swagger.config.get("basePath"):
+        data["basePath"] = swagger.config.get('basePath')
+    if swagger.config.get('schemes'):
+        data['schemes'] = swagger.config.get('schemes')
+    if swagger.config.get("securityDefinitions"):
+        data["securityDefinitions"] = swagger.config.get('securityDefinitions')
 
     # set defaults from template
-    if swag.template is not None:
-        data.update(swag.template)
+    if swagger.template is not None:
+        data.update(swagger.template)
 
     for rule, verbs in specs:
         for verb, swag in verbs:
@@ -214,15 +216,15 @@ def get_apispecs(endpoint: str = 'apispec_1') -> dict:
                         # get:
                         for path_verb in swag.get('paths').get(path):
                             if path_verb == verb:
-                                operations = get_operations(data, spec, rule, swag.get('paths').get(path).get(path_verb), optional_fields, path_verb)
+                                operations = get_operations(swag.get('paths').get(path).get(path_verb), data, spec, rule, verb, optional_fields, path_verb)
                 except AttributeError:
-                    logging.exception(f'Swagger doc not in the correct format. {swag}')
+                    logging.exception(f'Swagger doc not in the correct format. {swagger}')
             else:
-                operations = get_operations(data, spec, rule, swag.get('paths').get(path).get(path_verb), optional_fields)
+                operations = get_operations(swag, data, spec, rule, verb, optional_fields)
 
         if operations:
-            srule: str = f"{swag.template.get('swaggerUiPrefix', '')}{rule}"
-            base_path: str = swag.template.get('basePath', 'None')
+            srule: str = f"{swagger.template.get('swaggerUiPrefix', '')}{rule}"
+            base_path: str = swagger.template.get('basePath', 'None')
 
             if base_path:
                 if base_path.endswith('/'):
@@ -242,7 +244,7 @@ def get_apispecs(endpoint: str = 'apispec_1') -> dict:
                 else:
                     data['paths'][srule][key] = val
 
-    swag.apispecs[endpoint] = data
+    swagger.apispecs[endpoint] = data
 
     if is_openapi3(openapi_version):
         del data['definitions']
