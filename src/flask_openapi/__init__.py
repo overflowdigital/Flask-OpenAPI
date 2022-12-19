@@ -1,10 +1,15 @@
 # DO NOT CHANGE MANUALLY THIS IS CHANGED IN THE PIPELINES
 __version__ = '1.4.0'
 
-from jsonschema import ValidationError  # noqa
-
-from .base import (BR_SANITIZER, Flasgger, LazyJSONEncoder,  # noqa
-                   MK_SANITIZER, NO_SANITIZER, Swagger)
-from .constants import OPTIONAL_FIELDS  # noqa
-from flask_openapi.compat.marshmallow import APISpec, Schema, SwaggerView  # noqa
-from .utils import apispec_to_template, LazyString, swag_from, validate  # noqa
+import flask_openapi.compat.marshmallow as marshmallow_shim  # noqa
+from flask_openapi.base import OpenAPI  # noqa
+from flask_openapi.base import Swagger  # noqa
+from flask_openapi.base import Flasgger  # noqa
+from flask_openapi.base import BR_SANITIZER  # noqa
+from flask_openapi.base import MK_SANITIZER  # noqa
+from flask_openapi.base import NO_SANITIZER  # noqa
+from flask_openapi.utils import swag_from  # noqa
+from flask_openapi.utils import apispec_to_template  # noqa
+from flask_openapi.utils.encoder import LazyJSONEncoder  # noqa
+from flask_openapi.utils.types import LazyString  # noqa
+from flask_openapi.utils import validate  # noqa

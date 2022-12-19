@@ -39,7 +39,6 @@ try:
 
 except ImportError:
     Schema = None  # type: ignore
-    fields = None  # type: ignore
 
     def schema2jsonschema(schema): return {}  # type: ignore # noqa
     def schema2parameters(schema, location): return []  # type: ignore # noqa

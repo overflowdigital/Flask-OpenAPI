@@ -10,20 +10,18 @@ from collections import defaultdict
 from functools import partial, wraps
 from typing import Callable, Optional
 
-from flask import (Blueprint, Flask, Markup, abort, current_app, redirect, request, url_for)
-from flask.json import JSONEncoder
+from flask import (Blueprint, Flask, abort, current_app, redirect, request, url_for)
 
 from flask_openapi.constants import DEFAULT_CONFIG
 from flask_openapi.openapi.file import load_swagger_file
 from flask_openapi.openapi.specs import get_apispecs
-from flask_openapi.utils import LazyString, extract_schema, get_schema_specs, is_openapi3, swag_annotation, validate
+from flask_openapi.utils import extract_schema, get_schema_specs, is_openapi3, swag_annotation, validate
+from flask_openapi.utils.sanitizers import BR_SANITIZER
 from flask_openapi.views.docs import APIDocsView
 from flask_openapi.views.oauth import OAuthRedirect
 from flask_openapi.views.specs import APISpecsView
 
 import jsonschema
-
-from mistune import markdown
 
 from werkzeug.routing import Rule
 
@@ -32,18 +30,6 @@ try:
     from flask_restful.reqparse import RequestParser
 except ImportError:
     RequestParser = None
-
-
-def NO_SANITIZER(text: str) -> str:
-    return text
-
-
-def BR_SANITIZER(text: str) -> str:
-    return text.replace('\n', '<br/>')
-
-
-def MK_SANITIZER(text: str) -> str:
-    return Markup(markdown(text))
 
 
 class SwaggerDefinition:
@@ -463,10 +449,4 @@ class Swagger:
 
 # backwards compatibility
 Flasgger = Swagger  # noqa
-
-
-class LazyJSONEncoder(JSONEncoder):
-    def default(self, obj):
-        if isinstance(obj, LazyString):
-            return str(obj)
-        return super(LazyJSONEncoder, self).default(obj)
+OpenAPI = Swagger  # noqa
