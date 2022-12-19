@@ -16,12 +16,10 @@ from typing import Any
 from flask import Response, abort, current_app, request
 from flask.views import MethodView
 
-from flask_openapi.compat.marshmallow import Schema, SwaggerView, convert_schemas
+from flask_openapi import marshmallow_shim
 from flask_openapi.constants import DEFAULT_FIELDS, OPTIONAL_FIELDS
 
 import jsonschema
-
-from six import string_types
 
 import yaml
 
@@ -135,13 +133,13 @@ def get_specs(rules, ignore_verbs, optional_fields, sanitizer,
                 definition = {}
                 merge_specs(
                     swag,
-                    convert_schemas(deepcopy(method.specs_dict), definition)
+                    marshmallow_shim.convert_schemas(deepcopy(method.specs_dict), definition)
                 )
                 swag_def = definition
                 swagged = True
 
             view_class = getattr(endpoint, 'view_class', None)
-            if view_class and issubclass(view_class, SwaggerView):
+            if view_class and issubclass(view_class, marshmallow_shim.SwaggerView):
                 apispec_swag = {}
 
                 # Don't need to alter definitions here
@@ -158,7 +156,7 @@ def get_specs(rules, ignore_verbs, optional_fields, sanitizer,
                 # Since it would be appended later according to openapi
                 apispec_definitions = apispec_swag.get('definitions', {})
                 swag.update(
-                    convert_schemas(apispec_swag, apispec_definitions)
+                    marshmallow_shim.convert_schemas(apispec_swag, apispec_definitions)
                 )
                 swag_def = apispec_definitions
 
@@ -755,7 +753,7 @@ def swag_annotation(f):
 
         for variable, annotation in function.__annotations__.items():
 
-            if issubclass(annotation, Schema):
+            if issubclass(annotation, marshmallow_shim.Schema):
                 annotation = annotation()
                 data = annotation.to_specs_dict()
 
