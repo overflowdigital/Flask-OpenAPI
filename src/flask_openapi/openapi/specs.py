@@ -11,7 +11,7 @@ from flask_openapi.utils import extract_definitions, extract_schema, get_specs, 
 from werkzeug.routing import Rule
 
 if TYPE_CHECKING:
-    from flask_openapi.base import Swagger
+    from flask_openapi.core import Swagger
 
 
 def get_definitions(data: dict, spec: dict) -> dict:

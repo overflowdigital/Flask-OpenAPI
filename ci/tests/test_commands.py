@@ -1,6 +1,6 @@
 import json
 
-from flask_openapi.base import Swagger
+from flask_openapi.core import Swagger
 from flask_openapi.commands import generate_api_schema
 from flask_openapi.constants import DEFAULT_CONFIG, DEFAULT_ENDPOINT
 from flask_openapi.openapi.specs import get_apispecs

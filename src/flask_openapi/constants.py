@@ -42,9 +42,13 @@ DEFAULT_FIELDS = {
 }
 
 DEFAULT_FAVICON = 'favicon-32x32.png'
+
 DEFAULT_BUNDLE_JS = 'swagger-ui-bundle.js'
+
 DEFAULT_PRESET_JS = 'swagger-ui-standalone-preset.js'
+
 DEFAULT_JQUERY = 'lib/jquery.min.js'
+
 DEFAULT_CSS = 'swagger-ui.css'
 
 DEFAULT_ENDPOINT = 'apispec_1'
