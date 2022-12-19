@@ -1,63 +1,66 @@
 # coding: utf-8
 import inspect
+from typing import Optional, cast
 
+from flask import Flask
+from flask import typing as ft
 from flask.views import MethodView
 
-import flask_openapi
+from flask_openapi.constants import OPTIONAL_FIELDS
+from flask_openapi.utils import apispec_to_template, validate
 
 try:
-    import marshmallow
     from apispec import APISpec as BaseAPISpec
     from apispec.ext.marshmallow import openapi
-    from marshmallow import fields
-    # Note that openapi_converter is initialized with trivial
-    #   schema_name_resolver. Resolving circular reference is not
-    #   supported for now. See issue #314 .
-    # Also see: https://github.com/marshmallow-code/apispec/pull/447
+    from marshmallow.schema import Schema as MarshmallowSchema
+
     openapi_converter = openapi.OpenAPIConverter(
         openapi_version='2.0',
         schema_name_resolver=lambda schema: None,
-        spec=BaseAPISpec
+        spec=cast(BaseAPISpec, BaseAPISpec)  # mypy man...
     )
+
     schema2jsonschema = openapi_converter.schema2jsonschema
     schema2parameters = openapi_converter.schema2parameters
 
-    class Schema(marshmallow.Schema):
+    class Schema(MarshmallowSchema):
         swag_in = "body"
         swag_validate = True
         swag_validation_function = None
         swag_validation_error_handler = None
         swag_require_data = True
 
-        def to_specs_dict(self):
-            specs = {'parameters': self.__class__}
+        def to_specs_dict(self) -> dict:
+            specs: dict = {'parameters': self.__class__}
             definitions: dict = {}
             specs.update(convert_schemas(specs, definitions))
             specs['definitions'] = definitions
             return specs
 
 except ImportError:
-    Schema = None
-    fields = None
-    schema2jsonschema = lambda schema: {}  # noqa
-    schema2parameters = lambda schema, location: []  # noqa
-    BaseAPISpec = object
+    Schema = None  # type: ignore
+    fields = None  # type: ignore
+
+    def schema2jsonschema(schema): return {}  # type: ignore # noqa
+    def schema2parameters(schema, location): return []  # type: ignore # noqa
+
+    BaseAPISpec = object  # type: ignore
 
 
 class APISpec(BaseAPISpec):
     """
-    Wrapper around APISpec to add `to_flasgger` method
+    Wrapper around APISpec to add `to_swagger` method
     """
 
-    def to_flasgger(self, app=None, definitions=None, paths=None):
+    def to_swagger(self, app: Optional[Flask] = None, definitions: Optional[dict] = None, paths: Optional[list] = None) -> dict:
         """
-        Converts APISpec dict to flasgger suitable dict
+        Converts APISpec dict to swagger suitable dict
         also adds definitions and paths (optional)
         """
         if Schema is None:
             raise RuntimeError('Please install marshmallow and apispec')
 
-        return flask_openapi.utils.apispec_to_template(
+        return apispec_to_template(
             app,
             self,
             definitions=definitions,
@@ -69,46 +72,47 @@ class SwaggerView(MethodView):
     """
     A Swagger view
     """
-    parameters = []
-    responses = {}
-    definitions = {}
-    tags = []
+    parameters: list = []
+    responses: dict = {}
+    definitions: dict = {}
+    tags: list = []
     consumes = ['application/json']
     produces = ['application/json']
-    schemes = []
-    security = []
+    schemes: list = []
+    security: list = []
     deprecated = False
     operationId = None
-    externalDocs = {}
+    externalDocs: dict = {}
     summary = None
     description = None
     validation = False
     validation_function = None
     validation_error_handler = None
 
-    def dispatch_request(self, *args, **kwargs):
+    def dispatch_request(self, *args: tuple, **kwargs: dict) -> ft.ResponseReturnValue:
         """
         If validation=True perform validation
         """
         if self.validation:
-            specs = {}
-            attrs = flask_openapi.constants.OPTIONAL_FIELDS + [
+            specs: dict = {}
+            attrs: list = OPTIONAL_FIELDS + [
                 'parameters', 'definitions', 'responses',
                 'summary', 'description'
             ]
             for attr in attrs:
                 specs[attr] = getattr(self, attr)
-            definitions = {}
+            definitions: dict = {}
             specs.update(convert_schemas(specs, definitions))
             specs['definitions'] = definitions
-            flask_openapi.utils.validate(
+
+            validate(
                 specs=specs, validation_function=self.validation_function,
                 validation_error_handler=self.validation_error_handler
             )
         return super(SwaggerView, self).dispatch_request(*args, **kwargs)
 
 
-def convert_schemas(d, definitions=None):
+def convert_schemas(d: dict, definitions: Optional[dict] = None) -> dict:
     """
     Convert Marshmallow schemas to dict definitions
 
@@ -117,9 +121,11 @@ def convert_schemas(d, definitions=None):
     """
     if definitions is None:
         definitions = {}
+
     definitions.update(d.get('definitions', {}))
 
     new = {}
+
     for k, v in d.items():
         if isinstance(v, dict):
             v = convert_schemas(v, definitions)
