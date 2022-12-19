@@ -6,7 +6,7 @@ from importlib import import_module
 import pytest
 from flask import Flask
 from flask_openapi import Swagger
-from flask_openapi.utils import is_python_file, remove_suffix
+from flask_openapi.utils.files import is_python_file, remove_suffix
 
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
 TEST_SUITE = os.path.join(REPO_ROOT, 'ci/tests/suite')

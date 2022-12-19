@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, Union
 
 from flask import current_app
 
-from flask_openapi.compat.marshmallow import SwaggerView, convert_schemas
+import flask_openapi.compat.marshmallow as m
 from flask_openapi.constants import HTTP_METHODS, OAS3_SUB_COMPONENTS, OPTIONAL_FIELDS, OPTIONAL_OAS3_FIELDS
 from flask_openapi.openapi.parsers import extract_definitions, extract_schema, get_vendor_extension_fields, parse_definition_docstring, parse_docstring
 from flask_openapi.openapi.version import is_openapi3
@@ -204,13 +204,13 @@ def get_specs(rules, ignore_verbs, optional_fields, sanitizer,
                 definition = {}
                 merge_specs(
                     swag,
-                    convert_schemas(deepcopy(method.specs_dict), definition)
+                    m.convert_schemas(deepcopy(method.specs_dict), definition)
                 )
                 swag_def = definition
                 swagged = True
 
             view_class = getattr(endpoint, 'view_class', None)
-            if view_class and issubclass(view_class, SwaggerView):
+            if view_class and issubclass(view_class, m.SwaggerView):
                 apispec_swag = {}
 
                 # Don't need to alter definitions here
@@ -227,7 +227,7 @@ def get_specs(rules, ignore_verbs, optional_fields, sanitizer,
                 # Since it would be appended later according to openapi
                 apispec_definitions = apispec_swag.get('definitions', {})
                 swag.update(
-                    convert_schemas(apispec_swag, apispec_definitions)
+                    m.convert_schemas(apispec_swag, apispec_definitions)
                 )
                 swag_def = apispec_definitions
 

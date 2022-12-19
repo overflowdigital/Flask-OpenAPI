@@ -97,8 +97,8 @@ class Swagger:
 
         self.load_config(app)
 
-        if self.template_file is not None:
-            self.template = load_swagger_file(self.template_file)
+        if self.template_file:
+            self.template = load_swagger_file(app, self.template_file)
 
         self.register_views(app)
         self.add_headers(app)

@@ -7,8 +7,8 @@ from flask import typing as ft
 from flask.views import MethodView
 
 from flask_openapi.constants import OPTIONAL_FIELDS
-from flask_openapi.openapi.specs import apispec_to_template
-from flask_openapi.openapi.validator import validate
+import flask_openapi.openapi.specs as spec
+import flask_openapi.openapi.validator as validate
 
 try:
     from apispec import APISpec as BaseAPISpec
@@ -60,7 +60,7 @@ class APISpec(BaseAPISpec):
         if Schema is None:
             raise RuntimeError('Please install marshmallow and apispec')
 
-        return apispec_to_template(
+        return spec.apispec_to_template(
             app,
             self,
             definitions=definitions,
@@ -105,7 +105,7 @@ class SwaggerView(MethodView):
             specs.update(convert_schemas(specs, definitions))
             specs['definitions'] = definitions
 
-            validate(
+            validate.validate(
                 specs=specs, validation_function=self.validation_function,
                 validation_error_handler=self.validation_error_handler
             )

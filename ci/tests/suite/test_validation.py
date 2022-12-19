@@ -7,8 +7,8 @@ except ImportError:
     import httplib as HTTPStatus
 
 from flask import Blueprint, Flask, jsonify, request
-from flask_openapi import (fields, Schema, swag_from, Swagger, SwaggerView,
-                           utils, validate)
+from flask_openapi import swag_from, Swagger, validate
+from flask_openapi.openapi.parsers import extract_schema
 
 # Examples include intentionally invalid defaults to demonstrate validation.
 _TEST_META_SKIP_FULL_VALIDATION = True
@@ -360,7 +360,7 @@ def test_swag(client, specs_data):
 
     assert paths is not None and len(paths) > 0
 
-    definitions = utils.extract_schema(apispec)
+    definitions = extract_schema(apispec)
 
     assert definitions is not None
     assert definitions.get('User') is not None

@@ -111,7 +111,7 @@ def parse_imports(full_doc, root_path=None):
     Supports `import: otherfile.yml` in docstring specs
     """
     regex = re.compile('import: "(.*)"')
-    import_prop = regex.ssearch(full_doc)
+    import_prop = regex.search(full_doc)
     if import_prop:
         start = import_prop.start()
         spaces_num = start - full_doc.rfind('\n', 0, start) - 1

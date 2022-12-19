@@ -7,7 +7,6 @@ try:
 except ImportError:
     import httplib as HTTPStatus
 from flask_openapi import Swagger
-from flask_openapi.utils import swag_from
 
 
 swagger_config = {

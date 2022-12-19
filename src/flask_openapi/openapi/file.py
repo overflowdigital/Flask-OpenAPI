@@ -3,18 +3,18 @@ import json
 import os
 from typing import Any, Callable
 
-from flask import current_app
+from flask import Flask
 
 from flask_openapi.openapi.parsers import parse_imports
 
 import yaml
 
 
-def load_swagger_file(filename: str) -> Any:
+def load_swagger_file(app: Flask, filename: str) -> Any:
     loader: Callable = lambda stream: yaml.safe_load(parse_imports(stream.read(), filename))  # noqa
 
     if not filename.startswith('/'):
-        filename = os.path.join(current_app.root_path, filename)
+        filename = os.path.join(app.root_path, filename)
 
     if filename.endswith('.json'):
         loader = json.load

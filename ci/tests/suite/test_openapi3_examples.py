@@ -4,7 +4,8 @@ Example using Marshmallow Schema and fields as definitions
 # coding: utf-8
 from flask import Flask, jsonify, Response, request
 
-from flask_openapi import Swagger, SwaggerView
+from flask_openapi import Swagger
+from flask_openapi.compat.marshmallow import SwaggerView
 
 swagger_config = {
     "headers": [],
