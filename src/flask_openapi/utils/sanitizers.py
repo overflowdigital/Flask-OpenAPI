@@ -8,7 +8,7 @@ def NO_SANITIZER(text: str) -> str:
 
 
 def BR_SANITIZER(text: str) -> str:
-    return text.replace('\n', '<br/>')
+    return text.replace("\n", "<br/>")
 
 
 def MK_SANITIZER(text: str) -> str:

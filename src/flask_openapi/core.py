@@ -10,7 +10,7 @@ from collections import defaultdict
 from functools import partial, wraps
 from typing import Callable, Literal, LiteralString, Optional
 
-from flask import (Blueprint, Flask, abort, redirect, request, url_for)
+from flask import Blueprint, Flask, abort, redirect, request, url_for
 from grpc import Call
 
 from flask_openapi.constants import DEFAULT_CONFIG
@@ -47,18 +47,18 @@ class SwaggerDefinition:
 
 class Swagger:
     def __init__(
-            self,
-            app: Flask = None,
-            config: dict = {},
-            sanitizer: Optional[Callable] = None,
-            template: dict = {},
-            template_file: str = '',
-            decorators: Optional[list] = None,
-            validation_function: Optional[Callable] = None,
-            validation_error_handler: Optional[Callable] = None,
-            parse: bool = False,
-            format_checker: Optional[Callable] = None,
-            merge: bool = False
+        self,
+        app: Flask = None,
+        config: dict = {},
+        sanitizer: Optional[Callable] = None,
+        template: dict = {},
+        template_file: str = "",
+        decorators: Optional[list] = None,
+        validation_function: Optional[Callable] = None,
+        validation_error_handler: Optional[Callable] = None,
+        parse: bool = False,
+        format_checker: Optional[Callable] = None,
+        merge: bool = False,
     ) -> None:
         self._configured: Literal[False] = False
         self.endpoints: list[str] = []
@@ -79,11 +79,21 @@ class Swagger:
         self.decorators: list | None = decorators
         self.format_checker: Callable = format_checker or jsonschema.FormatChecker()
 
-        self.default_validation_function: Callable = lambda data, schema: jsonschema.validate(data, schema, format_checker=self.format_checker)
-        self.default_error_handler: Callable = lambda error, _, __: abort(400, error.message)
+        self.default_validation_function: Callable = (
+            lambda data, schema: jsonschema.validate(
+                data, schema, format_checker=self.format_checker
+            )
+        )
+        self.default_error_handler: Callable = lambda error, _, __: abort(
+            400, error.message
+        )
 
-        self.validation_function: Callable = validation_function or self.default_validation_function
-        self.validation_error_handler: Callable = validation_error_handler or self.default_error_handler
+        self.validation_function: Callable = (
+            validation_function or self.default_validation_function
+        )
+        self.validation_error_handler: Callable = (
+            validation_error_handler or self.default_error_handler
+        )
         self.apispecs: dict[str, dict] = {}  # cached apispecs
         self.parse: bool = parse
 
@@ -91,7 +101,7 @@ class Swagger:
             self.init_app(app)
 
     def init_app(self, app: Flask, decorators: list = None) -> None:
-        """ Initialize the app with Swagger plugin """
+        """Initialize the app with Swagger plugin"""
         self.decorators = decorators or self.decorators
         self.app: Flask = app
         self.app.add_url_rule = swag_annotation(self.app.add_url_rule)  # type: ignore
@@ -106,7 +116,7 @@ class Swagger:
 
         if self.parse:  # type: ignore
             if RequestParser is None:
-                raise RuntimeError('Please install flask_restful')
+                raise RuntimeError("Please install flask_restful")
             self.parsers: dict = {}
             self.schemas: dict = {}
             self.parse_request(app)
@@ -122,7 +132,7 @@ class Swagger:
         return self._configured
 
     def get_def_models(self, definition_filter: Optional[Callable] = None) -> dict:
-        """ Used for class based definitions """
+        """Used for class based definitions"""
         definition_filter: Callable = definition_filter or (lambda tag: True)
         return {
             definition.name: definition.obj
@@ -134,17 +144,18 @@ class Swagger:
         """
         Decorator to add class based definitions
         """
+
         def wrapper(obj):
-            self.definition_models.append(SwaggerDefinition(name, obj,
-                                                            tags=tags))
+            self.definition_models.append(SwaggerDefinition(name, obj, tags=tags))
             return obj
+
         return wrapper
 
     def load_config(self, app) -> None:
         """
         Copy config from app
         """
-        self.config.update(app.config.get('SWAGGER', {}))
+        self.config.update(app.config.get("SWAGGER", {}))
 
     def register_views(self, app) -> None:
         """
@@ -158,66 +169,63 @@ class Swagger:
                     view = decorator(view)
             return view
 
-        if self.config.get('swagger_ui', True):
-            uiversion: int = self.config.get('uiversion', 3)
+        if self.config.get("swagger_ui", True):
+            uiversion: int = self.config.get("uiversion", 3)
             blueprint: Blueprint = Blueprint(
-                self.config.get('endpoint', 'flask_openapi'),
+                self.config.get("endpoint", "flask_openapi"),
                 __name__,
-                url_prefix=self.config.get('url_prefix', None),
-                subdomain=self.config.get('subdomain', None),
+                url_prefix=self.config.get("url_prefix", None),
+                subdomain=self.config.get("subdomain", None),
                 template_folder=self.config.get(
-                    'template_folder', 'swagger_ui/v{0}/templates'.format(uiversion)
+                    "template_folder", "swagger_ui/v{0}/templates".format(uiversion)
                 ),
                 static_folder=self.config.get(
-                    'static_folder', 'swagger_ui/v{0}/static'.format(uiversion)
+                    "static_folder", "swagger_ui/v{0}/static".format(uiversion)
                 ),
-                static_url_path=self.config.get('static_url_path', None)
+                static_url_path=self.config.get("static_url_path", None),
             )
 
-            specs_route: str = self.config.get('specs_route', '/apidocs/')
+            specs_route: str = self.config.get("specs_route", "/apidocs/")
             blueprint.add_url_rule(
                 specs_route,
-                'apidocs',
-                view_func=wrap_view(APIDocsView().as_view(
-                    'apidocs',
-                    view_args=dict(config=self.config)
-                ))
+                "apidocs",
+                view_func=wrap_view(
+                    APIDocsView().as_view("apidocs", view_args=dict(config=self.config))
+                ),
             )
 
             if uiversion < 3:
-                redirect_default: str = specs_route + '/o2c.html'
+                redirect_default: str = specs_route + "/o2c.html"
             else:
                 redirect_default = "/oauth2-redirect.html"
 
             blueprint.add_url_rule(
-                self.config.get('oauth_redirect', redirect_default),
-                'oauth_redirect',
-                view_func=wrap_view(OAuthRedirect().as_view(
-                    'oauth_redirect'
-                ))
+                self.config.get("oauth_redirect", redirect_default),
+                "oauth_redirect",
+                view_func=wrap_view(OAuthRedirect().as_view("oauth_redirect")),
             )
 
             # backwards compatibility with old url style
             blueprint.add_url_rule(
-                '/apidocs/index.html',
-                view_func=lambda: redirect(url_for('flask_openapi.apidocs'))
+                "/apidocs/index.html",
+                view_func=lambda: redirect(url_for("flask_openapi.apidocs")),
             )
         else:
             blueprint = Blueprint(
-                self.config.get('endpoint', 'flask_openapi'),
-                __name__
+                self.config.get("endpoint", "flask_openapi"), __name__
             )
 
-        for spec in self.config['specs']:
-            self.endpoints.append(spec['endpoint'])
+        for spec in self.config["specs"]:
+            self.endpoints.append(spec["endpoint"])
             blueprint.add_url_rule(
-                spec['route'],
-                spec['endpoint'],
-                view_func=wrap_view(APISpecsView.as_view(
-                    spec['endpoint'],
-                    loader=partial(
-                        get_apispecs, endpoint=spec['endpoint'])
-                ))
+                spec["route"],
+                spec["endpoint"],
+                view_func=wrap_view(
+                    APISpecsView.as_view(
+                        spec["endpoint"],
+                        loader=partial(get_apispecs, endpoint=spec["endpoint"]),
+                    )
+                ),
             )
         app.register_blueprint(blueprint)
 
@@ -225,9 +233,10 @@ class Swagger:
         """
         Inject headers after request
         """
+
         @app.after_request
         def after_request(response):  # noqa
-            for header, value in self.config.get('headers'):
+            for header, value in self.config.get("headers"):
                 response.headers[header] = value
             return response
 
@@ -240,16 +249,16 @@ class Swagger:
             """
             # convert "/api/items/<int:id>/" to "/api/items/{id}/"
             subs: list = []
-            for sub in str(request.url_rule).split('/'):
-                if '<' in sub:
-                    if ':' in sub:
-                        start: int = sub.index(':') + 1
+            for sub in str(request.url_rule).split("/"):
+                if "<" in sub:
+                    if ":" in sub:
+                        start: int = sub.index(":") + 1
                     else:
                         start = 1
-                    subs.append('{{{:s}}}'.format(sub[start:-1]))
+                    subs.append("{{{:s}}}".format(sub[start:-1]))
                 else:
                     subs.append(sub)
-            path: LiteralString = '/'.join(subs)
+            path: LiteralString = "/".join(subs)
             path_key: str = path + request.method.lower()
 
             if not self.app.debug and path_key in self.parsers:
@@ -258,12 +267,11 @@ class Swagger:
             else:
                 doc = None
                 definitions = None
-                for spec in self.config['specs']:
-                    apispec: dict = get_apispecs(endpoint=spec['endpoint'])
-                    if path in apispec['paths']:
-                        if request.method.lower() in apispec['paths'][path]:
-                            doc = apispec['paths'][path][
-                                request.method.lower()]
+                for spec in self.config["specs"]:
+                    apispec: dict = get_apispecs(endpoint=spec["endpoint"])
+                    if path in apispec["paths"]:
+                        if request.method.lower() in apispec["paths"][path]:
+                            doc = apispec["paths"][path][request.method.lower()]
                             definitions: defaultdict = extract_schema(apispec)
                             break
                 if not doc:
@@ -271,53 +279,52 @@ class Swagger:
 
                 parsers: defaultdict = defaultdict(RequestParser)
                 schemas: defaultdict = defaultdict(
-                    lambda: {'type': 'object', 'properties': defaultdict(dict)}
+                    lambda: {"type": "object", "properties": defaultdict(dict)}
                 )
                 self.update_schemas_parsers(doc, schemas, parsers, definitions)
                 self.schemas[path_key] = schemas
                 self.parsers[path_key] = parsers
 
-            parsed_data: dict[str, dict[str, Any]] = {'path': request.view_args}
+            parsed_data: dict[str, dict[str, Any]] = {"path": request.view_args}
             for location in parsers.keys():
                 parsed_data[location] = parsers[location].parse_args()
-            if 'json' in schemas:
-                parsed_data['json'] = request.json or {}
+            if "json" in schemas:
+                parsed_data["json"] = request.json or {}
             for location, data in parsed_data.items():
                 try:
                     self.validation_function(data, schemas[location])
                 except jsonschema.ValidationError as e:
                     self.validation_error_handler(e, data, schemas[location])
 
-            setattr(request, 'parsed_data', parsed_data)  # noqa
+            setattr(request, "parsed_data", parsed_data)  # noqa
 
     def update_schemas_parsers(self, doc, schemas, parsers, definitions) -> None:
-        '''
+        """
         Schemas and parsers would be updated here from doc
-        '''
+        """
         if is_openapi3():
             # 'json' to comply with self.SCHEMA_LOCATIONS's {'body':'json'}
-            location = 'json'
+            location = "json"
             json_schema = None
 
             # For openapi3, currently only support single schema
-            for name, value in doc.get('requestBody', {}).get('content', {})\
-                    .items():
-                if 'application/json' in name:
+            for name, value in doc.get("requestBody", {}).get("content", {}).items():
+                if "application/json" in name:
                     # `$ref` to json, lookup in #/components/schema
-                    json_schema = value.get('schema', {})
+                    json_schema = value.get("schema", {})
                 else:  # schema set in requesty body
                     # Since osa3 might changed, repeat openapi2's code
                     parsers[location].add_argument(
                         name,
                         type=self.SCHEMA_TYPES[
-                            value['schema'].get('type', None)
-                            if 'schema' in value
-                            else value.get('type', None)],
-                        required=value.get('required', False),
-
+                            value["schema"].get("type", None)
+                            if "schema" in value
+                            else value.get("type", None)
+                        ],
+                        required=value.get("required", False),
                         # Parsed in body
-                        location=self.SCHEMA_LOCATIONS['body'],
-                        store_missing=False
+                        location=self.SCHEMA_LOCATIONS["body"],
+                        store_missing=False,
                     )
 
             # TODO support anyOf and oneOf in the future
@@ -327,40 +334,39 @@ class Swagger:
                 self.set_schemas(schemas, location, definitions)
 
         else:  # openapi2
-            for param in doc.get('parameters', []):
-                location = self.SCHEMA_LOCATIONS[param['in']]
-                if location == 'json':  # load data from 'request.json'
-                    schemas[location] = param['schema']
+            for param in doc.get("parameters", []):
+                location = self.SCHEMA_LOCATIONS[param["in"]]
+                if location == "json":  # load data from 'request.json'
+                    schemas[location] = param["schema"]
                     self.set_schemas(schemas, location, definitions)
                 else:
-                    name = param['name']
-                    if location != 'path':
+                    name = param["name"]
+                    if location != "path":
                         parsers[location].add_argument(
                             name,
                             type=self.SCHEMA_TYPES[
-                                param['schema'].get('type', None)
-                                if 'schema' in param
-                                else param.get('type', None)],
-                            required=param.get('required', False),
-                            location=self.SCHEMA_LOCATIONS[
-                                param['in']],
-                            store_missing=False)
+                                param["schema"].get("type", None)
+                                if "schema" in param
+                                else param.get("type", None)
+                            ],
+                            required=param.get("required", False),
+                            location=self.SCHEMA_LOCATIONS[param["in"]],
+                            store_missing=False,
+                        )
 
                     for k in param:
-                        if k != 'required':
-                            schemas[
-                                location]['properties'][name][k] = param[k]
+                        if k != "required":
+                            schemas[location]["properties"][name][k] = param[k]
 
-    def set_schemas(self, schemas: dict, location: str,
-                    definitions: dict) -> None:
-        if is_openapi3(self.config.get('openapi')):
-            schemas[location]['components'] = {'schemas': dict(definitions)}
+    def set_schemas(self, schemas: dict, location: str, definitions: dict) -> None:
+        if is_openapi3(self.config.get("openapi")):
+            schemas[location]["components"] = {"schemas": dict(definitions)}
         else:
-            schemas[location]['definitions'] = dict(definitions)
+            schemas[location]["definitions"] = dict(definitions)
 
     def validate(
-            self, schema_id, validation_function=None,
-            validation_error_handler=None) -> Callable:
+        self, schema_id, validation_function=None, validation_error_handler=None
+    ) -> Callable:
         """
         A decorator that is used to validate incoming requests data
         against a schema
@@ -404,10 +410,11 @@ class Swagger:
             def wrapper(*args, **kwargs):
                 specs = get_schema_specs(schema_id, self)
                 validate(
-                    schema_id=schema_id, specs=specs,
+                    schema_id=schema_id,
+                    specs=specs,
                     validation_function=validation_function,
                     validation_error_handler=validation_error_handler,
-                    openapi_version=self.config.get('openapi')
+                    openapi_version=self.config.get("openapi"),
                 )
                 return func(*args, **kwargs)
 
@@ -427,17 +434,16 @@ class Swagger:
         schema_specs = get_schema_specs(schema_id, self)
 
         if schema_specs is None:
-            raise KeyError(
-                'Specified schema_id \'{0}\' not found'.format(schema_id))
+            raise KeyError("Specified schema_id '{0}' not found".format(schema_id))
 
         for schema in (
-                parameter.get('schema') for parameter in
-                schema_specs['parameters']):
-            if schema is not None and schema.get('id').lower() == schema_id:
+            parameter.get("schema") for parameter in schema_specs["parameters"]
+        ):
+            if schema is not None and schema.get("id").lower() == schema_id:
                 return schema
 
     def is_openapi3(self) -> bool:
-        return is_openapi3(self.config.get('openapi'))
+        return is_openapi3(self.config.get("openapi"))
 
 
 # backwards compatibility

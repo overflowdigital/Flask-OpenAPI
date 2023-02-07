@@ -16,9 +16,9 @@ try:
     from marshmallow.schema import Schema as MarshmallowSchema
 
     openapi_converter: openapi.OpenAPIConverter = openapi.OpenAPIConverter(
-        openapi_version='2.0',
+        openapi_version="2.0",
         schema_name_resolver=lambda schema: None,
-        spec=cast(BaseAPISpec, BaseAPISpec)  # mypy man...
+        spec=cast(BaseAPISpec, BaseAPISpec),  # mypy man...
     )
 
     schema2jsonschema: Callable = openapi_converter.schema2jsonschema
@@ -32,17 +32,20 @@ try:
         swag_require_data: bool = True
 
         def to_specs_dict(self) -> dict:
-            specs: dict = {'parameters': self.__class__}
+            specs: dict = {"parameters": self.__class__}
             definitions: dict = {}
             specs.update(convert_schemas(specs, definitions))
-            specs['definitions'] = definitions
+            specs["definitions"] = definitions
             return specs
 
 except ImportError:
     Schema: Type[Schema] = None  # type: ignore
 
-    def schema2jsonschema(schema): return {}  # type: ignore # noqa
-    def schema2parameters(schema, location): return []  # type: ignore # noqa
+    def schema2jsonschema(schema):
+        return {}  # type: ignore # noqa
+
+    def schema2parameters(schema, location):
+        return []  # type: ignore # noqa
 
     BaseAPISpec: Type[object] = object  # type: ignore
 
@@ -52,32 +55,33 @@ class APISpec(BaseAPISpec):
     Wrapper around APISpec to add `to_swagger` method
     """
 
-    def to_swagger(self, app: Optional[Flask] = None, definitions: Optional[dict] = None, paths: Optional[list] = None) -> dict:
+    def to_swagger(
+        self,
+        app: Optional[Flask] = None,
+        definitions: Optional[dict] = None,
+        paths: Optional[list] = None,
+    ) -> dict:
         """
         Converts APISpec dict to swagger suitable dict
         also adds definitions and paths (optional)
         """
         if Schema is None:
-            raise RuntimeError('Please install marshmallow and apispec')
+            raise RuntimeError("Please install marshmallow and apispec")
 
-        return spec.apispec_to_template(
-            app,
-            self,
-            definitions=definitions,
-            paths=paths
-        )
+        return spec.apispec_to_template(app, self, definitions=definitions, paths=paths)
 
 
 class SwaggerView(MethodView):
     """
     A Swagger view
     """
+
     parameters: list = []
     responses: dict = {}
     definitions: dict = {}
     tags: list = []
-    consumes: list[str] = ['application/json']
-    produces: list[str] = ['application/json']
+    consumes: list[str] = ["application/json"]
+    produces: list[str] = ["application/json"]
     schemes: list = []
     security: list = []
     deprecated: bool = False
@@ -96,18 +100,22 @@ class SwaggerView(MethodView):
         if self.validation:
             specs: dict = {}
             attrs: list = OPTIONAL_FIELDS + [
-                'parameters', 'definitions', 'responses',
-                'summary', 'description'
+                "parameters",
+                "definitions",
+                "responses",
+                "summary",
+                "description",
             ]
             for attr in attrs:
                 specs[attr] = getattr(self, attr)
             definitions: dict = {}
             specs.update(convert_schemas(specs, definitions))
-            specs['definitions'] = definitions
+            specs["definitions"] = definitions
 
             validate.validate(
-                specs=specs, validation_function=self.validation_function,
-                validation_error_handler=self.validation_error_handler
+                specs=specs,
+                validation_function=self.validation_function,
+                validation_error_handler=self.validation_error_handler,
             )
         return super(SwaggerView, self).dispatch_request(*args, **kwargs)
 
@@ -122,7 +130,7 @@ def convert_schemas(d: dict, definitions: Optional[dict] = None) -> dict:
     if definitions is None:
         definitions: dict = {}
 
-    definitions.update(d.get('definitions', {}))
+    definitions.update(d.get("definitions", {}))
 
     new: dict = {}
 
@@ -140,24 +148,22 @@ def convert_schemas(d: dict, definitions: Optional[dict] = None) -> dict:
         if inspect.isclass(v) and issubclass(v, Schema):
 
             if Schema is None:
-                raise RuntimeError('Please install marshmallow and apispec')
+                raise RuntimeError("Please install marshmallow and apispec")
 
             definitions[v.__name__] = schema2jsonschema(v)
-            ref: dict[str, str] = {
-                "$ref": "#/definitions/{0}".format(v.__name__)
-            }
-            if k == 'parameters':
+            ref: dict[str, str] = {"$ref": "#/definitions/{0}".format(v.__name__)}
+            if k == "parameters":
                 new[k] = schema2parameters(v, location=v.swag_in)
-                new[k][0]['schema'] = ref
-                if len(definitions[v.__name__]['required']) != 0:
-                    new[k][0]['required'] = True
+                new[k][0]["schema"] = ref
+                if len(definitions[v.__name__]["required"]) != 0:
+                    new[k][0]["required"] = True
             else:
                 new[k] = ref
         else:
             new[k] = v
 
     # This key is not permitted anywhere except the very top level.
-    if 'definitions' in new:
-        del new['definitions']
+    if "definitions" in new:
+        del new["definitions"]
 
     return new

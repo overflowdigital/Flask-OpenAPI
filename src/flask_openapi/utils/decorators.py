@@ -14,9 +14,17 @@ from six import string_types
 
 
 def swag_from(
-        specs=None, filetype=None, endpoint=None, methods=None,
-        validation=False, schema_id=None, data=None, definition=None,
-        validation_function=None, validation_error_handler=None) -> Callable:
+    specs=None,
+    filetype=None,
+    endpoint=None,
+    methods=None,
+    validation=False,
+    schema_id=None,
+    data=None,
+    definition=None,
+    validation_function=None,
+    validation_error_handler=None,
+) -> Callable:
     """
     Takes a filename.yml, a dictionary or object and loads swagger specs.
 
@@ -39,12 +47,12 @@ def swag_from(
     """
 
     def resolve_path(function, filepath) -> str | Path:
-        
+
         if isinstance(filepath, Path):
             filepath: str = str(filepath)
 
-        if not filepath.startswith('/'):
-            if not hasattr(function, 'root_path'):
+        if not filepath.startswith("/"):
+            if not hasattr(function, "root_path"):
                 function.root_path = get_root_path(function)
             res: str = os.path.join(function.root_path, filepath)
             return res
@@ -52,10 +60,10 @@ def swag_from(
 
     def set_from_filepath(function) -> None:
         final_filepath: str | Path = resolve_path(function, specs)
-        function.swag_type = filetype or final_filepath.split('.')[-1]
+        function.swag_type = filetype or final_filepath.split(".")[-1]
 
         if endpoint or methods:
-            if not hasattr(function, 'swag_paths'):
+            if not hasattr(function, "swag_paths"):
                 function.swag_paths = {}
 
         if not endpoint and not methods:
@@ -74,11 +82,11 @@ def swag_from(
         function.specs_dict = specs
 
     def is_path(specs) -> bool:
-        """ Returns True if specs is a string or pathlib.Path
-        """
+        """Returns True if specs is a string or pathlib.Path"""
         is_str_path: bool = isinstance(specs, string_types)
         try:
             from pathlib import Path
+
             is_py3_path: bool = isinstance(specs, Path)
             return is_str_path or is_py3_path
         except ImportError:
@@ -89,15 +97,15 @@ def swag_from(
         if is_path(specs):
             set_from_filepath(function)
             # function must have or a single swag_path or a list of them
-            swag_path = getattr(function, 'swag_path', None)
-            swag_paths = getattr(function, 'swag_paths', None)
+            swag_path = getattr(function, "swag_path", None)
+            swag_paths = getattr(function, "swag_paths", None)
             validate_args: dict[str, Any | None] = {
-                'filepath': swag_path or swag_paths,
-                'root': getattr(function, 'root_path', None)
+                "filepath": swag_path or swag_paths,
+                "root": getattr(function, "root_path", None),
             }
         if isinstance(specs, dict):
             set_from_specs_dict(function)
-            validate_args = {'specs': specs}
+            validate_args = {"specs": specs}
 
         @wraps(function)
         def wrapper(*args, **kwargs):
@@ -110,6 +118,7 @@ def swag_from(
                     **validate_args
                 )
             return function(*args, **kwargs)
+
         return wrapper
 
     return decorator
@@ -141,19 +150,20 @@ def swag_annotation(f) -> Callable:
                 function: Callable = validate_annotation(annotation, variable)(function)
 
             elif issubclass(annotation, int):
-                m: dict[str, Any] = {"name": variable,
-                     "in": "path",
-                     "type": "integer",
-                     "required": True}
+                m: dict[str, Any] = {
+                    "name": variable,
+                    "in": "path",
+                    "type": "integer",
+                    "required": True,
+                }
                 if ("int(signed=True):" + variable) in args[0]:
-                    m['minimum'] = 0
+                    m["minimum"] = 0
                 specs["parameters"].append(m)
 
             elif issubclass(annotation, str):
-                specs["parameters"].append({"name": variable,
-                                            "in": "path",
-                                            "type": "string",
-                                            "required": True})
+                specs["parameters"].append(
+                    {"name": variable, "in": "path", "type": "string", "required": True}
+                )
 
         function.specs_dict = specs
         args: list = list(args)
@@ -161,6 +171,7 @@ def swag_annotation(f) -> Callable:
         args: tuple = tuple(args)
 
         return f(*args, **kwargs)
+
     return wrapper
 
 
@@ -189,5 +200,7 @@ def validate_annotation(an, var) -> Callable:
                 )
 
             return f(*args, **kwargs, **{var: payload})
+
         return wrapper
+
     return decorator
