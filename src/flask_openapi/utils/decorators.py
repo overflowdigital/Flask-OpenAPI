@@ -1,5 +1,7 @@
 import os
 from functools import wraps
+from pathlib import Path
+from typing import Any, Callable
 
 from flask import request
 
@@ -14,7 +16,7 @@ from six import string_types
 def swag_from(
         specs=None, filetype=None, endpoint=None, methods=None,
         validation=False, schema_id=None, data=None, definition=None,
-        validation_function=None, validation_error_handler=None):
+        validation_function=None, validation_error_handler=None) -> Callable:
     """
     Takes a filename.yml, a dictionary or object and loads swagger specs.
 
@@ -36,22 +38,20 @@ def swag_from(
         the schema being used to validate as the third argument
     """
 
-    def resolve_path(function, filepath):
-        try:
-            from pathlib import Path
-            if isinstance(filepath, Path):
-                filepath = str(filepath)
-        except ImportError:
-            pass
+    def resolve_path(function, filepath) -> str | Path:
+        
+        if isinstance(filepath, Path):
+            filepath: str = str(filepath)
+
         if not filepath.startswith('/'):
             if not hasattr(function, 'root_path'):
                 function.root_path = get_root_path(function)
-            res = os.path.join(function.root_path, filepath)
+            res: str = os.path.join(function.root_path, filepath)
             return res
         return filepath
 
-    def set_from_filepath(function):
-        final_filepath = resolve_path(function, specs)
+    def set_from_filepath(function) -> None:
+        final_filepath: str | Path = resolve_path(function, specs)
         function.swag_type = filetype or final_filepath.split('.')[-1]
 
         if endpoint or methods:
@@ -62,7 +62,7 @@ def swag_from(
             function.swag_path = final_filepath
         elif endpoint and methods:
             for verb in methods:
-                key = "{}_{}".format(endpoint, verb.lower())
+                key: str = "{}_{}".format(endpoint, verb.lower())
                 function.swag_paths[key] = final_filepath
         elif endpoint and not methods:
             function.swag_paths[endpoint] = final_filepath
@@ -70,28 +70,28 @@ def swag_from(
             for verb in methods:
                 function.swag_paths[verb.lower()] = final_filepath
 
-    def set_from_specs_dict(function):
+    def set_from_specs_dict(function) -> None:
         function.specs_dict = specs
 
-    def is_path(specs):
+    def is_path(specs) -> bool:
         """ Returns True if specs is a string or pathlib.Path
         """
-        is_str_path = isinstance(specs, string_types)
+        is_str_path: bool = isinstance(specs, string_types)
         try:
             from pathlib import Path
-            is_py3_path = isinstance(specs, Path)
+            is_py3_path: bool = isinstance(specs, Path)
             return is_str_path or is_py3_path
         except ImportError:
             return is_str_path
 
-    def decorator(function):
+    def decorator(function) -> Callable:
 
         if is_path(specs):
             set_from_filepath(function)
             # function must have or a single swag_path or a list of them
             swag_path = getattr(function, 'swag_path', None)
             swag_paths = getattr(function, 'swag_paths', None)
-            validate_args = {
+            validate_args: dict[str, Any | None] = {
                 'filepath': swag_path or swag_paths,
                 'root': getattr(function, 'root_path', None)
             }
@@ -115,7 +115,7 @@ def swag_from(
     return decorator
 
 
-def swag_annotation(f):
+def swag_annotation(f) -> Callable:
     @wraps(f)
     def wrapper(*args, **kwargs):
 
@@ -124,24 +124,24 @@ def swag_annotation(f):
 
         function = args[2]
 
-        specs = {}
+        specs: dict = {}
         for key, value in DEFAULT_FIELDS.items():
             specs[key] = kwargs.pop(key, value)
 
         for variable, annotation in function.__annotations__.items():
 
             if issubclass(annotation, Schema):
-                annotation = annotation()
-                data = annotation.to_specs_dict()
+                annotation: Schema = annotation()
+                data: dict = annotation.to_specs_dict()
 
                 for row in data["parameters"]:
                     specs["parameters"].append(row)
                 specs["definitions"].update(data["definitions"])
 
-                function = validate_annotation(annotation, variable)(function)
+                function: Callable = validate_annotation(annotation, variable)(function)
 
             elif issubclass(annotation, int):
-                m = {"name": variable,
+                m: dict[str, Any] = {"name": variable,
                      "in": "path",
                      "type": "integer",
                      "required": True}
@@ -156,22 +156,22 @@ def swag_annotation(f):
                                             "required": True})
 
         function.specs_dict = specs
-        args = list(args)
+        args: list = list(args)
         args[2] = function
-        args = tuple(args)
+        args: tuple = tuple(args)
 
         return f(*args, **kwargs)
     return wrapper
 
 
-def validate_annotation(an, var):
-    def decorator(f):
+def validate_annotation(an, var) -> Callable:
+    def decorator(f) -> Callable:
         @wraps(f)
-        def wrapper(*args, **kwargs):
+        def wrapper(*args, **kwargs) -> Any:
 
             if an.swag_validate:
 
-                payload = None
+                payload: dict | None = None
 
                 if an.swag_in == "query":
                     payload = dict(request.args)

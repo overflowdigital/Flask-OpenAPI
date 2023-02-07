@@ -2,6 +2,7 @@ import copy
 import inspect
 import os
 import sys
+from typing import Any, Callable
 
 from flask import Response, abort, request
 
@@ -13,11 +14,10 @@ import jsonschema
 import yaml
 
 
-
 def validate(
         data=None, schema_id=None, filepath=None, root=None, definition=None,
         specs=None, validation_function=None, validation_error_handler=None,
-        require_data=True, openapi_version=None):
+        require_data=True, openapi_version=None) -> Any:
     """
     This method is available to use YAML swagger definitions file
     or specs (dict or object) to validate data against its jsonschema.
@@ -60,37 +60,37 @@ def validate(
         abort(Response('No data to validate', status=400))
 
     # not used anymore but kept to reuse with marshmallow
-    endpoint = request.endpoint.lower().replace('.', '_')
-    verb = request.method.lower()
+    endpoint: str = request.endpoint.lower().replace('.', '_')
+    verb: str = request.method.lower()
 
     if filepath is not None:
         if not root:
             try:
-                frame_info = inspect.stack()[1]
-                root = os.path.dirname(os.path.abspath(frame_info[1]))
+                frame_info: inspect.FrameInfo = inspect.stack()[1]
+                root: str = os.path.dirname(os.path.abspath(frame_info[1]))
             except Exception:
                 root = None
         else:
             root = os.path.dirname(root)
 
         if not filepath.startswith('/'):
-            final_filepath = os.path.join(root, filepath)
+            final_filepath: str = os.path.join(root, filepath)
         else:
             final_filepath = filepath
-        full_doc = load_from_file(final_filepath)
-        yaml_start = full_doc.find('---')
+        full_doc: str = load_from_file(final_filepath)
+        yaml_start: int = full_doc.find('---')
         swag = yaml.safe_load(full_doc[yaml_start if yaml_start >= 0 else 0:])
     else:
         swag = copy.deepcopy(specs)
 
-    params = [
+    params: list = [
         item for item in swag.get('parameters', [])
         if item.get('schema')
     ]
 
-    definitions = {}
-    main_def = {}
-    raw_definitions = extract_definitions(params, endpoint=endpoint, verb=verb,
+    definitions: dict = {}
+    main_def: dict = {}
+    raw_definitions: list = extract_definitions(params, endpoint=endpoint, verb=verb,
                                           openapi_version=openapi_version)
 
     if schema_id is None:
@@ -125,11 +125,11 @@ def validate(
             del value['id']
 
     if validation_function is None:
-        validation_function = jsonschema.validate
+        validation_function: Callable = jsonschema.validate
 
-    absolute_path = os.path.dirname(sys.argv[0])
+    absolute_path: str = os.path.dirname(sys.argv[0])
     if filepath is None:
-        relative_path = absolute_path
+        relative_path: str = absolute_path
     else:
         relative_path = os.path.dirname(filepath)
     main_def = __replace_ref(main_def, relative_path, swag)
@@ -143,7 +143,7 @@ def validate(
             abort(Response(str(err), status=400))
 
 
-def __replace_ref(schema, relative_path, swag):
+def __replace_ref(schema, relative_path, swag) -> dict:
     """ TODO: add dev docs
 
     :param schema:
@@ -151,8 +151,8 @@ def __replace_ref(schema, relative_path, swag):
     :param swag:
     :return:
     """
-    absolute_path = os.path.dirname(sys.argv[0])
-    new_value = {}
+    absolute_path: str = os.path.dirname(sys.argv[0])
+    new_value: dict = {}
     for key, value in schema.items():
         if isinstance(value, dict):
             new_value[key] = __replace_ref(value, relative_path, swag)
@@ -172,8 +172,8 @@ def __replace_ref(schema, relative_path, swag):
                 file_ref_path = relative_path + '/' + value
             relative_path = os.path.dirname(file_ref_path)
             with open(file_ref_path) as file:
-                file_content = file.read()
-                comment_index = file_content.rfind('---')
+                file_content: str = file.read()
+                comment_index: int = file_content.rfind('---')
                 if comment_index > 0:
                     comment_index = comment_index + 3
                 else:

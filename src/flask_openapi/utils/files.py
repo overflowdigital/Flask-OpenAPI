@@ -1,5 +1,6 @@
 import codecs
 import importlib
+from importlib.machinery import ModuleSpec
 import inspect
 import logging
 import os
@@ -7,8 +8,8 @@ import re
 from typing import Any
 
 
-def get_swag_path_from_doc_dir(method: Any, view_class: Any, doc_dir: str, endpoint: Any):
-    file_path = ''
+def get_swag_path_from_doc_dir(method: Any, view_class: Any, doc_dir: str, endpoint: Any) -> str:
+    file_path: str = ''
     func = method.__func__ \
         if hasattr(method, '__func__') else method
     if view_class:
@@ -25,7 +26,7 @@ def get_swag_path_from_doc_dir(method: Any, view_class: Any, doc_dir: str, endpo
         # and the current filepath without the /tmp
         file_path = getattr(func, 'swag_path', '')  # noqa
         if file_path and not os.path.isfile(file_path):
-            regex = re.compile(r"(api.+)")
+            regex: re.Pattern[str] = re.compile(r"(api.+)")
             try:
                 file_path = doc_dir + regex.search(file_path)[0]
                 if os.path.isfile(file_path):
@@ -37,12 +38,12 @@ def get_swag_path_from_doc_dir(method: Any, view_class: Any, doc_dir: str, endpo
     return file_path
 
 
-def get_root_path(obj):
+def get_root_path(obj) -> str:
     """
     Get file path for object and returns its dirname
     """
     try:
-        filename = os.path.abspath(obj.__globals__['__file__'])
+        filename: str = os.path.abspath(obj.__globals__['__file__'])
     except (KeyError, AttributeError):
         if getattr(obj, '__wrapped__', None):
             # decorator package has been used in view
@@ -51,21 +52,21 @@ def get_root_path(obj):
     return os.path.dirname(filename)
 
 
-def remove_suffix(fpath):  # pragma: no cover
+def remove_suffix(fpath) -> str:  # pragma: no cover
     """Remove all file ending suffixes"""
     return os.path.splitext(fpath)[0]
 
 
-def get_path_from_doc(full_doc):
+def get_path_from_doc(full_doc) -> tuple[str, str]:
     """
     If `file:` is provided import the file.
     """
-    swag_path = full_doc.replace('file:', '').strip()
-    swag_type = swag_path.split('.')[-1]
+    swag_path: str = full_doc.replace('file:', '').strip()
+    swag_type: str = swag_path.split('.')[-1]
     return swag_path, swag_type
 
 
-def load_from_file(swag_path, swag_type='yml', root_path=None):
+def load_from_file(swag_path, swag_type='yml', root_path=None) -> str:
     """
     Load specs from YAML file
     """
@@ -74,12 +75,12 @@ def load_from_file(swag_path, swag_type='yml', root_path=None):
         # TODO: support JSON
 
     try:
-        enc = detect_by_bom(swag_path)
+        enc: str = detect_by_bom(swag_path)
         with codecs.open(swag_path, encoding=enc) as yaml_file:
             return yaml_file.read()
     except IOError:
         # not in the same dir, add dirname
-        swag_path = os.path.join(
+        swag_path: str = os.path.join(
             root_path or os.path.dirname(__file__), swag_path
         )
         try:
@@ -88,14 +89,14 @@ def load_from_file(swag_path, swag_type='yml', root_path=None):
                 return yaml_file.read()
         except IOError:  # pragma: no cover
             swag_path = swag_path.replace("/", os.sep).replace("\\", os.sep)
-            path = swag_path.replace(
+            path: list[str] = swag_path.replace(
                 (root_path or os.path.dirname(__file__)), ''
             ).split(os.sep)[1:]
-            package_spec = importlib.util.find_spec(path[0])
+            package_spec: ModuleSpec = importlib.util.find_spec(path[0])
             if package_spec.has_location:
                 # Improvement idea: Use package_spec.submodule_search_locations
                 # if we're sure there's only going to be one search location.
-                site_package = package_spec.origin.replace('/__init__.py', '')
+                site_package: str = package_spec.origin.replace('/__init__.py', '')
             else:
                 raise RuntimeError("Package does not have origin")
             swag_path = os.path.join(site_package, os.sep.join(path[1:]))
@@ -105,9 +106,9 @@ def load_from_file(swag_path, swag_type='yml', root_path=None):
         logging.warning(f"File path {swag_path} is either doesnt exist or is in the wrong type")
 
 
-def detect_by_bom(path, default='utf-8'):
+def detect_by_bom(path, default='utf-8') -> str:
     with open(path, 'rb') as f:
-        raw = f.read(4)  # will read less if the file is smaller
+        raw: bytes = f.read(4)  # will read less if the file is smaller
     for enc, boms in \
             ('utf-8-sig', (codecs.BOM_UTF8,)),\
             ('utf-16', (codecs.BOM_UTF16_LE, codecs.BOM_UTF16_BE)),\
@@ -116,6 +117,7 @@ def detect_by_bom(path, default='utf-8'):
             return enc
     return default
 
-def is_python_file(fpath):  # pragma: no cover
+
+def is_python_file(fpath) -> bool:  # pragma: no cover
     """Naive Python module filterer"""
     return fpath.endswith(".py") and "__" not in fpath

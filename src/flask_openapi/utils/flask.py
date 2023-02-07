@@ -6,7 +6,7 @@ from flask.views import MethodView
 from werkzeug.routing import Rule
 
 
-def has_valid_dispatch_view_docs(endpoint):
+def has_valid_dispatch_view_docs(endpoint) -> bool:
     """
     Return True if dispatch_request is swaggable
     """
@@ -16,7 +16,7 @@ def has_valid_dispatch_view_docs(endpoint):
         and getattr(klass, 'dispatch_request').__doc__  # noqa
 
 
-def is_valid_method_view(endpoint):
+def is_valid_method_view(endpoint) -> bool:
     """
     Return True if obj is MethodView
     """
@@ -27,7 +27,7 @@ def is_valid_method_view(endpoint):
         return False
 
 
-def get_url_mappings(self, rule_filter: Optional[Callable] = None) -> list[Rule]:
+def get_url_mappings(rule_filter: Optional[Callable] = None) -> list[Rule]:
     """ Returns all werkzeug rules """
     rule_filter = rule_filter or (lambda rule: True)
     return [

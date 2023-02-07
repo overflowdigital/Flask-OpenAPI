@@ -2,7 +2,7 @@ from copy import deepcopy
 import logging
 import re
 from collections import defaultdict
-from typing import TYPE_CHECKING, Union
+from typing import TYPE_CHECKING, Any, Generator, Union
 
 from flask import current_app
 
@@ -24,6 +24,7 @@ try:
     from flask_mongorest import methods as fmr_methods  # noqa
 except ImportError:
     fmr_methods = None
+
 
 def get_definitions(data: dict, spec: dict) -> dict:
     definitions: dict = extract_schema(data)
@@ -84,7 +85,7 @@ def get_operations(swag: dict, data: dict, spec: dict, rule: Rule, verb: str, op
     definitions.update(update_schemas)
 
     if verb in swag.keys():
-        verb_swag = swag.get(verb, {})
+        verb_swag: dict = swag.get(verb, {})
         if len(params) == 0 and verb.lower() in HTTP_METHODS:
             params = verb_swag.get('parameters', [])
 
@@ -92,7 +93,7 @@ def get_operations(swag: dict, data: dict, spec: dict, rule: Rule, verb: str, op
     defs += extract_definitions(params, endpoint=rule.endpoint, verb=verb, prefix_ids=prefix_ids, openapi_version=openapi_version)
 
     if request_body:
-        content = request_body.get("content", {})
+        content: dict = request_body.get("content", {})
         extract_definitions(list(content.values()), endpoint=rule.endpoint, verb=verb, prefix_ids=prefix_ids, openapi_version=openapi_version)
 
     if callbacks:
@@ -131,7 +132,7 @@ def get_operations(swag: dict, data: dict, spec: dict, rule: Rule, verb: str, op
             value = swag.get(key)
             if key in ('produces', 'consumes'):
                 if not isinstance(value, (list, tuple)):
-                    value = [value]
+                    value: list = [value]
 
             operation[key] = value
 
@@ -146,11 +147,11 @@ def get_operations(swag: dict, data: dict, spec: dict, rule: Rule, verb: str, op
 def get_specs(rules, ignore_verbs, optional_fields, sanitizer,
               openapi_version, doc_dir=None):
 
-    specs = []
+    specs: list = []
     for rule in rules:
         endpoint = current_app.view_functions[rule.endpoint]
-        methods = dict()
-        is_mv = is_valid_method_view(endpoint)
+        methods: dict = dict()
+        is_mv: bool = is_valid_method_view(endpoint)
 
         for verb in rule.methods.difference(ignore_verbs):
             if not is_mv and has_valid_dispatch_view_docs(endpoint):
@@ -163,7 +164,7 @@ def get_specs(rules, ignore_verbs, optional_fields, sanitizer,
                         verb = verb.lower()
                         methods[verb] = getattr(endpoint.view_class, verb)
                 elif fmr_methods is not None:  # flask-mongorest
-                    endpoint_methods = set(m.method for m in endpoint.methods)
+                    endpoint_methods: set = set(m.method for m in endpoint.methods)
                     if verb in endpoint_methods:
                         proxy_verb = rule.endpoint.replace(
                             endpoint.__name__, ''
@@ -177,7 +178,7 @@ def get_specs(rules, ignore_verbs, optional_fields, sanitizer,
             else:
                 methods[verb.lower()] = endpoint
 
-        verbs = []
+        verbs: list = []
         for verb, method in methods.items():
 
             klass = method.__dict__.get('view_class', None)
@@ -195,23 +196,23 @@ def get_specs(rules, ignore_verbs, optional_fields, sanitizer,
                     'Cannot detect view_func for rule {0}'.format(rule)
                 )
 
-            swag = {}
-            swag_def = {}
+            swag: dict = {}
+            swag_def: dict = {}
 
             swagged = False
 
             if getattr(method, 'specs_dict', None):
-                definition = {}
+                definition: dict = {}
                 merge_specs(
                     swag,
                     m.convert_schemas(deepcopy(method.specs_dict), definition)
                 )
-                swag_def = definition
+                swag_def: dict = definition
                 swagged = True
 
             view_class = getattr(endpoint, 'view_class', None)
             if view_class and issubclass(view_class, m.SwaggerView):
-                apispec_swag = {}
+                apispec_swag: dict = {}
 
                 # Don't need to alter definitions here
                 # Since it only stays in apispec_attrs
@@ -225,7 +226,7 @@ def get_specs(rules, ignore_verbs, optional_fields, sanitizer,
                         apispec_swag[attr] = value
                 # Don't need to change 'definitions' here
                 # Since it would be appended later according to openapi
-                apispec_definitions = apispec_swag.get('definitions', {})
+                apispec_definitions: dict = apispec_swag.get('definitions', {})
                 swag.update(
                     m.convert_schemas(apispec_swag, apispec_definitions)
                 )
@@ -235,7 +236,7 @@ def get_specs(rules, ignore_verbs, optional_fields, sanitizer,
 
             swag_path = None
             if doc_dir:
-                swag_path = get_swag_path_from_doc_dir(
+                swag_path: str = get_swag_path_from_doc_dir(
                     method, view_class, doc_dir, endpoint)
 
             doc_summary, doc_description, doc_swag = parse_docstring(
@@ -265,7 +266,7 @@ def get_specs(rules, ignore_verbs, optional_fields, sanitizer,
     return specs
 
 
-def merge_specs(target, source):
+def merge_specs(target, source) -> None:
     """
     Update target dictionary with values from the source, recursively.
     List items will be merged.
@@ -282,12 +283,12 @@ def merge_specs(target, source):
             target[key] = value
 
 
-def get_schema_specs(schema_id, swagger):
+def get_schema_specs(schema_id, swagger) -> Any:
     ignore_verbs = set(
         swagger.config.get('ignore_verbs', ("HEAD", "OPTIONS")))
 
     # technically only responses is non-optional
-    optional_fields \
+    optional_fields: list[str] \
         = swagger.config.get('optional_fields') or OPTIONAL_FIELDS
 
     openapi_version = swagger.config.get('openapi')
@@ -297,7 +298,7 @@ def get_schema_specs(schema_id, swagger):
             current_app.url_map.iter_rules(), ignore_verbs,
             optional_fields, swagger.sanitizer, openapi_version)
 
-        swags = (swag for _, verbs in specs for _, swag in verbs
+        swags: Generator = (swag for _, verbs in specs for _, swag in verbs
                  if swag is not None)
 
     for swag in swags:
@@ -308,7 +309,7 @@ def get_schema_specs(schema_id, swagger):
                 return swag
 
 
-def apispec_to_template(app, spec, definitions=None, paths=None):
+def apispec_to_template(app, spec, definitions=None, paths=None) -> dict:
     """
     Converts apispec object in to flasgger definitions template
     :param app: Current app
@@ -316,8 +317,8 @@ def apispec_to_template(app, spec, definitions=None, paths=None):
     :param definitions: a list of [Schema, ..] or [('Name', Schema), ..]
     :param paths: A list of flask views
     """
-    definitions = definitions or []
-    paths = paths or []
+    definitions: list = definitions or []
+    paths: list = paths or []
 
     with app.app_context():
         for definition in definitions:
@@ -333,7 +334,7 @@ def apispec_to_template(app, spec, definitions=None, paths=None):
             spec.path(view=path)
 
     spec_dict = spec.to_dict()
-    ret = ordered_dict_to_dict(spec_dict)
+    ret: dict = ordered_dict_to_dict(spec_dict)
     return ret
 
 
@@ -391,7 +392,7 @@ def get_apispecs(endpoint: str = 'apispec_1') -> dict:
                 data[key] = swagger.config.get(key)
 
     # Support extension properties in the top level config
-    top_level_extension_options = get_vendor_extension_fields(swagger.config)
+    top_level_extension_options: dict = get_vendor_extension_fields(swagger.config)
 
     if top_level_extension_options:
         data.update(top_level_extension_options)

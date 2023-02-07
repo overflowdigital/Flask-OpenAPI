@@ -1,4 +1,4 @@
-OPTIONAL_FIELDS = [
+OPTIONAL_FIELDS: list[str] = [
     'tags',
     'consumes',
     'produces',
@@ -9,12 +9,12 @@ OPTIONAL_FIELDS = [
     'externalDocs'
 ]
 
-OPTIONAL_OAS3_FIELDS = [
+OPTIONAL_OAS3_FIELDS: list[str] = [
     'components',
     'servers'
 ]
 
-OAS3_SUB_COMPONENTS = [
+OAS3_SUB_COMPONENTS: list[str] = [
     "parameters",
     "securitySchemes",
     "requestBodies",
@@ -26,7 +26,7 @@ OAS3_SUB_COMPONENTS = [
     "schemas"
 ]
 
-DEFAULT_FIELDS = {
+DEFAULT_FIELDS: dict = {
     "tags": [],
     "consumes": ['application/json'],
     "produces": ['application/json'],
@@ -53,7 +53,7 @@ DEFAULT_CSS = 'swagger-ui.css'
 
 DEFAULT_ENDPOINT = 'apispec_1'
 
-DEFAULT_CONFIG = {
+DEFAULT_CONFIG: dict = {
     "headers": [],
     "specs": [
         {
@@ -68,14 +68,14 @@ DEFAULT_CONFIG = {
     "specs_route": "/apidocs/"
 }
 
-SCHEMA_TYPES = {
+SCHEMA_TYPES: dict = {
     'string': str,
     'integer': int,
     'number': float,
     'boolean': bool
 }
 
-SCHEMA_LOCATIONS = {
+SCHEMA_LOCATIONS: dict[str, str] = {
     'query': 'args',
     'header': 'headers',
     'formData': 'form',
@@ -83,7 +83,7 @@ SCHEMA_LOCATIONS = {
     'path': 'path'
 }
 
-HTTP_METHODS = [
+HTTP_METHODS: list[str] = [
     'get',
     'post',
     'put',

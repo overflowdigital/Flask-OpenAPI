@@ -1,5 +1,6 @@
 from collections import OrderedDict
 from copy import deepcopy
+from typing import Iterator, Type
 
 from six import text_type
 
@@ -8,13 +9,13 @@ def ordered_dict_to_dict(d: dict) -> dict:
     """
     Converts inner OrderedDict to bare dict
     """
-    ret = {}
-    new_d = deepcopy(d)
+    ret: dict = {}
+    new_d: dict = deepcopy(d)
     for k, v in new_d.items():
         if isinstance(v, OrderedDict):
-            v = dict(v)
+            v: dict = dict(v)
         if isinstance(v, dict):
-            v = ordered_dict_to_dict(v)
+            v: dict = ordered_dict_to_dict(v)
         ret[k] = v
     return ret
 
@@ -31,21 +32,21 @@ class StringLike(object):
         Forwards any non-magic methods to the resulting string's class. This
         allows support for string methods like `upper()`, `lower()`, etc.
         """
-        string = self.text_type(self)
+        string: str = self.text_type(self)
         if hasattr(string, attr):
             return getattr(string, attr)
         raise AttributeError(attr)
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self.text_type(self))
 
-    def __getitem__(self, key):
+    def __getitem__(self, key) -> str:
         return self.text_type(self)[key]
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator[str]:
         return iter(self.text_type(self))
 
-    def __contains__(self, item):
+    def __contains__(self, item) -> bool:
         return item in self.text_type(self)
 
     def __add__(self, other):
@@ -79,7 +80,7 @@ class StringLike(object):
         return self.text_type(self) >= other
 
     @property
-    def text_type(self):
+    def text_type(self) -> Type[str]:
         return text_type
 
 
@@ -89,7 +90,7 @@ class LazyString(StringLike):
     every request.
     """
 
-    def __init__(self, func):
+    def __init__(self, func) -> None:
         """
         Creates a `LazyString` object using `func` as the delayed closure.
         `func` must return a string.
@@ -108,7 +109,7 @@ class CachedLazyString(LazyString):
     A lazy string with caching.
     """
 
-    def __init__(self, func):
+    def __init__(self, func) -> None:
         """
         Uses `__init__()` from the parent and initializes a cache.
         """

@@ -1,6 +1,6 @@
 # coding: utf-8
 import inspect
-from typing import Optional, cast
+from typing import Any, Callable, Optional, cast
 
 from flask import Flask
 from flask import typing as ft
@@ -15,21 +15,21 @@ try:
     from apispec.ext.marshmallow import openapi
     from marshmallow.schema import Schema as MarshmallowSchema
 
-    openapi_converter = openapi.OpenAPIConverter(
+    openapi_converter: openapi.OpenAPIConverter = openapi.OpenAPIConverter(
         openapi_version='2.0',
         schema_name_resolver=lambda schema: None,
         spec=cast(BaseAPISpec, BaseAPISpec)  # mypy man...
     )
 
-    schema2jsonschema = openapi_converter.schema2jsonschema
-    schema2parameters = openapi_converter.schema2parameters
+    schema2jsonschema: Callable = openapi_converter.schema2jsonschema
+    schema2parameters: Callable = openapi_converter.schema2parameters
 
     class Schema(MarshmallowSchema):
-        swag_in = "body"
-        swag_validate = True
-        swag_validation_function = None
-        swag_validation_error_handler = None
-        swag_require_data = True
+        swag_in: str = "body"
+        swag_validate: bool = True
+        swag_validation_function: Callable = None
+        swag_validation_error_handler: Callable = None
+        swag_require_data: bool = True
 
         def to_specs_dict(self) -> dict:
             specs: dict = {'parameters': self.__class__}
@@ -39,12 +39,12 @@ try:
             return specs
 
 except ImportError:
-    Schema = None  # type: ignore
+    Schema: Type[Schema] = None  # type: ignore
 
     def schema2jsonschema(schema): return {}  # type: ignore # noqa
     def schema2parameters(schema, location): return []  # type: ignore # noqa
 
-    BaseAPISpec = object  # type: ignore
+    BaseAPISpec: Type[object] = object  # type: ignore
 
 
 class APISpec(BaseAPISpec):
@@ -76,18 +76,18 @@ class SwaggerView(MethodView):
     responses: dict = {}
     definitions: dict = {}
     tags: list = []
-    consumes = ['application/json']
-    produces = ['application/json']
+    consumes: list[str] = ['application/json']
+    produces: list[str] = ['application/json']
     schemes: list = []
     security: list = []
-    deprecated = False
-    operationId = None
+    deprecated: bool = False
+    operationId: Any = None
     externalDocs: dict = {}
-    summary = None
-    description = None
-    validation = False
-    validation_function = None
-    validation_error_handler = None
+    summary: Any = None
+    description: Any = None
+    validation: bool = False
+    validation_function: Any = None
+    validation_error_handler: Any = None
 
     def dispatch_request(self, *args: tuple, **kwargs: dict) -> ft.ResponseReturnValue:
         """
@@ -120,17 +120,17 @@ def convert_schemas(d: dict, definitions: Optional[dict] = None) -> dict:
     entries contained within the schema.
     """
     if definitions is None:
-        definitions = {}
+        definitions: dict = {}
 
     definitions.update(d.get('definitions', {}))
 
-    new = {}
+    new: dict = {}
 
     for k, v in d.items():
         if isinstance(v, dict):
-            v = convert_schemas(v, definitions)
+            v: dict = convert_schemas(v, definitions)
         if isinstance(v, (list, tuple)):
-            new_v = []
+            new_v: list = []
             for item in v:
                 if isinstance(item, dict):
                     new_v.append(convert_schemas(item, definitions))
@@ -143,7 +143,7 @@ def convert_schemas(d: dict, definitions: Optional[dict] = None) -> dict:
                 raise RuntimeError('Please install marshmallow and apispec')
 
             definitions[v.__name__] = schema2jsonschema(v)
-            ref = {
+            ref: dict[str, str] = {
                 "$ref": "#/definitions/{0}".format(v.__name__)
             }
             if k == 'parameters':

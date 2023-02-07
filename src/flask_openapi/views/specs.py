@@ -8,7 +8,7 @@ from flask.views import MethodView
 class APISpecsView(MethodView):
     """ View that loads the JSON file of compiled api specs """
 
-    def __init__(self, *args: tuple, **kwargs: dict[str, Any]):
+    def __init__(self, *args: tuple, **kwargs: dict[str, Any]) -> None:
         self.loader: Callable = kwargs['loader']  # type: ignore
         super(APISpecsView, self).__init__(*args, **kwargs)
 
@@ -16,5 +16,5 @@ class APISpecsView(MethodView):
         try:
             return jsonify(self.loader())
         except Exception:
-            specs = json.dumps(self.loader())
+            specs: str = json.dumps(self.loader())
             return Response(specs, mimetype='application/json')

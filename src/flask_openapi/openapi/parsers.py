@@ -2,6 +2,7 @@ import inspect
 import os
 import re
 from collections import defaultdict
+from typing import Any, Literal
 
 from flask import request
 
@@ -11,7 +12,7 @@ from flask_openapi.utils.files import get_path_from_doc, get_root_path, load_fro
 import yaml
 
 
-def parse_docstring(obj, process_doc, endpoint=None, verb=None, swag_path=None):
+def parse_docstring(obj, process_doc, endpoint=None, verb=None, swag_path=None) -> tuple:
     """
     Gets swag data for method/view docstring
     """
@@ -19,14 +20,14 @@ def parse_docstring(obj, process_doc, endpoint=None, verb=None, swag_path=None):
 
     full_doc = None
     if not swag_path:
-        swag_path = getattr(obj, 'swag_path', None)
-    swag_type = getattr(obj, 'swag_type', 'yml')
-    swag_paths = getattr(obj, 'swag_paths', None)
-    root_path = get_root_path(obj)
-    from_file = False
+        swag_path: Any | None = getattr(obj, 'swag_path', None)
+    swag_type: Any | str = getattr(obj, 'swag_type', 'yml')
+    swag_paths: Any | None = getattr(obj, 'swag_paths', None)
+    root_path: str = get_root_path(obj)
+    from_file: Literal[False] = False
 
     if swag_path is not None:
-        full_doc = load_from_file(swag_path, swag_type)
+        full_doc: str = load_from_file(swag_path, swag_type)
         from_file = True
     elif swag_paths is not None:
         for key in ("{}_{}".format(endpoint, verb), endpoint, verb.lower()):
@@ -45,16 +46,16 @@ def parse_docstring(obj, process_doc, endpoint=None, verb=None, swag_path=None):
             if not hasattr(obj, 'root_path'):
                 obj.root_path = root_path
             swag_path, swag_type = get_path_from_doc(full_doc)
-            doc_filepath = os.path.join(obj.root_path, swag_path)
+            doc_filepath: str = os.path.join(obj.root_path, swag_path)
             full_doc = load_from_file(doc_filepath, swag_type)
             from_file = True
 
         full_doc = parse_imports(full_doc, root_path)
 
-        yaml_sep = full_doc.find('---')
+        yaml_sep: int = full_doc.find('---')
 
         if yaml_sep != -1:
-            line_feed = full_doc.find('\n')
+            line_feed: int = full_doc.find('\n')
             if line_feed != -1:
                 first_line = process_doc(full_doc[:line_feed])
                 other_lines = process_doc(
@@ -65,23 +66,23 @@ def parse_docstring(obj, process_doc, endpoint=None, verb=None, swag_path=None):
             if from_file:
                 swag = yaml.safe_load(full_doc)
             else:
-                first_line = full_doc
+                first_line: str = full_doc
 
     return first_line, other_lines, swag
 
 
-def parse_definition_docstring(obj, process_doc, doc_dir=None):
+def parse_definition_docstring(obj, process_doc, doc_dir=None) -> tuple:
     """
     Gets swag data from docstring for class based definitions
     """
     doc_lines, swag = None, None
 
     full_doc = None
-    swag_path = getattr(obj, 'swag_path', None)
-    swag_type = getattr(obj, 'swag_type', 'yml')
+    swag_path: Any | None = getattr(obj, 'swag_path', None)
+    swag_type: Any | str = getattr(obj, 'swag_type', 'yml')
 
     if swag_path is not None:
-        full_doc = load_from_file(swag_path, swag_type)
+        full_doc: str = load_from_file(swag_path, swag_type)
     else:
         full_doc = inspect.getdoc(obj)
 
@@ -91,10 +92,10 @@ def parse_definition_docstring(obj, process_doc, doc_dir=None):
             if not hasattr(obj, 'root_path'):
                 obj.root_path = get_root_path(obj)
             swag_path, swag_type = get_path_from_doc(full_doc)
-            doc_filepath = os.path.join(obj.root_path, swag_path)
+            doc_filepath: str = os.path.join(obj.root_path, swag_path)
             full_doc = load_from_file(doc_filepath, swag_type)
 
-        yaml_sep = full_doc.find('---')
+        yaml_sep: int = full_doc.find('---')
         if yaml_sep != -1:
             doc_lines = process_doc(
                 full_doc[:yaml_sep - 1]
@@ -110,43 +111,43 @@ def parse_imports(full_doc, root_path=None):
     """
     Supports `import: otherfile.yml` in docstring specs
     """
-    regex = re.compile('import: "(.*)"')
-    import_prop = regex.search(full_doc)
+    regex: re.Pattern[str] = re.compile('import: "(.*)"')
+    import_prop: re.match[str] | None = regex.search(full_doc)
     if import_prop:
-        start = import_prop.start()
+        start: int = import_prop.start()
         spaces_num = start - full_doc.rfind('\n', 0, start) - 1
-        filepath = import_prop.group(1)
+        filepath: str | Any = import_prop.group(1)
         if filepath.startswith('/'):
-            imported_doc = load_from_file(filepath)
+            imported_doc: str = load_from_file(filepath)
         else:
             imported_doc = load_from_file(filepath, root_path=root_path)
-        indented_imported_doc = imported_doc.replace(
+        indented_imported_doc: str = imported_doc.replace(
             '\n', '\n' + ' ' * spaces_num
         )
-        full_doc = regex.sub(indented_imported_doc, full_doc, count=1)
+        full_doc: str = regex.sub(indented_imported_doc, full_doc, count=1)
         return parse_imports(full_doc)
     return full_doc
 
 
 def extract_definitions(alist, level=None, endpoint=None, verb=None,
-                        prefix_ids=False, openapi_version=None):
+                        prefix_ids=False, openapi_version=None) -> list:
     """
     Since we couldn't be bothered to register models elsewhere
     our definitions need to be extracted from the parameters.
     We require an 'id' field for the schema to be correctly
     added to the definitions list.
     """
-    endpoint = endpoint or request.endpoint.lower()
-    verb = verb or request.method.lower()
+    endpoint: str = endpoint or request.endpoint.lower()
+    verb: str = verb or request.method.lower()
     endpoint = endpoint.replace('.', '_')
 
-    def _extract_array_defs(source):
+    def _extract_array_defs(source) -> list:
         """
         Extracts definitions identified by `id`
         """
         # extract any definitions that are within arrays
         # this occurs recursively
-        ret = []
+        ret: list = []
         items = source.get('items')
         if items is not None and 'schema' in items:
             ret += extract_definitions(
@@ -156,9 +157,9 @@ def extract_definitions(alist, level=None, endpoint=None, verb=None,
 
     # for tracking level of recursion
     if level is None:
-        level = 0
+        level: Literal[0] = 0
 
-    defs = list()
+    defs: list = list()
     for item in alist:
         if not getattr(item, 'get'):  # noqa
             raise RuntimeError('definitions must be a list of dicts')
@@ -181,7 +182,7 @@ def extract_definitions(alist, level=None, endpoint=None, verb=None,
                     ref_path = "#/components/schemas/"
                 else:
                     ref_path = "#/definitions/"
-                ref = {"$ref": "{}{}".format(ref_path, schema_id)}
+                ref: dict[str, str] = {"$ref": "{}{}".format(ref_path, schema_id)}
 
                 # only add the reference as a schema if we are in a
                 # response or a parameter i.e. at the top level
@@ -208,7 +209,7 @@ def extract_definitions(alist, level=None, endpoint=None, verb=None,
     return defs
 
 
-def get_vendor_extension_fields(mapping):
+def get_vendor_extension_fields(mapping) -> dict:
     """
     Identify vendor extension fields and extract them into a new dictionary.
     Examples:

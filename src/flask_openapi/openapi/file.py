@@ -14,13 +14,13 @@ def load_swagger_file(app: Flask, filename: str) -> Any:
     loader: Callable = lambda stream: yaml.safe_load(parse_imports(stream.read(), filename))  # noqa
 
     if not filename.startswith('/'):
-        filename = os.path.join(app.root_path, filename)
+        filename: str = os.path.join(app.root_path, filename)
 
     if filename.endswith('.json'):
         loader = json.load
     else:
         with codecs.open(filename, 'r', 'utf-8') as f:
-            contents = f.read().strip()
+            contents: str = f.read().strip()
             if contents[0] in ['{', '[']:
                 loader = json.load
 

@@ -8,9 +8,10 @@ we add the endpoint to swagger specification output
 """
 from collections import defaultdict
 from functools import partial, wraps
-from typing import Callable, Optional
+from typing import Callable, Literal, LiteralString, Optional
 
-from flask import (Blueprint, Flask, abort, current_app, redirect, request, url_for)
+from flask import (Blueprint, Flask, abort, redirect, request, url_for)
+from grpc import Call
 
 from flask_openapi.constants import DEFAULT_CONFIG
 from flask_openapi.openapi.file import load_swagger_file
@@ -38,7 +39,7 @@ class SwaggerDefinition:
     Class based definition
     """
 
-    def __init__(self, name: str, obj: dict, tags: Optional[list[str]] = None):
+    def __init__(self, name: str, obj: dict, tags: Optional[list[str]] = None) -> None:
         self.name: str = name
         self.obj: dict = obj
         self.tags: list[str] = tags or []
@@ -59,13 +60,13 @@ class Swagger:
             format_checker: Optional[Callable] = None,
             merge: bool = False
     ) -> None:
-        self._configured = False
+        self._configured: Literal[False] = False
         self.endpoints: list[str] = []
         self.definition_models: list = []
-        self.sanitizer = sanitizer or BR_SANITIZER
+        self.sanitizer: Callable = sanitizer or BR_SANITIZER
 
         if config and merge:
-            self.config = dict(DEFAULT_CONFIG.copy(), **config)
+            self.config: dict = dict(DEFAULT_CONFIG.copy(), **config)
         elif config and not merge:
             self.config = config
         elif not config:
@@ -73,18 +74,18 @@ class Swagger:
         else:  # The above branches must be exhaustive
             raise ValueError
 
-        self.template = template
-        self.template_file = template_file
-        self.decorators = decorators
-        self.format_checker = format_checker or jsonschema.FormatChecker()
+        self.template: dict = template
+        self.template_file: str = template_file
+        self.decorators: list | None = decorators
+        self.format_checker: Callable = format_checker or jsonschema.FormatChecker()
 
-        self.default_validation_function = lambda data, schema: jsonschema.validate(data, schema, format_checker=self.format_checker)
-        self.default_error_handler = lambda error, _, __: abort(400, error.message)
+        self.default_validation_function: Callable = lambda data, schema: jsonschema.validate(data, schema, format_checker=self.format_checker)
+        self.default_error_handler: Callable = lambda error, _, __: abort(400, error.message)
 
-        self.validation_function = validation_function or self.default_validation_function
-        self.validation_error_handler = validation_error_handler or self.default_error_handler
+        self.validation_function: Callable = validation_function or self.default_validation_function
+        self.validation_error_handler: Callable = validation_error_handler or self.default_error_handler
         self.apispecs: dict[str, dict] = {}  # cached apispecs
-        self.parse = parse
+        self.parse: bool = parse
 
         if app:
             self.init_app(app)
@@ -92,7 +93,7 @@ class Swagger:
     def init_app(self, app: Flask, decorators: list = None) -> None:
         """ Initialize the app with Swagger plugin """
         self.decorators = decorators or self.decorators
-        self.app = app
+        self.app: Flask = app
         self.app.add_url_rule = swag_annotation(self.app.add_url_rule)  # type: ignore
 
         self.load_config(app)
@@ -122,14 +123,14 @@ class Swagger:
 
     def get_def_models(self, definition_filter: Optional[Callable] = None) -> dict:
         """ Used for class based definitions """
-        definition_filter = definition_filter or (lambda tag: True)
+        definition_filter: Callable = definition_filter or (lambda tag: True)
         return {
             definition.name: definition.obj
             for definition in self.definition_models
             if definition_filter(definition)
         }
 
-    def definition(self, name, tags=None):
+    def definition(self, name, tags=None) -> Callable:
         """
         Decorator to add class based definitions
         """
@@ -139,13 +140,13 @@ class Swagger:
             return obj
         return wrapper
 
-    def load_config(self, app):
+    def load_config(self, app) -> None:
         """
         Copy config from app
         """
         self.config.update(app.config.get('SWAGGER', {}))
 
-    def register_views(self, app):
+    def register_views(self, app) -> None:
         """
         Register views
         """
@@ -158,8 +159,8 @@ class Swagger:
             return view
 
         if self.config.get('swagger_ui', True):
-            uiversion = self.config.get('uiversion', 3)
-            blueprint = Blueprint(
+            uiversion: int = self.config.get('uiversion', 3)
+            blueprint: Blueprint = Blueprint(
                 self.config.get('endpoint', 'flask_openapi'),
                 __name__,
                 url_prefix=self.config.get('url_prefix', None),
@@ -173,7 +174,7 @@ class Swagger:
                 static_url_path=self.config.get('static_url_path', None)
             )
 
-            specs_route = self.config.get('specs_route', '/apidocs/')
+            specs_route: str = self.config.get('specs_route', '/apidocs/')
             blueprint.add_url_rule(
                 specs_route,
                 'apidocs',
@@ -184,7 +185,7 @@ class Swagger:
             )
 
             if uiversion < 3:
-                redirect_default = specs_route + '/o2c.html'
+                redirect_default: str = specs_route + '/o2c.html'
             else:
                 redirect_default = "/oauth2-redirect.html"
 
@@ -220,7 +221,7 @@ class Swagger:
             )
         app.register_blueprint(blueprint)
 
-    def add_headers(self, app):
+    def add_headers(self, app) -> None:
         """
         Inject headers after request
         """
@@ -230,26 +231,26 @@ class Swagger:
                 response.headers[header] = value
             return response
 
-    def parse_request(self, app):
+    def parse_request(self, app) -> None:
         @app.before_request
-        def before_request():  # noqa
+        def before_request() -> None:  # noqa
             """
             Parse and validate request data(query, form, header and body),
             set data to `request.parsed_data`
             """
             # convert "/api/items/<int:id>/" to "/api/items/{id}/"
-            subs = []
+            subs: list = []
             for sub in str(request.url_rule).split('/'):
                 if '<' in sub:
                     if ':' in sub:
-                        start = sub.index(':') + 1
+                        start: int = sub.index(':') + 1
                     else:
                         start = 1
                     subs.append('{{{:s}}}'.format(sub[start:-1]))
                 else:
                     subs.append(sub)
-            path = '/'.join(subs)
-            path_key = path + request.method.lower()
+            path: LiteralString = '/'.join(subs)
+            path_key: str = path + request.method.lower()
 
             if not self.app.debug and path_key in self.parsers:
                 parsers = self.parsers[path_key]
@@ -258,25 +259,25 @@ class Swagger:
                 doc = None
                 definitions = None
                 for spec in self.config['specs']:
-                    apispec = get_apispecs(endpoint=spec['endpoint'])
+                    apispec: dict = get_apispecs(endpoint=spec['endpoint'])
                     if path in apispec['paths']:
                         if request.method.lower() in apispec['paths'][path]:
                             doc = apispec['paths'][path][
                                 request.method.lower()]
-                            definitions = extract_schema(apispec)
+                            definitions: defaultdict = extract_schema(apispec)
                             break
                 if not doc:
                     return
 
-                parsers = defaultdict(RequestParser)
-                schemas = defaultdict(
+                parsers: defaultdict = defaultdict(RequestParser)
+                schemas: defaultdict = defaultdict(
                     lambda: {'type': 'object', 'properties': defaultdict(dict)}
                 )
                 self.update_schemas_parsers(doc, schemas, parsers, definitions)
                 self.schemas[path_key] = schemas
                 self.parsers[path_key] = parsers
 
-            parsed_data = {'path': request.view_args}
+            parsed_data: dict[str, dict[str, Any]] = {'path': request.view_args}
             for location in parsers.keys():
                 parsed_data[location] = parsers[location].parse_args()
             if 'json' in schemas:
@@ -289,7 +290,7 @@ class Swagger:
 
             setattr(request, 'parsed_data', parsed_data)  # noqa
 
-    def update_schemas_parsers(self, doc, schemas, parsers, definitions):
+    def update_schemas_parsers(self, doc, schemas, parsers, definitions) -> None:
         '''
         Schemas and parsers would be updated here from doc
         '''
@@ -351,7 +352,7 @@ class Swagger:
                                 location]['properties'][name][k] = param[k]
 
     def set_schemas(self, schemas: dict, location: str,
-                    definitions: dict):
+                    definitions: dict) -> None:
         if is_openapi3(self.config.get('openapi')):
             schemas[location]['components'] = {'schemas': dict(definitions)}
         else:
@@ -359,7 +360,7 @@ class Swagger:
 
     def validate(
             self, schema_id, validation_function=None,
-            validation_error_handler=None):
+            validation_error_handler=None) -> Callable:
         """
         A decorator that is used to validate incoming requests data
         against a schema
@@ -393,12 +394,12 @@ class Swagger:
         """
 
         if validation_function is None:
-            validation_function = self.validation_function
+            validation_function: Callable = self.validation_function
 
         if validation_error_handler is None:
-            validation_error_handler = self.validation_error_handler
+            validation_error_handler: Callable = self.validation_error_handler
 
-        def decorator(func):
+        def decorator(func) -> Callable:
             @wraps(func)
             def wrapper(*args, **kwargs):
                 specs = get_schema_specs(schema_id, self)
@@ -435,7 +436,7 @@ class Swagger:
             if schema is not None and schema.get('id').lower() == schema_id:
                 return schema
 
-    def is_openapi3(self):
+    def is_openapi3(self) -> bool:
         return is_openapi3(self.config.get('openapi'))
 
 
