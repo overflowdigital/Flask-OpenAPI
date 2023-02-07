@@ -1,6 +1,6 @@
 # coding: utf-8
 import inspect
-from typing import Any, Callable, Optional, cast
+from typing import Any, Callable, Optional, cast, Type
 
 from flask import Flask
 from flask import typing as ft
@@ -27,8 +27,8 @@ try:
     class Schema(MarshmallowSchema):
         swag_in: str = "body"
         swag_validate: bool = True
-        swag_validation_function: Callable = None
-        swag_validation_error_handler: Callable = None
+        swag_validation_function = None
+        swag_validation_error_handler = None
         swag_require_data: bool = True
 
         def to_specs_dict(self) -> dict:
@@ -127,8 +127,7 @@ def convert_schemas(d: dict, definitions: Optional[dict] = None) -> dict:
     Also updates the optional definitions argument with any definitions
     entries contained within the schema.
     """
-    if definitions is None:
-        definitions: dict = {}
+    definitions = definitions or {}
 
     definitions.update(d.get("definitions", {}))
 
@@ -136,7 +135,7 @@ def convert_schemas(d: dict, definitions: Optional[dict] = None) -> dict:
 
     for k, v in d.items():
         if isinstance(v, dict):
-            v: dict = convert_schemas(v, definitions)
+            v = convert_schemas(v, definitions)
         if isinstance(v, (list, tuple)):
             new_v: list = []
             for item in v:

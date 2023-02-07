@@ -20,16 +20,16 @@ def parse_docstring(
     """
     first_line, other_lines, swag = None, None, None
 
-    full_doc = None
+    full_doc = ''
     if not swag_path:
-        swag_path: Any | None = getattr(obj, "swag_path", None)
+        swag_path = getattr(obj, "swag_path", None)
     swag_type: Any | str = getattr(obj, "swag_type", "yml")
     swag_paths: Any | None = getattr(obj, "swag_paths", None)
     root_path: str = get_root_path(obj)
-    from_file: Literal[False] = False
+    from_file: bool = False
 
     if swag_path is not None:
-        full_doc: str = load_from_file(swag_path, swag_type)
+        full_doc = load_from_file(swag_path, swag_type)
         from_file = True
     elif swag_paths is not None:
         for key in ("{}_{}".format(endpoint, verb), endpoint, verb.lower()):
@@ -60,13 +60,13 @@ def parse_docstring(
             line_feed: int = full_doc.find("\n")
             if line_feed != -1:
                 first_line = process_doc(full_doc[:line_feed])
-                other_lines = process_doc(full_doc[line_feed + 1 : yaml_sep])
-                swag = yaml.safe_load(full_doc[yaml_sep + 4 :])
+                other_lines = process_doc(full_doc[line_feed + 1:yaml_sep])
+                swag = yaml.safe_load(full_doc[yaml_sep + 4:])
         else:
             if from_file:
                 swag = yaml.safe_load(full_doc)
             else:
-                first_line: str = full_doc
+                first_line = full_doc
 
     return first_line, other_lines, swag
 
@@ -77,12 +77,12 @@ def parse_definition_docstring(obj, process_doc, doc_dir=None) -> tuple:
     """
     doc_lines, swag = None, None
 
-    full_doc = None
+    full_doc = ''
     swag_path: Any | None = getattr(obj, "swag_path", None)
     swag_type: Any | str = getattr(obj, "swag_type", "yml")
 
     if swag_path is not None:
-        full_doc: str = load_from_file(swag_path, swag_type)
+        full_doc = load_from_file(swag_path, swag_type)
     else:
         full_doc = inspect.getdoc(obj)
 
@@ -110,7 +110,7 @@ def parse_imports(full_doc, root_path=None):
     Supports `import: otherfile.yml` in docstring specs
     """
     regex: re.Pattern[str] = re.compile('import: "(.*)"')
-    import_prop: re.match[str] | None = regex.search(full_doc)
+    import_prop: re.Match[str] | None = regex.search(full_doc)
     if import_prop:
         start: int = import_prop.start()
         spaces_num = start - full_doc.rfind("\n", 0, start) - 1
@@ -120,7 +120,7 @@ def parse_imports(full_doc, root_path=None):
         else:
             imported_doc = load_from_file(filepath, root_path=root_path)
         indented_imported_doc: str = imported_doc.replace("\n", "\n" + " " * spaces_num)
-        full_doc: str = regex.sub(indented_imported_doc, full_doc, count=1)
+        full_doc = regex.sub(indented_imported_doc, full_doc, count=1)
         return parse_imports(full_doc)
     return full_doc
 
@@ -134,9 +134,9 @@ def extract_definitions(
     We require an 'id' field for the schema to be correctly
     added to the definitions list.
     """
-    endpoint: str = endpoint or request.endpoint.lower()
-    verb: str = verb or request.method.lower()
-    endpoint = endpoint.replace(".", "_")
+    endpoint = endpoint or request.endpoint or ''
+    verb = verb or request.method.lower() or ''
+    endpoint = endpoint.lower().replace(".", "_")
 
     def _extract_array_defs(source) -> list:
         """
@@ -154,7 +154,7 @@ def extract_definitions(
 
     # for tracking level of recursion
     if level is None:
-        level: Literal[0] = 0
+        level: int = 0
 
     defs: list = list()
     for item in alist:

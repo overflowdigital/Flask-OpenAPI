@@ -8,10 +8,9 @@ we add the endpoint to swagger specification output
 """
 from collections import defaultdict
 from functools import partial, wraps
-from typing import Callable, Literal, LiteralString, Optional
+from typing import Any, Callable, LiteralString, Optional
 
 from flask import Blueprint, Flask, abort, redirect, request, url_for
-from grpc import Call
 
 from flask_openapi.constants import DEFAULT_CONFIG
 from flask_openapi.openapi.file import load_swagger_file
@@ -60,7 +59,7 @@ class Swagger:
         format_checker: Optional[Callable] = None,
         merge: bool = False,
     ) -> None:
-        self._configured: Literal[False] = False
+        self._configured: bool = False
         self.endpoints: list[str] = []
         self.definition_models: list = []
         self.sanitizer: Callable = sanitizer or BR_SANITIZER
@@ -133,7 +132,7 @@ class Swagger:
 
     def get_def_models(self, definition_filter: Optional[Callable] = None) -> dict:
         """Used for class based definitions"""
-        definition_filter: Callable = definition_filter or (lambda tag: True)
+        definition_filter = definition_filter or (lambda tag: True)
         return {
             definition.name: definition.obj
             for definition in self.definition_models
@@ -236,7 +235,7 @@ class Swagger:
 
         @app.after_request
         def after_request(response):  # noqa
-            for header, value in self.config.get("headers"):
+            for header, value in self.config.get("headers", []):
                 response.headers[header] = value
             return response
 
@@ -272,13 +271,13 @@ class Swagger:
                     if path in apispec["paths"]:
                         if request.method.lower() in apispec["paths"][path]:
                             doc = apispec["paths"][path][request.method.lower()]
-                            definitions: defaultdict = extract_schema(apispec)
+                            definitions = extract_schema(apispec)
                             break
                 if not doc:
                     return
 
-                parsers: defaultdict = defaultdict(RequestParser)
-                schemas: defaultdict = defaultdict(
+                parsers = defaultdict(RequestParser)
+                schemas = defaultdict(
                     lambda: {"type": "object", "properties": defaultdict(dict)}
                 )
                 self.update_schemas_parsers(doc, schemas, parsers, definitions)
@@ -302,7 +301,7 @@ class Swagger:
         """
         Schemas and parsers would be updated here from doc
         """
-        if is_openapi3():
+        if is_openapi3(self.config.get("openapi", "")):
             # 'json' to comply with self.SCHEMA_LOCATIONS's {'body':'json'}
             location = "json"
             json_schema = None
@@ -400,10 +399,10 @@ class Swagger:
         """
 
         if validation_function is None:
-            validation_function: Callable = self.validation_function
+            validation_function = self.validation_function
 
         if validation_error_handler is None:
-            validation_error_handler: Callable = self.validation_error_handler
+            validation_error_handler = self.validation_error_handler
 
         def decorator(func) -> Callable:
             @wraps(func)

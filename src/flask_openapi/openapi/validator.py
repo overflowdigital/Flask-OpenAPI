@@ -68,14 +68,15 @@ def validate(
         abort(Response("No data to validate", status=400))
 
     # not used anymore but kept to reuse with marshmallow
-    endpoint: str = request.endpoint.lower().replace(".", "_")
+    endpoint: str = request.endpoint or ''
     verb: str = request.method.lower()
+    endpoint = endpoint.lower().replace(".", "_")
 
     if filepath is not None:
         if not root:
             try:
                 frame_info: inspect.FrameInfo = inspect.stack()[1]
-                root: str = os.path.dirname(os.path.abspath(frame_info[1]))
+                root = os.path.dirname(os.path.abspath(frame_info[1]))
             except Exception:
                 root = None
         else:
@@ -87,7 +88,7 @@ def validate(
             final_filepath = filepath
         full_doc: str = load_from_file(final_filepath)
         yaml_start: int = full_doc.find("---")
-        swag = yaml.safe_load(full_doc[yaml_start if yaml_start >= 0 else 0 :])
+        swag = yaml.safe_load(full_doc[yaml_start if yaml_start >= 0 else 0:])
     else:
         swag = copy.deepcopy(specs)
 
@@ -120,7 +121,7 @@ def validate(
 
     # support definitions informed in dict
     if schema_id in extract_schema(swag):
-        main_def = extract_schema(swag).get(schema_id)
+        main_def = extract_schema(swag).get(schema_id) or {}
 
     # Doensn't need to alter 'definitions' according to open api
     # Since it main_def exists only in this function
@@ -131,7 +132,7 @@ def validate(
             del value["id"]
 
     if validation_function is None:
-        validation_function: Callable = jsonschema.validate
+        validation_function = jsonschema.validate
 
     absolute_path: str = os.path.dirname(sys.argv[0])
     if filepath is None:

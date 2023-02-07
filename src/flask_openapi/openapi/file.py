@@ -16,7 +16,7 @@ def load_swagger_file(app: Flask, filename: str) -> Any:
     )  # noqa
 
     if not filename.startswith("/"):
-        filename: str = os.path.join(app.root_path, filename)
+        filename = os.path.join(app.root_path, filename)
 
     if filename.endswith(".json"):
         loader = json.load

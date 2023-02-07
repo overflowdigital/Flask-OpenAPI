@@ -49,7 +49,7 @@ def swag_from(
     def resolve_path(function, filepath) -> str | Path:
 
         if isinstance(filepath, Path):
-            filepath: str = str(filepath)
+            filepath = str(filepath)
 
         if not filepath.startswith("/"):
             if not hasattr(function, "root_path"):
@@ -60,7 +60,7 @@ def swag_from(
 
     def set_from_filepath(function) -> None:
         final_filepath: str | Path = resolve_path(function, specs)
-        function.swag_type = filetype or final_filepath.split(".")[-1]
+        function.swag_type = filetype or str(final_filepath).split(".")[-1]
 
         if endpoint or methods:
             if not hasattr(function, "swag_paths"):
@@ -140,14 +140,14 @@ def swag_annotation(f) -> Callable:
         for variable, annotation in function.__annotations__.items():
 
             if issubclass(annotation, Schema):
-                annotation: Schema = annotation()
+                annotation = annotation()
                 data: dict = annotation.to_specs_dict()
 
                 for row in data["parameters"]:
                     specs["parameters"].append(row)
                 specs["definitions"].update(data["definitions"])
 
-                function: Callable = validate_annotation(annotation, variable)(function)
+                function = validate_annotation(annotation, variable)(function)
 
             elif issubclass(annotation, int):
                 m: dict[str, Any] = {
@@ -166,9 +166,9 @@ def swag_annotation(f) -> Callable:
                 )
 
         function.specs_dict = specs
-        args: list = list(args)
-        args[2] = function
-        args: tuple = tuple(args)
+        args = list(args)
+        args[2] = function  # type: ignore
+        args = tuple(args)
 
         return f(*args, **kwargs)
 

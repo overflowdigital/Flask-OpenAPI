@@ -27,7 +27,7 @@ def get_swag_path_from_doc_dir(
         if file_path and not os.path.isfile(file_path):
             regex: re.Pattern[str] = re.compile(r"(api.+)")
             try:
-                file_path = doc_dir + regex.search(file_path)[0]
+                file_path = doc_dir + regex.search(file_path)
                 if os.path.isfile(file_path):
                     setattr(func, "swag_type", "yml")  # noqa
                     setattr(func, "swag_path", file_path)  # noqa
@@ -65,7 +65,7 @@ def get_path_from_doc(full_doc) -> tuple[str, str]:
     return swag_path, swag_type
 
 
-def load_from_file(swag_path, swag_type="yml", root_path=None) -> str:
+def load_from_file(swag_path: str, swag_type="yml", root_path=None) -> str:
     """
     Load specs from YAML file
     """
@@ -79,7 +79,7 @@ def load_from_file(swag_path, swag_type="yml", root_path=None) -> str:
             return yaml_file.read()
     except IOError:
         # not in the same dir, add dirname
-        swag_path: str = os.path.join(root_path or os.path.dirname(__file__), swag_path)
+        swag_path = os.path.join(root_path or os.path.dirname(__file__), swag_path)
         try:
             enc = detect_by_bom(swag_path)
             with codecs.open(swag_path, encoding=enc) as yaml_file:
@@ -89,8 +89,8 @@ def load_from_file(swag_path, swag_type="yml", root_path=None) -> str:
             path: list[str] = swag_path.replace(
                 (root_path or os.path.dirname(__file__)), ""
             ).split(os.sep)[1:]
-            package_spec: ModuleSpec = importlib.util.find_spec(path[0])
-            if package_spec.has_location:
+            package_spec: ModuleSpec | None = importlib.util.find_spec(path[0])
+            if package_spec and package_spec.has_location:
                 # Improvement idea: Use package_spec.submodule_search_locations
                 # if we're sure there's only going to be one search location.
                 site_package: str = package_spec.origin.replace("/__init__.py", "")
@@ -103,6 +103,7 @@ def load_from_file(swag_path, swag_type="yml", root_path=None) -> str:
         logging.warning(
             f"File path {swag_path} is either doesnt exist or is in the wrong type"
         )
+        return ''
 
 
 def detect_by_bom(path, default="utf-8") -> str:

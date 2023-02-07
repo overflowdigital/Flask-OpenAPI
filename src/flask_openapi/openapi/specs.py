@@ -193,7 +193,7 @@ def get_operations(
             value = swag.get(key)
             if key in ("produces", "consumes"):
                 if not isinstance(value, (list, tuple)):
-                    value: list = [value]
+                    value = [value]
 
             operation[key] = value
 
@@ -262,7 +262,7 @@ def get_specs(
                 merge_specs(
                     swag, m.convert_schemas(deepcopy(method.specs_dict), definition)
                 )
-                swag_def: dict = definition
+                swag_def = definition
                 swagged = True
 
             view_class = getattr(endpoint, "view_class", None)
@@ -383,8 +383,8 @@ def apispec_to_template(app, spec, definitions=None, paths=None) -> dict:
     :param definitions: a list of [Schema, ..] or [('Name', Schema), ..]
     :param paths: A list of flask views
     """
-    definitions: list = definitions or []
-    paths: list = paths or []
+    definitions = definitions or []
+    paths = paths or []
 
     with app.app_context():
         for definition in definitions:
@@ -436,8 +436,7 @@ def get_apispecs(endpoint: str = "apispec_1") -> dict:
         )
 
     data: dict = {
-        "info": swagger.config.get("info")
-        or {
+        "info": swagger.config.get("info") or {
             "version": spec.get("version", swagger.config.get("version", "0.0.1")),
             "title": spec.get("title", swagger.config.get("title", "A swagger API")),
             "description": spec.get(

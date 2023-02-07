@@ -18,7 +18,7 @@ def generate_api_schema(file: IO, endpoint: str) -> dict:
     """Generate the swagger schema for your api."""
     try:
         if endpoint is None:
-            endpoint: str = current_app.swag.config["specs"][0]["endpoint"]
+            endpoint = current_app.swag.config["specs"][0]["endpoint"]
 
         spec: dict = get_apispecs(endpoint)
     except RuntimeError as e:

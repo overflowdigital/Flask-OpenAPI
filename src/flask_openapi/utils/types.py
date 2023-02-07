@@ -13,9 +13,9 @@ def ordered_dict_to_dict(d: dict) -> dict:
     new_d: dict = deepcopy(d)
     for k, v in new_d.items():
         if isinstance(v, OrderedDict):
-            v: dict = dict(v)
+            v = dict(v)
         if isinstance(v, dict):
-            v: dict = ordered_dict_to_dict(v)
+            v = ordered_dict_to_dict(v)
         ret[k] = v
     return ret
 
@@ -114,12 +114,12 @@ class CachedLazyString(LazyString):
         Uses `__init__()` from the parent and initializes a cache.
         """
         super(CachedLazyString, self).__init__(func)
-        self._cache = None
+        self._cache: str = ''
 
-    def __str__(self):
+    def __str__(self) -> str:
         """
         Returns the actual string and caches the result.
         """
         if not self._cache:
-            self._cache = self.text_type(self._func())
+            self._cache: str = self.text_type(self._func())
         return self._cache
