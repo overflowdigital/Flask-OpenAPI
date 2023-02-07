@@ -121,5 +121,5 @@ class CachedLazyString(LazyString):
         Returns the actual string and caches the result.
         """
         if not self._cache:
-            self._cache: str = self.text_type(self._func())
+            self._cache = self.text_type(self._func())
         return self._cache

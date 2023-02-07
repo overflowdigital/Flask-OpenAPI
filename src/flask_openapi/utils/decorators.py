@@ -166,9 +166,9 @@ def swag_annotation(f) -> Callable:
                 )
 
         function.specs_dict = specs
-        args = list(args)
-        args[2] = function  # type: ignore
-        args = tuple(args)
+        _args: list = list(args)
+        _args[2] = function  # type: ignore
+        args = tuple(_args)
 
         return f(*args, **kwargs)
 

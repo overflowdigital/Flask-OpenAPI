@@ -292,7 +292,7 @@ def get_specs(
 
             swag_path = None
             if doc_dir:
-                swag_path: str = get_swag_path_from_doc_dir(
+                swag_path = get_swag_path_from_doc_dir(
                     method, view_class, doc_dir, endpoint
                 )
 
@@ -527,7 +527,7 @@ def get_apispecs(endpoint: str = "apispec_1") -> dict:
                     base_path = base_path[:-1]
                 if base_path:
                     if srule.startswith(base_path):
-                        srule = srule[len(base_path) :]
+                        srule = srule[len(base_path):]
 
             for arg in re.findall("(<([^<>]*:)?([^<>]*)>)", srule):
                 srule = srule.replace(arg[0], "{%s}" % arg[2])

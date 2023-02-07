@@ -8,7 +8,7 @@ we add the endpoint to swagger specification output
 """
 from collections import defaultdict
 from functools import partial, wraps
-from typing import Any, Callable, LiteralString, Optional
+from typing import Any, Callable, Optional
 
 from flask import Blueprint, Flask, abort, redirect, request, url_for
 
@@ -257,7 +257,7 @@ class Swagger:
                     subs.append("{{{:s}}}".format(sub[start:-1]))
                 else:
                     subs.append(sub)
-            path: LiteralString = "/".join(subs)
+            path = "/".join(subs)
             path_key: str = path + request.method.lower()
 
             if not self.app.debug and path_key in self.parsers:
@@ -284,7 +284,7 @@ class Swagger:
                 self.schemas[path_key] = schemas
                 self.parsers[path_key] = parsers
 
-            parsed_data: dict[str, dict[str, Any]] = {"path": request.view_args}
+            parsed_data: dict[str, dict[str, Any]] = {"path": request.view_args or {}}
             for location in parsers.keys():
                 parsed_data[location] = parsers[location].parse_args()
             if "json" in schemas:

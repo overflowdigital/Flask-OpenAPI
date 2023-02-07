@@ -2,7 +2,7 @@ import copy
 import inspect
 import os
 import sys
-from typing import Any, Callable
+from typing import Any
 
 from flask import Response, abort, request
 

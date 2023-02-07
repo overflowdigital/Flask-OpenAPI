@@ -27,7 +27,7 @@ def get_swag_path_from_doc_dir(
         if file_path and not os.path.isfile(file_path):
             regex: re.Pattern[str] = re.compile(r"(api.+)")
             try:
-                file_path = doc_dir + regex.search(file_path)
+                file_path = doc_dir + str(regex.search(file_path))
                 if os.path.isfile(file_path):
                     setattr(func, "swag_type", "yml")  # noqa
                     setattr(func, "swag_path", file_path)  # noqa
@@ -90,7 +90,7 @@ def load_from_file(swag_path: str, swag_type="yml", root_path=None) -> str:
                 (root_path or os.path.dirname(__file__)), ""
             ).split(os.sep)[1:]
             package_spec: ModuleSpec | None = importlib.util.find_spec(path[0])
-            if package_spec and package_spec.has_location:
+            if package_spec and package_spec.has_location and package_spec.origin:
                 # Improvement idea: Use package_spec.submodule_search_locations
                 # if we're sure there's only going to be one search location.
                 site_package: str = package_spec.origin.replace("/__init__.py", "")

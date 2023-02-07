@@ -2,7 +2,7 @@ import inspect
 import os
 import re
 from collections import defaultdict
-from typing import Any, Literal
+from typing import Any
 
 from flask import request
 
@@ -40,7 +40,7 @@ def parse_docstring(
         # TODO: handle multiple root_paths
         # to support `import: ` from multiple places
     else:
-        full_doc = inspect.getdoc(obj)
+        full_doc = inspect.getdoc(obj) or ''
 
     if full_doc:
 
@@ -154,7 +154,7 @@ def extract_definitions(
 
     # for tracking level of recursion
     if level is None:
-        level: int = 0
+        level = 0
 
     defs: list = list()
     for item in alist:
