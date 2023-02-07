@@ -21,3 +21,4 @@ babel==2.9.1
 twisted==22.10.0
 pyjwt==2.4.0
 oauthlib==3.2.1
+certifi==2022.12.07
