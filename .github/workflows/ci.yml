@@ -21,8 +21,6 @@ jobs:
         run: ci/scripts/setup_worker.sh
       - name: Build Package and Verify
         run: ci/scripts/build.sh
-      - name: Run Unit Tests
-        run: ci/scripts/test_runner.sh
       - name: Perform Static Code Analysis
         run: ci/scripts/codescan.sh
       - name: Perform Runtime Code Analysis
@@ -30,13 +28,15 @@ jobs:
       - name: Perfom Secure Code Analysis (Vulnerabilities)
         uses: snyk/actions/python@master
         env:
-          SNYK_TOKEN: ${{ secrets.SYNK_TOKEN }}
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
       - name: Perform Secure Code Analysis (Secrets)
         uses: trufflesecurity/trufflehog@main
         with:
           path: ./
           base: ${{ github.ref_name }}
           head: HEAD
+      - name: Run Unit Tests
+        run: ci/scripts/test_runner.sh
       - name: Upload Test Report
         if: ${{ always() }}
         uses: actions/upload-artifact@v2
