@@ -84,7 +84,7 @@ def parse_definition_docstring(obj, process_doc, doc_dir=None) -> tuple:
     if swag_path is not None:
         full_doc = load_from_file(swag_path, swag_type)
     else:
-        full_doc = inspect.getdoc(obj)
+        full_doc = inspect.getdoc(obj) or ''
 
     if full_doc:
 

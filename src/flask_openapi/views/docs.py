@@ -18,7 +18,7 @@ from werkzeug.datastructures import Authorization
 
 def _is_auth(auth: Optional[Authorization], username: str, password: str) -> bool:
     return (
-        auth is not None 
+        auth is not None
         and auth.type == "basic"
         and auth.username == username
         and auth.password == password

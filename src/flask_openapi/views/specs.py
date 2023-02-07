@@ -9,7 +9,7 @@ class APISpecsView(MethodView):
     """View that loads the JSON file of compiled api specs"""
 
     def __init__(self, *args: tuple, **kwargs: dict[str, Any]) -> None:
-        self.loader: Callable = kwargs["loader"]  # type: ignore
+        self.loader: Callable = kwargs.pop('loader')  # type: ignore
         super(APISpecsView, self).__init__(*args, **kwargs)
 
     def get(self) -> Response:

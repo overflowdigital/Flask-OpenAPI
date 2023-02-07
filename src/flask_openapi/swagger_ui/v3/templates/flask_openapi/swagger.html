@@ -21,8 +21,8 @@ window.onload = function() {
     displayOperationId: true,
     deepLinking: true,
     jsonEditor: true,
-    {% if flasgger_config.doc_expansion -%}
-        docExpansion: "{{flasgger_config.doc_expansion | safe }}",
+    {% if flask_openapi_config.doc_expansion -%}
+        docExpansion: "{{flask_openapi_config.doc_expansion | safe }}",
     {%- endif %}
     apisSorter: "alpha",
     presets: [
@@ -66,30 +66,30 @@ window.onload = function() {
         return response;
     },
     {%- endif %}
-    {% if not flasgger_config.hide_top_bar -%}
+    {% if not flask_openapi_config.hide_top_bar -%}
     layout: "StandaloneLayout",
     {%- endif %}
     
     },
-    {{ json.dumps(flasgger_config.get('ui_params', {})) | safe }}
-    {% if flasgger_config.ui_params_text -%}
-    , {{ flasgger_config.ui_params_text | safe }}
+    {{ json.dumps(flask_openapi_config.get('ui_params', {})) | safe }}
+    {% if flask_openapi_config.ui_params_text -%}
+    , {{ flask_openapi_config.ui_params_text | safe }}
     {%- endif %}
     )
     
     )
 
-    {% if flasgger_config.oauth %}
-    ui.initOAuth({{ json.dumps(flasgger_config['oauth']) | safe }})
+    {% if flask_openapi_config.oauth %}
+    ui.initOAuth({{ json.dumps(flask_openapi_config['oauth']) | safe }})
     {%- endif %}
 
-    {% if flasgger_config.auth %}
-    let auth_config = {{ flasgger_config.get("auth") | safe }}
+    {% if flask_openapi_config.auth %}
+    let auth_config = {{ flask_openapi_config.get("auth") | safe }}
     {%- endif %}
 
     window.ui = ui
 
-    {% if not flasgger_config.hide_top_bar -%}
+    {% if not flask_openapi_config.hide_top_bar -%}
     $(".topbar-wrapper .link span").replaceWith("<span>{{title}}</span>");
     {%- endif %}
 }
