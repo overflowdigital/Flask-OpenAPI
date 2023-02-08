@@ -8,8 +8,8 @@ REPO=$(dirname "$REPO../")
 REPO=$(dirname "$REPO../")
 
 echo Running flake8
-python3 -m flake8 $REPO/src/flask_openapi --config $REPO/ci/config/.flake8rc || true
+python3 -m flake8 $REPO/src/flask_openapi --config $REPO/ci/config/.flake8rc
 echo Running mypy
-python3 -m mypy --config-file $REPO/ci/config/.mypyrc $REPO/src/flask_openapi || true
+python3 -m mypy --config-file $REPO/ci/config/.mypyrc $REPO/src/flask_openapi
 echo Running safety
 python3 -m safety check --full-report
