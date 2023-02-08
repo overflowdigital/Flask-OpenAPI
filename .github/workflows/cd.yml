@@ -47,7 +47,7 @@ jobs:
       - name: Perfom Secure Code Analysis (Vulnerabilities)
         uses: snyk/actions/python@master
         env:
-          SNYK_TOKEN: ${{ secrets.SYNK_TOKEN }}
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
       - name: Perform Secure Code Analysis (Secrets)
         uses: trufflesecurity/trufflehog@main
         with:
