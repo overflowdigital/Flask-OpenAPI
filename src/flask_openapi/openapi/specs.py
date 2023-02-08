@@ -518,7 +518,7 @@ def get_apispecs(endpoint: str = "apispec_1") -> dict:
                     swag, data, spec, rule, verb, optional_fields
                 )
 
-        if operations:
+        if operations and swagger.template:
             srule: str = f"{swagger.template.get('swaggerUiPrefix', '')}{rule}"
             base_path: str = swagger.template.get("basePath", "None")
 

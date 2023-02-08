@@ -1,4 +1,5 @@
 import json
+import logging
 import os
 import random
 from importlib import import_module
@@ -18,6 +19,7 @@ def get_specs_data(mod):
     """
     # for each example app in /examples folder
     client = mod.app.test_client()
+    print(f'Running {mod}')
     # init swag if not yet inititalized (no-routes example)
     specs_route = None
     specs_data = {}
