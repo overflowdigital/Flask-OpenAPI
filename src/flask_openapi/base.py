@@ -7,19 +7,27 @@ we add the endpoint to swagger specification output
 
 """
 import codecs
+import json
 import logging
 import os
 import re
+from collections import defaultdict
+from functools import partial, wraps
 from typing import Optional
 
 import yaml
-import json
-
-from collections import defaultdict
-from functools import partial, wraps
-
-from flask import (abort, Blueprint, current_app, jsonify, Markup, redirect,
-                   render_template, request, Response, url_for)
+from flask import (
+    abort,
+    Blueprint,
+    current_app,
+    jsonify,
+    Markup,
+    redirect,
+    render_template,
+    request,
+    Response,
+    url_for,
+)
 from flask.json import JSONEncoder
 from flask.views import MethodView
 from werkzeug.datastructures import Authorization
@@ -32,12 +40,21 @@ import jsonschema
 from mistune import markdown
 
 from . import __version__
-from .constants import (OAS3_SUB_COMPONENTS, OPTIONAL_FIELDS,
-                        OPTIONAL_OAS3_FIELDS)
-from .utils import (extract_definitions, extract_schema, get_schema_specs,
-                    get_specs, get_vendor_extension_fields, is_openapi3,
-                    LazyString, parse_definition_docstring, parse_imports,
-                    swag_annotation, validate)
+from .constants import OAS3_SUB_COMPONENTS, OPTIONAL_FIELDS, OPTIONAL_OAS3_FIELDS
+from .utils import (
+    convert_responses_to_openapi3,
+    extract_definitions,
+    extract_schema,
+    get_schema_specs,
+    get_specs,
+    get_vendor_extension_fields,
+    is_openapi3,
+    LazyString,
+    parse_definition_docstring,
+    parse_imports,
+    swag_annotation,
+    validate,
+)
 
 
 def NO_SANITIZER(text):
@@ -546,11 +563,11 @@ class Swagger(object):
                 operation['requestBody'] = request_body
             if callbacks:
                 operation['callbacks'] = callbacks
-            if responses:
-                operation['responses'] = responses
             # parameters - swagger ui dislikes empty parameter lists
             if len(params) > 0:
                 operation['parameters'] = params
+
+            media_types = ['application/json']
             # other optionals
             for key in optional_fields:
                 if key in swag:
@@ -558,8 +575,17 @@ class Swagger(object):
                     if key in ('produces', 'consumes'):
                         if not isinstance(value, (list, tuple)):
                             value = [value]
+                        if key == 'produces':
+                            media_types = value
 
                     operation[key] = value
+
+                if responses:
+                    if is_openapi3(openapi_version):
+                        convert_responses_to_openapi3(responses, media_types)
+
+                    operation['responses'] = responses
+
             if path_verb:
                 operations[path_verb] = operation
             else:
@@ -616,8 +642,12 @@ class Swagger(object):
                         paths[srule][key] = val
         self.apispecs[endpoint] = data
 
+        # if is_openapi3(openapi_version):
+        #     del data['definitions']
         if is_openapi3(openapi_version):
-            del data['definitions']
+            # Copy definitions to components/schemas
+            if definitions:
+                data.setdefault('components', {}).setdefault('schemas', {}).update(definitions)
 
         return data
 
@@ -786,7 +816,7 @@ class Swagger(object):
         '''
         Schemas and parsers would be updated here from doc
         '''
-        if self.is_openapi3():
+        if is_openapi3(self.config.get('openapi')):
             # 'json' to comply with self.SCHEMA_LOCATIONS's {'body':'json'}
             location = 'json'
             json_schema = None
