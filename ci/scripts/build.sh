@@ -10,3 +10,4 @@ REPO=$(dirname "$REPO../")
 cd $REPO
 sudo python3 -m build
 sudo python3 -m twine check $REPO/dist/*
+sudo python3 -m pip install --force-reinstall $REPO/dist/*.whl

@@ -4,7 +4,9 @@ Test the use of LazyString to populate a template at runtime.
 
 from flask import Flask, jsonify, request
 
-from flask_openapi import Swagger, LazyString, LazyJSONEncoder
+from flask_openapi import Swagger
+from flask_openapi.utils.types import LazyString
+from flask_openapi.utils.encoder import LazyJSONEncoder
 
 app = Flask(__name__)
 

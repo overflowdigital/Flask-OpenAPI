@@ -1,23 +1,26 @@
 import json
+from typing import IO
 
 import click
+
 from flask import current_app
 from flask.cli import with_appcontext
 
-from .utils import is_openapi3
+from flask_openapi.openapi.specs import get_apispecs
+from flask_openapi.openapi.version import is_openapi3
 
 
 @click.command()
 @click.option("-f", "--file", type=click.File("w"), default="-")
 @click.option("-e", "--endpoint", default=None)
 @with_appcontext
-def generate_api_schema(file, endpoint):
+def generate_api_schema(file: IO, endpoint: str) -> dict:
     """Generate the swagger schema for your api."""
     try:
         if endpoint is None:
             endpoint = current_app.swag.config["specs"][0]["endpoint"]
 
-        spec = current_app.swag.get_apispecs(endpoint)
+        spec: dict = get_apispecs(endpoint)
     except RuntimeError as e:
         click.echo(e, err=True)
         click.echo(

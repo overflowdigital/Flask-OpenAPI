@@ -1,4 +1,5 @@
 import json
+import logging
 import os
 import random
 from importlib import import_module
@@ -6,7 +7,7 @@ from importlib import import_module
 import pytest
 from flask import Flask
 from flask_openapi import Swagger
-from flask_openapi.utils import is_python_file, remove_suffix
+from flask_openapi.utils.files import is_python_file, remove_suffix
 
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
 TEST_SUITE = os.path.join(REPO_ROOT, 'ci/tests/suite')
@@ -18,6 +19,7 @@ def get_specs_data(mod):
     """
     # for each example app in /examples folder
     client = mod.app.test_client()
+    print(f'Running {mod}')
     # init swag if not yet inititalized (no-routes example)
     specs_route = None
     specs_data = {}

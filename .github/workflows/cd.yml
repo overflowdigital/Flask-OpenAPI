@@ -37,7 +37,7 @@ jobs:
       - name: Setup Worker
         run: ci/scripts/setup_worker.sh
       - name: Increment Version Number
-        run: ci/scripts/new_version.sh --auto_increment
+        run: ci/scripts/new_version.sh auto_increment
       - name: Build Package and Verify
         run: ci/scripts/build.sh
       - name: Perform Static Code Analysis
@@ -47,7 +47,7 @@ jobs:
       - name: Perfom Secure Code Analysis (Vulnerabilities)
         uses: snyk/actions/python@master
         env:
-          SNYK_TOKEN: ${{ secrets.SYNK_TOKEN }}
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
       - name: Perform Secure Code Analysis (Secrets)
         uses: trufflesecurity/trufflehog@main
         with:

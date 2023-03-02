@@ -3,8 +3,7 @@ A test to ensure routes from Blueprints are swagged as expected.
 """
 from flask import Blueprint, Flask, jsonify
 
-from flask_openapi import Swagger
-from flask_openapi.utils import swag_from
+from flask_openapi import Swagger, swag_from
 
 app = Flask(__name__)
 
