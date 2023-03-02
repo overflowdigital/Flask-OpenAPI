@@ -1,4 +1,4 @@
-# Flask-OpenAPI3-UI
+# Flask-OAS3
 
 [![Python](https://img.shields.io/badge/python-3.6.1-blue.svg)](https://img.shields.io/badge/python-3.6.1-blue.svg)
 [![PyPi](https://img.shields.io/pypi/v/Flask-OpenAPI3-UI.svg)](https://pypi.python.org/pypi/Flask-OpenAPI3-UI)
@@ -15,7 +15,7 @@ pip install Flask-OpenAPI3-UI
 ## Usage
 You can start your Swagger spec with any default data providing a template:
 ```python
-from flask_openapi import Swagger
+from flask_openapi import OpenAPI
 
 def main():
   app = create_app()
@@ -42,6 +42,6 @@ def main():
       "optional_fields": ["components", "tags", "paths"],
       "doc_dir": "/home/admin/flaskapp/src/api/",
   }
-  Swagger(app=app)
+  OpenAPI(app=app)
 ```
 And then the template is the default data unless some view changes it. You can also provide all your specs as template and have no views. Or views in external APP.
