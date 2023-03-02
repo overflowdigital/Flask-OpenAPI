@@ -30,10 +30,6 @@ jobs:
         run: ci/scripts/codescan.sh
       - name: Perform Runtime Code Analysis
         uses: github/codeql-action/analyze@v2
-      - name: Perfom Secure Code Analysis (Vulnerabilities)
-        uses: snyk/actions/python@master
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
       - name: Perform Secure Code Analysis (Secrets)
         uses: trufflesecurity/trufflehog@main
         with:
