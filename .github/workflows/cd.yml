@@ -37,7 +37,7 @@ jobs:
       - name: Setup Worker
         run: ci/scripts/setup_worker.sh
       - name: Increment Version Number
-        run: ci/scripts/new_version.sh --auto_increment
+        run: ci/scripts/new_version.sh auto_increment
       - name: Build Package and Verify
         run: ci/scripts/build.sh
       - name: Perform Static Code Analysis
