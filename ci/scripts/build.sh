@@ -8,5 +8,5 @@ REPO=$(dirname "$REPO../")
 REPO=$(dirname "$REPO../")
 
 cd $REPO
-sudo python3 -m build
-sudo python3 -m twine check $REPO/dist/*
+python3 -m build
+python3 -m twine check $REPO/dist/*
