@@ -10,6 +10,3 @@ REPO=$(dirname "$REPO../")
 python3 -m pip install --upgrade pip
 python3 -m pip install -r $REPO/ci/config/requirements.txt
 python3 -m pip install -r $REPO/requirements.txt
-sudo python3 -m pip install --upgrade pip
-sudo python3 -m pip install -r $REPO/ci/config/requirements.txt
-sudo python3 -m pip install -r $REPO/requirements.txt
