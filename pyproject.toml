@@ -3,7 +3,7 @@ requires = ["setuptools", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "Flask-OpenAPI3-UI"
+name = "Flask-OAS3"
 dynamic = ["version"]
 license = { file = "LICENSE" }
 requires-python = ">=3.6.1"
@@ -30,7 +30,7 @@ dependencies = [
 ]
 
 [project.urls]
-repository = "https://github.com/overflowdigital/Flask-OpenAPI/"
+repository = "https://github.com/overflowdigital/Flask-OAS3/"
 
 [project.entry-points."flask.commands"]
 generate-api-schema = "flask_openapi.commands:generate_api_schema"
