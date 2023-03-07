@@ -9,7 +9,7 @@ Next generation OpenAPI v3 Integration for Flask based APIs. Based on Flasgger.
 
 ## Install
 ```
-pip install Flask-OpenAPI3-UI
+pip install Flask-OAS3
 ```
 
 ## Usage
@@ -19,7 +19,7 @@ from flask_openapi import OpenAPI
 
 def main():
   app = create_app()
-  app.config['SWAGGER'] = {
+  app.config['OPEN_API'] = {
       "uiversion": 3,
       "openapi": "3.0.3",
       "info": {
