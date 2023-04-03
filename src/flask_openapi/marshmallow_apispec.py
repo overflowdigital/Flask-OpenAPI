@@ -15,9 +15,9 @@ try:
     #   supported for now. See issue #314 .
     # Also see: https://github.com/marshmallow-code/apispec/pull/447
     openapi_converter = openapi.OpenAPIConverter(
-        openapi_version='2.0',
+        openapi_version="2.0",
         schema_name_resolver=lambda schema: None,
-        spec=BaseAPISpec
+        spec=BaseAPISpec,
     )
     schema2jsonschema = openapi_converter.schema2jsonschema
     schema2parameters = openapi_converter.schema2parameters
@@ -30,10 +30,10 @@ try:
         swag_require_data = True
 
         def to_specs_dict(self):
-            specs = {'parameters': self.__class__}
+            specs = {"parameters": self.__class__}
             definitions: dict = {}
             specs.update(convert_schemas(specs, definitions))
-            specs['definitions'] = definitions
+            specs["definitions"] = definitions
             return specs
 
 except ImportError:
@@ -55,13 +55,10 @@ class APISpec(BaseAPISpec):
         also adds definitions and paths (optional)
         """
         if Schema is None:
-            raise RuntimeError('Please install marshmallow and apispec')
+            raise RuntimeError("Please install marshmallow and apispec")
 
         return flask_openapi.utils.apispec_to_template(
-            app,
-            self,
-            definitions=definitions,
-            paths=paths
+            app, self, definitions=definitions, paths=paths
         )
 
 
@@ -69,12 +66,13 @@ class SwaggerView(MethodView):
     """
     A Swagger view
     """
+
     parameters = []
     responses = {}
     definitions = {}
     tags = []
-    consumes = ['application/json']
-    produces = ['application/json']
+    consumes = ["application/json"]
+    produces = ["application/json"]
     schemes = []
     security = []
     deprecated = False
@@ -93,17 +91,21 @@ class SwaggerView(MethodView):
         if self.validation:
             specs = {}
             attrs = flask_openapi.constants.OPTIONAL_FIELDS + [
-                'parameters', 'definitions', 'responses',
-                'summary', 'description'
+                "parameters",
+                "definitions",
+                "responses",
+                "summary",
+                "description",
             ]
             for attr in attrs:
                 specs[attr] = getattr(self, attr)
             definitions = {}
             specs.update(convert_schemas(specs, definitions))
-            specs['definitions'] = definitions
+            specs["definitions"] = definitions
             flask_openapi.utils.validate(
-                specs=specs, validation_function=self.validation_function,
-                validation_error_handler=self.validation_error_handler
+                specs=specs,
+                validation_function=self.validation_function,
+                validation_error_handler=self.validation_error_handler,
             )
         return super(SwaggerView, self).dispatch_request(*args, **kwargs)
 
@@ -117,7 +119,7 @@ def convert_schemas(d, definitions=None):
     """
     if definitions is None:
         definitions = {}
-    definitions.update(d.get('definitions', {}))
+    definitions.update(d.get("definitions", {}))
 
     new = {}
     for k, v in d.items():
@@ -134,24 +136,22 @@ def convert_schemas(d, definitions=None):
         if inspect.isclass(v) and issubclass(v, Schema):
 
             if Schema is None:
-                raise RuntimeError('Please install marshmallow and apispec')
+                raise RuntimeError("Please install marshmallow and apispec")
 
             definitions[v.__name__] = schema2jsonschema(v)
-            ref = {
-                "$ref": "#/definitions/{0}".format(v.__name__)
-            }
-            if k == 'parameters':
+            ref = {"$ref": "#/definitions/{0}".format(v.__name__)}
+            if k == "parameters":
                 new[k] = schema2parameters(v, location=v.swag_in)
-                new[k][0]['schema'] = ref
-                if len(definitions[v.__name__]['required']) != 0:
-                    new[k][0]['required'] = True
+                new[k][0]["schema"] = ref
+                if len(definitions[v.__name__]["required"]) != 0:
+                    new[k][0]["required"] = True
             else:
                 new[k] = ref
         else:
             new[k] = v
 
     # This key is not permitted anywhere except the very top level.
-    if 'definitions' in new:
-        del new['definitions']
+    if "definitions" in new:
+        del new["definitions"]
 
     return new

@@ -2,6 +2,7 @@
 In this example Swagger UI is disabled.
 """
 from flask import Flask
+
 try:
     from http import HTTPStatus
 except ImportError:
@@ -9,17 +10,16 @@ except ImportError:
 from flask_openapi import Swagger
 
 swagger_config = {
-    'headers': [
-    ],
-    'specs': [
+    "headers": [],
+    "specs": [
         {
-            'endpoint': 'apispec',
-            'route': '/apispec.json',
-            'rule_filter': lambda rule: True,
-            'model_filter': lambda tag: True,
+            "endpoint": "apispec",
+            "route": "/apispec.json",
+            "rule_filter": lambda rule: True,
+            "model_filter": lambda tag: True,
         }
     ],
-    'swagger_ui': False
+    "swagger_ui": False,
 }
 
 app = Flask(__name__)
@@ -33,8 +33,9 @@ def test_swag(client, specs_data):
     """
 
     assert not specs_data
-    assert client.get('/apidocs/').status_code == HTTPStatus.NOT_FOUND
-    assert client.get('/apispec.json').status_code == HTTPStatus.OK
+    assert client.get("/apidocs/").status_code == HTTPStatus.NOT_FOUND
+    assert client.get("/apispec.json").status_code == HTTPStatus.OK
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     app.run(debug=True)

@@ -9,7 +9,7 @@ from flask_openapi import Swagger
 from flask_openapi.utils import is_python_file, remove_suffix
 
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
-TEST_SUITE = os.path.join(REPO_ROOT, 'ci/tests/suite')
+TEST_SUITE = os.path.join(REPO_ROOT, "ci/tests/suite")
 
 
 def get_specs_data(mod):
@@ -21,31 +21,31 @@ def get_specs_data(mod):
     # init swag if not yet inititalized (no-routes example)
     specs_route = None
     specs_data = {}
-    if getattr(mod.app, 'swag', None) is None:
+    if getattr(mod.app, "swag", None) is None:
         _swag = Swagger()
-        _swag.config['endpoint'] = str(random.randint(1, 5000))
+        _swag.config["endpoint"] = str(random.randint(1, 5000))
         _swag.init_app(mod.app)
     # get all the specs defined for the example app
     else:
         try:
             flasgger_config = mod.swag.config
 
-            if flasgger_config.get('swagger_ui') is False:
+            if flasgger_config.get("swagger_ui") is False:
                 return specs_data
 
-            specs_route = flasgger_config.get('specs_route', '/apidocs/')
+            specs_route = flasgger_config.get("specs_route", "/apidocs/")
         except AttributeError:
             pass
 
     if specs_route is None:
-        specs_route = '/apidocs/'
+        specs_route = "/apidocs/"
 
-    apidocs = client.get('?'.join((specs_route, 'json=true')))
-    specs = json.loads(apidocs.data.decode("utf-8")).get('specs')
+    apidocs = client.get("?".join((specs_route, "json=true")))
+    specs = json.loads(apidocs.data.decode("utf-8")).get("specs")
 
     for spec in specs:
         # for each spec get the spec url
-        url = spec['url']
+        url = spec["url"]
         response = client.get(url)
         decoded = response.data.decode("utf-8")
         print(mod)
@@ -65,11 +65,8 @@ def get_examples(examples_dir=TEST_SUITE):  # pragma: no cover
     all_files = os.listdir(examples_dir)
     python_files = [f for f in all_files if is_python_file(f)]
     basenames = [remove_suffix(f) for f in python_files]
-    modules = [import_module(f'suite.{module}') for module in basenames]
-    return [
-        module for module in modules
-        if getattr(module, 'app', None) is not None
-    ]
+    modules = [import_module(f"suite.{module}") for module in basenames]
+    return [module for module in modules if getattr(module, "app", None) is not None]
 
 
 def get_test_metadata(mod):
@@ -82,10 +79,12 @@ def get_test_metadata(mod):
     Example: '_TEST_META_SKIP_FULL_VALIDATION' -> 'skip_full_validation'
     """
 
-    test_metadata_prefix = '_TEST_META_'
-    return {key[len(test_metadata_prefix):].lower(): getattr(mod, key)
-            for key in mod.__dict__
-            if key.startswith(test_metadata_prefix)}
+    test_metadata_prefix = "_TEST_META_"
+    return {
+        key[len(test_metadata_prefix) :].lower(): getattr(mod, key)
+        for key in mod.__dict__
+        if key.startswith(test_metadata_prefix)
+    }
 
 
 def pytest_generate_tests(metafunc):
@@ -94,18 +93,13 @@ def pytest_generate_tests(metafunc):
     to generate one test for each examples/
     """
 
-    if 'test_data' in metafunc.fixturenames:
+    if "test_data" in metafunc.fixturenames:
         test_data = [
-            (mod, mod.app.test_client(),
-             get_specs_data(mod), get_test_metadata(mod))
+            (mod, mod.app.test_client(), get_specs_data(mod), get_test_metadata(mod))
             for mod in get_examples()
         ]
 
-        metafunc.parametrize(
-            'test_data',
-            test_data,
-            ids=lambda x: x[0].__name__
-        )
+        metafunc.parametrize("test_data", test_data, ids=lambda x: x[0].__name__)
 
 
 @pytest.fixture(scope="function")

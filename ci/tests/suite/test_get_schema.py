@@ -1,5 +1,5 @@
-
 import json
+
 try:
     from http import HTTPStatus
 except ImportError:
@@ -13,14 +13,17 @@ app = Flask(__name__)
 swag = Swagger(app)
 
 
-@app.route("/officer/<int:priority>", methods=['POST'])
+@app.route("/officer/<int:priority>", methods=["POST"])
 @swag_from("docs/officer_specs.yml")
 def create_officer(priority):
-    return 'Request for officer creation successfully received' \
-           ' (priority: %i)'.format(priority), HTTPStatus.OK
+    return (
+        "Request for officer creation successfully received"
+        " (priority: %i)".format(priority),
+        HTTPStatus.OK,
+    )
 
 
-@app.route('/schema/<string:schema_id>', methods=['GET'])
+@app.route("/schema/<string:schema_id>", methods=["GET"])
 def get_schema(schema_id):
     """
     Test schema retrieval
@@ -50,15 +53,16 @@ def test_swag(client, specs_data):
     :param client: Flask app test client
     :param specs_data: {'url': {swag_specs}} for every spec in app
     """
-    response = client.get('/schema/officer')
+    response = client.get("/schema/officer")
     assert response.status_code == HTTPStatus.OK
 
-    retrieved_schema = json.loads(response.data.decode('utf-8'))
-    actual_schema = specs_data['/apispec_1.json']['definitions']['Officer']
+    retrieved_schema = json.loads(response.data.decode("utf-8"))
+    actual_schema = specs_data["/apispec_1.json"]["definitions"]["Officer"]
     try:
         assert retrieved_schema.viewitems() >= actual_schema.viewitems()
     except AttributeError:
         assert retrieved_schema.items() >= actual_schema.items()
+
 
 if __name__ == "__main__":
     app.run(debug=True)

@@ -7,14 +7,11 @@ from flask import Flask, jsonify
 from flask_openapi import Swagger
 
 app = Flask(__name__)
-app.config['SWAGGER'] = {
-    'title': 'OA3 Callbacks',
-    'openapi': '3.0.2'
-}
+app.config["SWAGGER"] = {"title": "OA3 Callbacks", "openapi": "3.0.2"}
 Swagger(app)
 
 
-@app.route('/run_callback/',  methods=['POST'])
+@app.route("/run_callback/", methods=["POST"])
 def run_callback():
     """Example endpoint that specifies OA3 callbacks
     This is using docstring for specifications
@@ -46,7 +43,7 @@ def run_callback():
                           type: string
     """
 
-    return jsonify({'result': 'ok'})
+    return jsonify({"result": "ok"})
 
 
 def test_swag(client, specs_data):
@@ -55,12 +52,11 @@ def test_swag(client, specs_data):
     :param specs_data: {'url': {swag_specs}} for every spec in app
     """
     for url, spec in specs_data.items():
-        assert 'openapi' in spec
-        assert spec['openapi'] == '3.0.2'
+        assert "openapi" in spec
+        assert spec["openapi"] == "3.0.2"
 
-        assert 'callbacks' in spec['paths']['/run_callback/']['post']
-        assert 'onSomeEvent' in \
-               spec['paths']['/run_callback/']['post']['callbacks']
+        assert "callbacks" in spec["paths"]["/run_callback/"]["post"]
+        assert "onSomeEvent" in spec["paths"]["/run_callback/"]["post"]["callbacks"]
 
 
 if __name__ == "__main__":

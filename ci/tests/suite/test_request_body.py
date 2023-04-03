@@ -5,19 +5,17 @@ from flask import Flask, jsonify, request
 from flask_openapi import Swagger, swag_from
 
 app = Flask(__name__)
-swag = Swagger(app, config={
-    'headers': [],
-    'specs': [
-        {
-            'endpoint': 'apispec',
-            'route': '/apispec.json'
-        }
-    ],
-    'openapi': '3.0.1'
-})
+swag = Swagger(
+    app,
+    config={
+        "headers": [],
+        "specs": [{"endpoint": "apispec", "route": "/apispec.json"}],
+        "openapi": "3.0.1",
+    },
+)
 
 
-@swag.definition('Pet')
+@swag.definition("Pet")
 class Pet(object):
     """
     Pet Object
@@ -26,6 +24,7 @@ class Pet(object):
         name:
             type: string
     """
+
     def __init__(self, name):
         self.name = str(name)
 
@@ -33,7 +32,7 @@ class Pet(object):
         return dict(vars(self).items())
 
 
-@app.route('/requestBody', methods=['POST'])
+@app.route("/requestBody", methods=["POST"])
 @swag_from()
 def request_body_endpoint():
     """
@@ -62,16 +61,16 @@ def test_swag(client, specs_data):
     :param client: Flask app test client
     :param specs_data: {'url': {swag_specs}} for every spec in app
     """
-    print('SPEC+'+str(specs_data))
+    print("SPEC+" + str(specs_data))
     for url, spec in specs_data.items():
-        assert 'Pet' in spec['components']['schemas']
+        assert "Pet" in spec["components"]["schemas"]
 
-        assert 'paths' in spec
-        paths = spec['paths']
+        assert "paths" in spec
+        paths = spec["paths"]
         for path_def in paths.values():
             for method_def in path_def.values():
-                assert 'requestBody' in method_def
+                assert "requestBody" in method_def
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     app.run(debug=True)

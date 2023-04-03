@@ -1,19 +1,19 @@
 import os
 
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
-EXISTING_VERSION_DEF_LOCATION = os.path.join(REPO_ROOT, 'src/flask_openapi/__init__.py')
+EXISTING_VERSION_DEF_LOCATION = os.path.join(REPO_ROOT, "src/flask_openapi/__init__.py")
 
 
 def main() -> None:
-    read_file = ''
+    read_file = ""
 
-    with open(EXISTING_VERSION_DEF_LOCATION, 'r') as file:
+    with open(EXISTING_VERSION_DEF_LOCATION, "r") as file:
         for line in file.readlines():
-            if '__version__' in line:
+            if "__version__" in line:
                 read_file = line
 
     version = read_file.split("= '")[1]
-    parts = version.split('.')
+    parts = version.split(".")
 
     major = int(parts[0])
     minor = int(parts[1])
@@ -21,8 +21,8 @@ def main() -> None:
 
     minor = minor + 1
 
-    print(f'{major}.{minor}.{patch}')
+    print(f"{major}.{minor}.{patch}")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

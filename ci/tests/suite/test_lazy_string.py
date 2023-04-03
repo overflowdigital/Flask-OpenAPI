@@ -11,26 +11,24 @@ app = Flask(__name__)
 # Set the LAzyString JSON Encoder
 app.json_encoder = LazyJSONEncoder
 
-app.config['SWAGGER'] = {
-    'uiversion': 2
-}
+app.config["SWAGGER"] = {"uiversion": 2}
 
 template = dict(
     info={
-        'title': LazyString(lambda: 'Lazy Title'),
-        'version': LazyString(lambda: '99.9.9'),
-        'description': LazyString(lambda: 'Hello Lazy World'),
-        'termsOfService': LazyString(lambda: '/there_is_no_tos')
+        "title": LazyString(lambda: "Lazy Title"),
+        "version": LazyString(lambda: "99.9.9"),
+        "description": LazyString(lambda: "Hello Lazy World"),
+        "termsOfService": LazyString(lambda: "/there_is_no_tos"),
     },
     host=LazyString(lambda: request.host),
-    schemes=[LazyString(lambda: 'https' if request.is_secure else 'http')],
-    foo=LazyString(lambda: "Bar")
+    schemes=[LazyString(lambda: "https" if request.is_secure else "http")],
+    foo=LazyString(lambda: "Bar"),
 )
 
 Swagger(app, template=template)
 
 
-@app.route('/colors/<palette>/')
+@app.route("/colors/<palette>/")
 def colors(palette):
     """Example endpoint return a list of colors by palette
     This is using docstring for specifications
@@ -78,10 +76,10 @@ def colors(palette):
           rgb: ['red', 'green', 'blue']
     """
     all_colors = {
-        'cmyk': ['cyan', 'magenta', 'yellow', 'black'],
-        'rgb': ['red', 'green', 'blue']
+        "cmyk": ["cyan", "magenta", "yellow", "black"],
+        "rgb": ["red", "green", "blue"],
     }
-    if palette == 'all':
+    if palette == "all":
         result = all_colors
     else:
         result = {palette: all_colors.get(palette)}
@@ -95,11 +93,11 @@ def test_swag(client, specs_data):
     :param specs_data: {'url': {swag_specs}} for every spec in app
     """
     for url, spec in specs_data.items():
-        assert 'Palette' in spec['definitions']
-        assert 'Color' in spec['definitions']
-        assert 'colors' in spec['paths']['/colors/{palette}/']['get']['tags']
-        assert spec['schemes'] == ['http']
-        assert spec['foo'] == 'Bar'
+        assert "Palette" in spec["definitions"]
+        assert "Color" in spec["definitions"]
+        assert "colors" in spec["paths"]["/colors/{palette}/"]["get"]["tags"]
+        assert spec["schemes"] == ["http"]
+        assert spec["foo"] == "Bar"
 
 
 if __name__ == "__main__":

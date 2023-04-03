@@ -7,17 +7,20 @@ from flask import Flask, jsonify
 from flask_openapi import Swagger
 
 app = Flask(__name__)
-app.config['SWAGGER'] = {
-    'title': 'Colors API'
-}
+app.config["SWAGGER"] = {"title": "Colors API"}
 swagger_config = Swagger.DEFAULT_CONFIG
-swagger_config['swagger_ui_bundle_js'] = '//unpkg.com/swagger-ui-dist@3/swagger-ui-bundle.js'
-swagger_config['swagger_ui_standalone_preset_js'] = '//unpkg.com/swagger-ui-dist@3/swagger-ui-standalone-preset.js'
-swagger_config['jquery_js'] = '//unpkg.com/jquery@2.2.4/dist/jquery.min.js'
-swagger_config['swagger_ui_css'] = '//unpkg.com/swagger-ui-dist@3/swagger-ui.css'
+swagger_config[
+    "swagger_ui_bundle_js"
+] = "//unpkg.com/swagger-ui-dist@3/swagger-ui-bundle.js"
+swagger_config[
+    "swagger_ui_standalone_preset_js"
+] = "//unpkg.com/swagger-ui-dist@3/swagger-ui-standalone-preset.js"
+swagger_config["jquery_js"] = "//unpkg.com/jquery@2.2.4/dist/jquery.min.js"
+swagger_config["swagger_ui_css"] = "//unpkg.com/swagger-ui-dist@3/swagger-ui.css"
 Swagger(app, config=swagger_config)
 
-@app.route('/colors/<palette>/')
+
+@app.route("/colors/<palette>/")
 def colors(palette):
     """Example endpoint return a list of colors by palette
     This is using docstring for specifications
@@ -65,10 +68,10 @@ def colors(palette):
           rgb: ['red', 'green', 'blue']
     """
     all_colors = {
-        'cmyk': ['cyan', 'magenta', 'yellow', 'black'],
-        'rgb': ['red', 'green', 'blue']
+        "cmyk": ["cyan", "magenta", "yellow", "black"],
+        "rgb": ["red", "green", "blue"],
     }
-    if palette == 'all':
+    if palette == "all":
         result = all_colors
     else:
         result = {palette: all_colors.get(palette)}
@@ -82,9 +85,9 @@ def test_swag(client, specs_data):
     :param specs_data: {'url': {swag_specs}} for every spec in app
     """
     for url, spec in specs_data.items():
-        assert 'Palette' in spec['definitions']
-        assert 'Color' in spec['definitions']
-        assert 'colors' in spec['paths']['/colors/{palette}/']['get']['tags']
+        assert "Palette" in spec["definitions"]
+        assert "Color" in spec["definitions"]
+        assert "colors" in spec["paths"]["/colors/{palette}/"]["get"]["tags"]
 
 
 if __name__ == "__main__":

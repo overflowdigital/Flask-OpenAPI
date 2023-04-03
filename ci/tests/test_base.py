@@ -3,7 +3,6 @@ from flask_openapi.base import Swagger
 
 
 def test_init_config(monkeypatch):
-
     def __init__(self, config=None, merge=False):
         self._init_config(config, merge)
 
@@ -31,7 +30,7 @@ def test_init_config(monkeypatch):
     # Config will be merged
     t = Swagger(config={"a": 0}, merge=True)
     assert t.config.items() > {"a": 0}.items()
-    assert all( t.config[k] == v for k, v in Swagger.DEFAULT_CONFIG.items() )
+    assert all(t.config[k] == v for k, v in Swagger.DEFAULT_CONFIG.items())
 
     # Config will be merged
     empty_dict = dict()

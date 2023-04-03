@@ -6,10 +6,10 @@ from flask_openapi import Swagger
 from flask import Flask, jsonify
 
 app = Flask(__name__)
-app.config['SWAGGER'] = {
-    'title': 'Vendor extension test',
-    'uiversion': 2,
-    'x-groupTag': 'Test',
+app.config["SWAGGER"] = {
+    "title": "Vendor extension test",
+    "uiversion": 2,
+    "x-groupTag": "Test",
 }
 swag = Swagger(app)
 
@@ -19,8 +19,8 @@ def test_swag(client, specs_data):
     :param client: Flask app test client
     :param specs_data: {'url': {swag_specs}} for every spec in app
     """
-    assert 'x-groupTag' in specs_data['/apispec_1.json']
-    assert specs_data['/apispec_1.json']['x-groupTag'] == 'Test'
+    assert "x-groupTag" in specs_data["/apispec_1.json"]
+    assert specs_data["/apispec_1.json"]["x-groupTag"] == "Test"
 
 
 if __name__ == "__main__":

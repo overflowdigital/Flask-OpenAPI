@@ -11,12 +11,12 @@ swag = Swagger(app)
 
 @decorator
 def trace(f, *args, **kw):
-    kwstr = ', '.join('%r: %r' % (k, kw[k]) for k in sorted(kw))
+    kwstr = ", ".join("%r: %r" % (k, kw[k]) for k in sorted(kw))
     print("calling %s with args %s, {%s}" % (f.__name__, args, kwstr))
     return f(*args, **kw)
 
 
-@app.route('/')
+@app.route("/")
 @trace
 def index():
     """
@@ -27,9 +27,8 @@ def index():
       200:
         description: Yeah it works
     """
-    return jsonify({'data': 'It works'})
+    return jsonify({"data": "It works"})
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     app.run(debug=True)
-

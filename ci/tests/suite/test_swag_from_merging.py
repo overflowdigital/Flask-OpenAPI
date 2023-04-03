@@ -8,17 +8,15 @@ swag = Swagger(app)
 
 
 @app.route("/example")
-@swag_from({
-    "responses": {
-        400: {
-            "description": "Invalid action"
+@swag_from(
+    {
+        "responses": {
+            400: {"description": "Invalid action"},
+            401: {"description": "Login required"},
         },
-        401: {
-            "description": "Login required"
-        }
-    },
-    "tags": ["Tag 1", "Tag 2"]
-})
+        "tags": ["Tag 1", "Tag 2"],
+    }
+)
 def view():
     """
     A test view

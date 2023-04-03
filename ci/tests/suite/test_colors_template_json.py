@@ -6,14 +6,11 @@ from flask import Flask, jsonify
 from flask_openapi import Swagger
 
 app = Flask(__name__)
-app.config['SWAGGER'] = {
-    'title': 'Colors API',
-    'uiversion': 2
-}
-swag = Swagger(app, template_file='docs/colors_template.json')
+app.config["SWAGGER"] = {"title": "Colors API", "uiversion": 2}
+swag = Swagger(app, template_file="docs/colors_template.json")
 
 
-@app.route('/colors/<palette>/')
+@app.route("/colors/<palette>/")
 def colors(palette):
     """
     Example using a dictionary as specification
@@ -25,15 +22,16 @@ def colors(palette):
     deprecated: true
     """
     all_colors = {
-        'cmyk': ['cyan', 'magenta', 'yellow', 'black'],
-        'rgb': ['red', 'green', 'blue']
+        "cmyk": ["cyan", "magenta", "yellow", "black"],
+        "rgb": ["red", "green", "blue"],
     }
-    if palette == 'all':
+    if palette == "all":
         result = all_colors
     else:
         result = {palette: all_colors.get(palette)}
 
     return jsonify(result)
+
 
 if __name__ == "__main__":
     app.run(debug=True)

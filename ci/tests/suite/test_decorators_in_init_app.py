@@ -33,7 +33,8 @@ def requires_basic_auth(f):
 
     def authenticate():
         return Response(
-            "Authentication required.", 401,
+            "Authentication required.",
+            401,
             {"WWW-Authenticate": "Basic realm='Login Required'"},
         )
 

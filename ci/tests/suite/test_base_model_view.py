@@ -16,7 +16,6 @@ class ModelAPIView(BaseAPIView):
 
 
 class PostAPIView(ModelAPIView):
-
     def get(self, team_id):
         """
         Get a list of users
@@ -57,7 +56,7 @@ class PostAPIView(ModelAPIView):
             "users": [
                 {"name": "Steven Wilson", "team": team_id},
                 {"name": "Mikael Akerfeldt", "team": team_id},
-                {"name": "Daniel Gildenlow", "team": team_id}
+                {"name": "Daniel Gildenlow", "team": team_id},
             ]
         }
         return jsonify(data)
@@ -67,9 +66,7 @@ app = Flask(__name__)
 swag = Swagger(app)
 
 app.add_url_rule(
-    '/user/<team_id>',
-    view_func=PostAPIView.as_view('user'),
-    methods=['GET']
+    "/user/<team_id>", view_func=PostAPIView.as_view("user"), methods=["GET"]
 )
 
 if __name__ == "__main__":

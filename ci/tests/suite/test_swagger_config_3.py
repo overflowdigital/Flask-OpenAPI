@@ -17,19 +17,19 @@ swagger_config = {
                     "clientCredentials": {
                         "tokenUrl": "https://api.pgsmartshopassistant.com/o/token/",
                     }
-                }
+                },
             }
         },
     },
     "servers": [
         {
             "url": "https://api.example.com/v1",
-            "description": "Production server (uses live data)"
+            "description": "Production server (uses live data)",
         },
         {
             "url": "https://sandbox-api.example.com:8443/v1",
-            "description": "Sandbox server (uses test data)"
-        }
+            "description": "Sandbox server (uses test data)",
+        },
     ],
     "specs": [
         {
@@ -40,7 +40,7 @@ swagger_config = {
         }
     ],
     "title": "Product Characteristics API",
-    "version": '',
+    "version": "",
     "termsOfService": "",
     "static_url_path": "/characteristics/static",
     "swagger_ui": True,
@@ -49,77 +49,47 @@ swagger_config = {
 }
 
 colors_spec = {
-  "tags": [
-    "colors"
-  ],
-  "parameters": [
-    {
-      "name": "palette",
-      "in": "path",
-      "type": "string",
-      "enum": [
-        "all",
-        "rgb",
-        "cmyk"
-      ],
-      "required": True,
-      "default": "all",
-      "description": "Which palette to filter?"
-    }
-  ],
-  "operationId": "get_colors",
-  "consumes": [
-    "application/json"
-  ],
-  "produces": [
-    "application/json"
-  ],
-  "security": {
-    "colors_auth": [
-      "write:colors",
-      "read:colors"
-    ]
-  },
-  "schemes": [
-    "http",
-    "https"
-  ],
-  "deprecated": False,
-  "externalDocs": {
-    "description": "Project repository",
-    "url": "http://github.com/overflowdigital/flask_openapi"
-  },
-  "definitions": {
-    "Palette": {
-      "type": "object",
-      "properties": {
-        "palette_name": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/Color"
-          }
+    "tags": ["colors"],
+    "parameters": [
+        {
+            "name": "palette",
+            "in": "path",
+            "type": "string",
+            "enum": ["all", "rgb", "cmyk"],
+            "required": True,
+            "default": "all",
+            "description": "Which palette to filter?",
         }
-      }
+    ],
+    "operationId": "get_colors",
+    "consumes": ["application/json"],
+    "produces": ["application/json"],
+    "security": {"colors_auth": ["write:colors", "read:colors"]},
+    "schemes": ["http", "https"],
+    "deprecated": False,
+    "externalDocs": {
+        "description": "Project repository",
+        "url": "http://github.com/overflowdigital/flask_openapi",
     },
-    "Color": {
-      "type": "string"
-    }
-  },
-  "responses": {
-    "200": {
-      "description": "A list of colors (may be filtered by palette)",
-      "schema": {
-        "$ref": "#/definitions/Palette"
-      },
-      "examples": {
-        "rgb": [
-          "red",
-          "green",
-          "blue"
-        ]
-      }
-    }
-  }
+    "definitions": {
+        "Palette": {
+            "type": "object",
+            "properties": {
+                "palette_name": {
+                    "type": "array",
+                    "items": {"$ref": "#/definitions/Color"},
+                }
+            },
+        },
+        "Color": {"type": "string"},
+    },
+    "responses": {
+        "200": {
+            "description": "A list of colors (may be filtered by palette)",
+            "schema": {"$ref": "#/definitions/Palette"},
+            "examples": {"rgb": ["red", "green", "blue"]},
+        }
+    },
 }
 
 
@@ -133,15 +103,15 @@ def test_swag(client, specs_data):
     :param specs_data: {'url': {swag_specs}} for every spec in app
     """
     for spec in specs_data.values():
-        assert 'openapi' in spec
-        assert '3.0.2' == spec['openapi']
-        assert 'swagger' not in spec
-        assert 'components' in spec
-        assert 'securitySchemes' in spec['components']
-        assert 'oAuthSample' in spec['components']['securitySchemes']
+        assert "openapi" in spec
+        assert "3.0.2" == spec["openapi"]
+        assert "swagger" not in spec
+        assert "components" in spec
+        assert "securitySchemes" in spec["components"]
+        assert "oAuthSample" in spec["components"]["securitySchemes"]
 
-        assert 'servers' in spec  # See issue #366
+        assert "servers" in spec  # See issue #366
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     app.run(debug=True)
