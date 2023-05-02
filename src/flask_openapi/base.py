@@ -28,7 +28,7 @@ from flask import (
     Response,
     url_for,
 )
-from flask.json import JSONEncoder
+from json import JSONEncoder
 from flask.views import MethodView
 from werkzeug.datastructures import Authorization
 
