@@ -3,4 +3,4 @@ jsonschema==4.17.3
 mistune==2.0.4
 PyYAML==6.0
 six==1.16.0
-werkzeug==2.3.0
+werkzeug==2.3.4
