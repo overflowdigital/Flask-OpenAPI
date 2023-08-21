@@ -10,7 +10,7 @@ requires-python = ">=3.6.1"
 authors = [{ name = "Overflow Digital", email = "team@overflow.digital" }]
 maintainers = [
     { name = "Katerina Tiddy", email = "katerina@overflow.digital" },
-    { name = "Joshua Thompson-Lindley", email = "joshua@overflow.digital" }
+    { name = "Joshua Thompson-Lindley", email = "joshua@overflow.digital" },
 ]
 description = "Next generation OpenAPI v3 Integration for Flask based APIs. Based on Flasgger."
 readme = "README.md"
@@ -18,7 +18,7 @@ classifiers = [
     "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Developers",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.6"
+    "Programming Language :: Python :: 3.6",
 ]
 keywords = ['flask', 'swagger', 'openapi', 'python', 'api', 'rest', 'openapi3']
 dependencies = [
@@ -26,7 +26,7 @@ dependencies = [
     "PyYAML>=6.0",
     "jsonschema>=4.17.3",
     "mistune>=2.0.4",
-    "six>=1.16.0"
+    "six>=1.16.0",
 ]
 
 [project.urls]
@@ -55,7 +55,7 @@ include = ['flask_openapi*']
     "*.gif",
     "*.ico",
     "*.png",
-    "*.map"
+    "*.map",
 ]
 
 [tool.setuptools.dynamic]

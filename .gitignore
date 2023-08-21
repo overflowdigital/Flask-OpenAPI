@@ -16,6 +16,7 @@ var/
 .installed.cfg
 *.egg
 *.manifest
+.DS_Store
 *.spec
 pip-log.txt
 pip-delete-this-directory.txt
