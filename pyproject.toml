@@ -22,7 +22,7 @@ classifiers = [
 ]
 keywords = ['flask', 'swagger', 'openapi', 'python', 'api', 'rest', 'openapi3']
 dependencies = [
-    "Flask>=2.3.1",
+    "Flask>=2.0.0",
     "PyYAML>=6.0",
     "jsonschema>=4.19.0",
     "mistune>=3.0.0",
