@@ -10,14 +10,14 @@ app = Flask(__name__)
 example_blueprint = Blueprint("example_blueprint", __name__)
 
 
-@example_blueprint.route('/usernames/<username>', methods=['GET', 'POST'])
-@swag_from('docs/username_specs.yml', methods=['GET'])
-@swag_from('docs/username_specs.yml', methods=['POST'])
+@example_blueprint.route("/usernames/<username>", methods=["GET", "POST"])
+@swag_from("docs/username_specs.yml", methods=["GET"])
+@swag_from("docs/username_specs.yml", methods=["POST"])
 def usernames(username):
-    return jsonify({'username': username})
+    return jsonify({"username": username})
 
 
-@example_blueprint.route('/usernames2/<username>', methods=['GET', 'POST'])
+@example_blueprint.route("/usernames2/<username>", methods=["GET", "POST"])
 def usernames2(username):
     """
     This is the summary defined in yaml file
@@ -44,16 +44,24 @@ def usernames2(username):
               description: The name of the user
               default: 'steve-harris'
     """
-    return jsonify({'username': username})
+    return jsonify({"username": username})
 
 
-@example_blueprint.route('/users', endpoint='user-without-id', methods=['GET'])
-@example_blueprint.route('/users/<user_id>', endpoint='user-with-id', methods=['GET'])
-@swag_from('docs/user_with_id_specs.yml', endpoint='example_blueprint.user-with-id', methods=['GET'])
-@swag_from('docs/user_without_id_specs.yml', endpoint='example_blueprint.user-without-id', methods=['GET'])
+@example_blueprint.route("/users", endpoint="user-without-id", methods=["GET"])
+@example_blueprint.route("/users/<user_id>", endpoint="user-with-id", methods=["GET"])
+@swag_from(
+    "docs/user_with_id_specs.yml",
+    endpoint="example_blueprint.user-with-id",
+    methods=["GET"],
+)
+@swag_from(
+    "docs/user_without_id_specs.yml",
+    endpoint="example_blueprint.user-without-id",
+    methods=["GET"],
+)
 def usernames(user_id=None):
     if user_id:
-        return jsonify({'user_id': user_id})
+        return jsonify({"user_id": user_id})
     else:
         return jsonify([])
 
@@ -64,4 +72,3 @@ swag = Swagger(app)
 
 if __name__ == "__main__":
     app.run(debug=True)
-

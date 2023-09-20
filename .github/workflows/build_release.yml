@@ -16,10 +16,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - name: Initialize Runtime Code Analysis
-        uses: github/codeql-action/init@v2
-        with:
-          languages: python
       - name: Setup Worker
         run: ci/scripts/setup_worker.sh
       - name: Increment Version Number
@@ -28,6 +24,7 @@ jobs:
         run: ci/scripts/build.sh
       - name: Perform Static Code Analysis
         run: ci/scripts/codescan.sh
+<<<<<<< HEAD
       - name: Perform Runtime Code Analysis
         uses: github/codeql-action/analyze@v2
       - name: Perfom Secure Code Analysis (Vulnerabilities)
@@ -40,6 +37,8 @@ jobs:
           path: ./
           base: ${{ github.ref_name }}
           head: HEAD
+=======
+>>>>>>> 03dddf7a7598427afa6195bfb0c33fdf2bc2774c
       - name: Run Unit Tests
         run: ci/scripts/test_runner.sh
       - name: Upload release to PyPI

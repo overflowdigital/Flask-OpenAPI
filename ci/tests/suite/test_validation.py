@@ -7,8 +7,20 @@ except ImportError:
     import httplib as HTTPStatus
 
 from flask import Blueprint, Flask, jsonify, request
+<<<<<<< HEAD
 from flask_openapi import swag_from, Swagger, validate
 from flask_openapi.openapi.parsers import extract_schema
+=======
+from flask_openapi import (
+    fields,
+    Schema,
+    swag_from,
+    Swagger,
+    SwaggerView,
+    utils,
+    validate,
+)
+>>>>>>> 03dddf7a7598427afa6195bfb0c33fdf2bc2774c
 
 # Examples include intentionally invalid defaults to demonstrate validation.
 _TEST_META_SKIP_FULL_VALIDATION = True
@@ -18,59 +30,46 @@ swag = Swagger(app)
 
 
 test_specs_1 = {
-  "tags": [
-    "users"
-  ],
-  "parameters": [
-    {
-      "name": "body",
-      "in": "body",
-      "required": True,
-      "schema": {
-        "id": "User",
-        "required": [
-          "username",
-          "age"
-        ],
-        "properties": {
-          "username": {
-            "type": "string",
-            "description": "The user name.",
-            "default": "Sirius Black"
-          },
-          "age": {
-            "type": "integer",
-            "description": "The user age (should be integer)",
-            "default": "180"
-          },
-          "tags": {
-            "type": "array",
-            "description": "optional list of tags",
-            "default": [
-              "wizard",
-              "hogwarts",
-              "dead"
-            ],
-            "items": {
-              "type": "string"
-            }
-          }
+    "tags": ["users"],
+    "parameters": [
+        {
+            "name": "body",
+            "in": "body",
+            "required": True,
+            "schema": {
+                "id": "User",
+                "required": ["username", "age"],
+                "properties": {
+                    "username": {
+                        "type": "string",
+                        "description": "The user name.",
+                        "default": "Sirius Black",
+                    },
+                    "age": {
+                        "type": "integer",
+                        "description": "The user age (should be integer)",
+                        "default": "180",
+                    },
+                    "tags": {
+                        "type": "array",
+                        "description": "optional list of tags",
+                        "default": ["wizard", "hogwarts", "dead"],
+                        "items": {"type": "string"},
+                    },
+                },
+            },
         }
-      }
-    }
-  ],
-  "responses": {
-    "200": {
-      "description": "A single user item",
-      "schema": {
-        "$ref": "#/definitions/User"
-      }
-    }
-  }
+    ],
+    "responses": {
+        "200": {
+            "description": "A single user item",
+            "schema": {"$ref": "#/definitions/User"},
+        }
+    },
 }
 
 
-@app.route("/manualvalidation", methods=['POST'])
+@app.route("/manualvalidation", methods=["POST"])
 @swag_from("docs/test_validation.yml")
 def manualvalidation():
     """
@@ -78,12 +77,12 @@ def manualvalidation():
     passing received data, Definition (schema: id), specs filename
     """
     data = request.json
-    validate(data, 'User', "docs/test_validation.yml")
+    validate(data, "User", "docs/test_validation.yml")
     return jsonify(data)
 
 
-@app.route("/validateannotation", methods=['POST'])
-@swag.validate('User')
+@app.route("/validateannotation", methods=["POST"])
+@swag.validate("User")
 @swag_from("docs/test_validation.yml")
 def validateannotation():
     """
@@ -94,7 +93,7 @@ def validateannotation():
     return jsonify(data)
 
 
-@app.route("/autovalidation", methods=['POST'])
+@app.route("/autovalidation", methods=["POST"])
 @swag_from("docs/test_validation.yml", validation=True)
 def autovalidation():
     """
@@ -116,7 +115,7 @@ def autovalidation():
     return jsonify(data)
 
 
-@app.route("/autovalidationfromspecdict", methods=['POST'])
+@app.route("/autovalidationfromspecdict", methods=["POST"])
 @swag_from(test_specs_1, validation=True)
 def autovalidation_from_spec_dict():
     """
@@ -140,12 +139,11 @@ def autovalidation_from_spec_dict():
 
 # ensure the same works for blueprints
 
-example_blueprint = Blueprint(
-    "example", __name__, url_prefix='/blueprint')
+example_blueprint = Blueprint("example", __name__, url_prefix="/blueprint")
 
 
-@example_blueprint.route("/autovalidationfromdocstring", methods=['POST'])
-@swag.validate('Officer')
+@example_blueprint.route("/autovalidationfromdocstring", methods=["POST"])
+@swag.validate("Officer")
 def autovalidation_from_docstring():
     """
     Test validation using JsonSchema
@@ -190,7 +188,7 @@ def autovalidation_from_docstring():
     return jsonify(data)
 
 
-@example_blueprint.route('/manualvalidation', methods=['POST'])
+@example_blueprint.route("/manualvalidation", methods=["POST"])
 @swag_from("docs/test_validation.yml")
 def manualvalidation_bp():
     """
@@ -198,11 +196,11 @@ def manualvalidation_bp():
     passing received data, Definition (schema: id), specs filename
     """
     data = request.json
-    validate(data, 'User', "docs/test_validation.yml")
+    validate(data, "User", "docs/test_validation.yml")
     return jsonify(data)
 
 
-@example_blueprint.route('/autovalidation', methods=['POST'])
+@example_blueprint.route("/autovalidation", methods=["POST"])
 @swag_from("docs/test_validation.yml", validation=True)
 def autovalidation_bp():
     """
@@ -224,7 +222,7 @@ def autovalidation_bp():
     return jsonify(data)
 
 
-@example_blueprint.route("/autovalidationfromspecdict", methods=['POST'])
+@example_blueprint.route("/autovalidationfromspecdict", methods=["POST"])
 @swag_from(test_specs_1, validation=True)
 def autovalidation_from_spec_dict_bp():
     """
@@ -245,6 +243,7 @@ def autovalidation_from_spec_dict_bp():
     data = request.json
     return jsonify(data)
 
+
 app.register_blueprint(example_blueprint)
 
 
@@ -254,25 +253,23 @@ def test_swag(client, specs_data):
     :param specs_data: {'url': {swag_specs}} for every spec in app
     """
 
-    apispec = specs_data.get('/apispec_1.json')
+    apispec = specs_data.get("/apispec_1.json")
 
     assert apispec is not None
 
-    paths = apispec.get('paths')
+    paths = apispec.get("paths")
 
     expected_user_paths = (
-        '/autovalidation',
-        '/validateannotation',
-        '/autovalidationfromspecdict',
-        '/blueprint/autovalidation',
-        '/blueprint/autovalidationfromspecdict',
-        '/blueprint/manualvalidation',
-        '/manualvalidation',
+        "/autovalidation",
+        "/validateannotation",
+        "/autovalidationfromspecdict",
+        "/blueprint/autovalidation",
+        "/blueprint/autovalidationfromspecdict",
+        "/blueprint/manualvalidation",
+        "/manualvalidation",
     )
 
-    expected_officer_paths = (
-        '/blueprint/autovalidationfromdocstring',
-    )
+    expected_officer_paths = ("/blueprint/autovalidationfromdocstring",)
 
     invalid_users = (
         """
@@ -363,22 +360,22 @@ def test_swag(client, specs_data):
     definitions = extract_schema(apispec)
 
     assert definitions is not None
-    assert definitions.get('User') is not None
-    assert definitions.get('Officer') is not None
+    assert definitions.get("User") is not None
+    assert definitions.get("Officer") is not None
 
     for expected_path in expected_user_paths:
         assert paths.get(expected_path) is not None
 
         for invalid_user in invalid_users:
             response = client.post(
-                expected_path, data=invalid_user,
-                content_type='application/json')
+                expected_path, data=invalid_user, content_type="application/json"
+            )
             assert response.status_code == HTTPStatus.BAD_REQUEST
 
         for valid_user in valid_users:
             response = client.post(
-                expected_path, data=valid_user,
-                content_type='application/json')
+                expected_path, data=valid_user, content_type="application/json"
+            )
             assert response.status_code == HTTPStatus.OK
 
     for expected_path in expected_officer_paths:
@@ -386,15 +383,16 @@ def test_swag(client, specs_data):
 
         for invalid_officer in invalid_officers:
             response = client.post(
-                expected_path, data=invalid_officer,
-                content_type='application/json')
+                expected_path, data=invalid_officer, content_type="application/json"
+            )
             assert response.status_code == HTTPStatus.BAD_REQUEST
 
         for valid_officer in valid_officers:
             response = client.post(
-                expected_path, data=valid_officer,
-                content_type='application/json')
+                expected_path, data=valid_officer, content_type="application/json"
+            )
             assert response.status_code == HTTPStatus.OK
+
 
 if __name__ == "__main__":
     app.run(debug=True)

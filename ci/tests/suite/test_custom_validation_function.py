@@ -1,5 +1,6 @@
 import time
 import jsonschema
+
 try:
     import simplejson as json
 except ImportError:
@@ -20,8 +21,8 @@ def drop_id_validate(data, schema):
     in data
     """
     jsonschema.validate(data, schema)
-    if data.get('_id') is not None:
-        del data['_id']
+    if data.get("_id") is not None:
+        del data["_id"]
 
 
 def timestamping_validate(data, schema):
@@ -30,7 +31,7 @@ def timestamping_validate(data, schema):
     validation occurred
     """
     jsonschema.validate(data, schema)
-    data['timestamp'] = str(time.time())
+    data["timestamp"] = str(time.time())
 
 
 def special_validate(data, schema):
@@ -39,7 +40,7 @@ def special_validate(data, schema):
     on the cat's name
     """
     jsonschema.validate(data, schema)
-    data['special'] = str(data['name'] == 'Garfield').lower()
+    data["special"] = str(data["name"] == "Garfield").lower()
 
 
 def regular_validate(data, schema):
@@ -53,8 +54,8 @@ app = Flask(__name__)
 swag = Swagger(app, validation_function=drop_id_validate)
 
 
-@app.route('/cat', methods=['POST'])
-@swag.validate('Cat')
+@app.route("/cat", methods=["POST"])
+@swag.validate("Cat")
 def create_cat():
     """
     Cat creation endpoint which drops '_id' parameters when present in
@@ -96,8 +97,8 @@ def create_cat():
     return jsonify(request.json), HTTPStatus.OK
 
 
-@app.route('/timestamped/cat', methods=['POST'])
-@swag.validate('Cat', validation_function=timestamping_validate)
+@app.route("/timestamped/cat", methods=["POST"])
+@swag.validate("Cat", validation_function=timestamping_validate)
 def create_timestamped_cat():
     """
     Cat creation endpoint which timestamps validated data
@@ -128,8 +129,8 @@ def create_timestamped_cat():
     return jsonify(request.json), HTTPStatus.OK
 
 
-@app.route('/special/cat', methods=['POST'])
-@swag.validate('Cat', validation_function=special_validate)
+@app.route("/special/cat", methods=["POST"])
+@swag.validate("Cat", validation_function=special_validate)
 def create_special_cat():
     """
     Cat creation endpoint which timestamps validated data
@@ -160,8 +161,8 @@ def create_special_cat():
     return jsonify(request.json), HTTPStatus.OK
 
 
-@app.route('/regular/cat', methods=['POST'])
-@swag.validate('Cat', validation_function=regular_validate)
+@app.route("/regular/cat", methods=["POST"])
+@swag.validate("Cat", validation_function=regular_validate)
 def create_regular_cat():
     """
     Cat creation endpoint
@@ -198,65 +199,67 @@ def test_swag(client, specs_data):
     :param specs_data: {'url': {swag_specs}} for every spec in app
     """
     cat = {
-        '_id': "594dba7b2879334e411f3dcc",
-        'name': "Tom",
-        'address': "MGM, 245 N. Beverly Drive, Beverly Hills, CA 90210"
+        "_id": "594dba7b2879334e411f3dcc",
+        "name": "Tom",
+        "address": "MGM, 245 N. Beverly Drive, Beverly Hills, CA 90210",
     }
 
     with client.post(
-            '/cat', data=json.dumps(cat), content_type='application/json') as response:
+        "/cat", data=json.dumps(cat), content_type="application/json"
+    ) as response:
         assert response.status_code == HTTPStatus.OK
 
-        received = json.loads(response.data.decode('utf-8'))
-        assert received.get('_id') is None
-        assert received.get('timestamp') is None
-        assert received.get('special') is None
+        received = json.loads(response.data.decode("utf-8"))
+        assert received.get("_id") is None
+        assert received.get("timestamp") is None
+        assert received.get("special") is None
         try:
             assert received.viewitems() < cat.viewitems()
         except AttributeError:
             assert received.items() < cat.items()
 
     with client.post(
-            '/timestamped/cat', data=json.dumps(cat),
-            content_type='application/json') as response:
+        "/timestamped/cat", data=json.dumps(cat), content_type="application/json"
+    ) as response:
         assert response.status_code == HTTPStatus.OK
 
-        received = json.loads(response.data.decode('utf-8'))
-        assert received.get('_id') == cat.get('_id')
-        assert received.get('timestamp') is not None
-        assert received.get('special') is None
+        received = json.loads(response.data.decode("utf-8"))
+        assert received.get("_id") == cat.get("_id")
+        assert received.get("timestamp") is not None
+        assert received.get("special") is None
         try:
             assert received.viewitems() > cat.viewitems()
         except AttributeError:
             assert received.items() > cat.items()
 
     with client.post(
-            '/special/cat', data=json.dumps(cat),
-            content_type='application/json') as response:
+        "/special/cat", data=json.dumps(cat), content_type="application/json"
+    ) as response:
         assert response.status_code == HTTPStatus.OK
 
-        received = json.loads(response.data.decode('utf-8'))
-        assert received.get('_id') == cat.get('_id')
-        assert received.get('timestamp') is None
-        assert received.get('special') is not None
+        received = json.loads(response.data.decode("utf-8"))
+        assert received.get("_id") == cat.get("_id")
+        assert received.get("timestamp") is None
+        assert received.get("special") is not None
         try:
             assert received.viewitems() > cat.viewitems()
         except AttributeError:
             assert received.items() > cat.items()
 
     with client.post(
-            '/regular/cat', data=json.dumps(cat),
-            content_type='application/json') as response:
+        "/regular/cat", data=json.dumps(cat), content_type="application/json"
+    ) as response:
         assert response.status_code == HTTPStatus.OK
 
-        received = json.loads(response.data.decode('utf-8'))
-        assert received.get('_id') == cat.get('_id')
-        assert received.get('timestamp') is None
-        assert received.get('special') is None
+        received = json.loads(response.data.decode("utf-8"))
+        assert received.get("_id") == cat.get("_id")
+        assert received.get("timestamp") is None
+        assert received.get("special") is None
         try:
             assert received.viewitems() == cat.viewitems()
         except AttributeError:
             assert received.items() == cat.items()
+
 
 if __name__ == "__main__":
     app.run(debug=True)

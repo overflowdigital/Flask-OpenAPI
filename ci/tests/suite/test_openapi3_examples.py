@@ -11,34 +11,25 @@ swagger_config = {
     "headers": [],
     "openapi": "3.0.2",
     "components": {
-        'schemas': {
-            'Species': {
-                'type': 'object',
-                'properties': {
-                    'id': {
-                        'type': 'integer',
-                        'format': 'int64'
-                    },
-                    'name': {
-                        'type': 'string'
-                    }
-                }
+        "schemas": {
+            "Species": {
+                "type": "object",
+                "properties": {
+                    "id": {"type": "integer", "format": "int64"},
+                    "name": {"type": "string"},
+                },
             },
-            'Animal': {
-                'type': 'object',
-                'properties': {
-                    'species': {
-                        '$ref': '#/components/schemas/Species'
-                    },
-                    'name': {
-                        'type': 'string'
-                    }
-                }
-            }
+            "Animal": {
+                "type": "object",
+                "properties": {
+                    "species": {"$ref": "#/components/schemas/Species"},
+                    "name": {"type": "string"},
+                },
+            },
         }
     },
     "title": "Animal Shelter API",
-    "version": '',
+    "version": "",
     "termsOfService": "",
     "static_url_path": "/characteristics/static",
     "swagger_ui": True,
@@ -47,7 +38,6 @@ swagger_config = {
 
 
 class Animals(SwaggerView):
-
     def get(self):
         """
         find shelter animals that fit the criteria
@@ -85,19 +75,15 @@ class Animals(SwaggerView):
                     items:
                       $ref: '#/components/schemas/Animal'
         """
-        species = request.args.get('name')
-        status = request.args.get('status')
+        species = request.args.get("name")
+        status = request.args.get("status")
         return Response(status=200)
 
 
 app = Flask(__name__)
 swag = Swagger(app, config=swagger_config, merge=True)
 
-app.add_url_rule(
-    '/animals',
-    view_func=Animals.as_view('animals'),
-    methods=['GET']
-)
+app.add_url_rule("/animals", view_func=Animals.as_view("animals"), methods=["GET"])
 
 if __name__ == "__main__":
     app.run(debug=True)

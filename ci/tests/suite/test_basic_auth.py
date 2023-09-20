@@ -15,6 +15,7 @@ from functools import wraps
 
 from flask_openapi import Swagger
 
+
 def requires_basic_auth(f):
     """Decorator to require HTTP Basic Auth for your endpoint."""
 
@@ -23,7 +24,8 @@ def requires_basic_auth(f):
 
     def authenticate():
         return Response(
-            "Authentication required.", 401,
+            "Authentication required.",
+            401,
             {"WWW-Authenticate": "Basic realm='Login Required'"},
         )
 
@@ -44,13 +46,15 @@ def requires_basic_auth(f):
 
     return decorated
 
+
 app = Flask(__name__)
 app.config["SWAGGER"] = {
     "title": "Swagger Basic Auth App",
     "uiversion": 2,
 }
-swag = Swagger(app,
-    decorators=[ requires_basic_auth ],
+swag = Swagger(
+    app,
+    decorators=[requires_basic_auth],
     template={
         "swagger": "2.0",
         "info": {
@@ -65,6 +69,7 @@ swag = Swagger(app,
         ],
     },
 )
+
 
 @app.route("/echo/<name>", methods=["GET", "POST"])
 def echo(name):
@@ -110,9 +115,11 @@ def echo(name):
     }
     return jsonify(data)
 
+
 @app.route("/")
 def index():
     return redirect("/apidocs")
+
 
 if __name__ == "__main__":
     app.run(debug=True)

@@ -16,44 +16,38 @@ app = Flask(__name__)
 # rule_filter is a callable that receives "Rule" object and
 #   returns a boolean to filter in only desired views
 
-app.config['SWAGGER'] = {
+app.config["SWAGGER"] = {
     "swagger_version": "2.0",
     "title": "Flask-OpenAPI",
     "headers": [
-        ('Access-Control-Allow-Origin', '*'),
-        ('Access-Control-Allow-Methods', "GET, POST, PUT, DELETE, OPTIONS"),
-        ('Access-Control-Allow-Credentials', "true"),
+        ("Access-Control-Allow-Origin", "*"),
+        ("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS"),
+        ("Access-Control-Allow-Credentials", "true"),
     ],
     "specs": [
         {
             "version": "0.0.1",
             "title": "Api v1",
-            "endpoint": 'v1_spec',
-            "description": 'This is the version 1 of our API',
-            "route": '/v1/spec',
+            "endpoint": "v1_spec",
+            "description": "This is the version 1 of our API",
+            "route": "/v1/spec",
             # rule_filter is optional
             # it is a callable to filter the views to extract
-            "rule_filter": lambda rule: rule.endpoint.startswith(
-                'should_be_v1_only'
-            ),
+            "rule_filter": lambda rule: rule.endpoint.startswith("should_be_v1_only"),
             # definition_filter is optional
             # it is a callable to filter the definition models to include
-            "definition_filter": lambda definition: (
-                'v1_model' in definition.tags)
+            "definition_filter": lambda definition: ("v1_model" in definition.tags),
         },
         {
             "version": "0.0.2",
             "title": "Api v2",
-            "description": 'This is the version 2 of our API',
-            "endpoint": 'v2_spec',
-            "route": '/v2/spec',
-            "rule_filter": lambda rule: rule.endpoint.startswith(
-                'should_be_v2_only'
-            ),
-            "definition_filter": lambda definition: (
-                'v2_model' in definition.tags)
-        }
-    ]
+            "description": "This is the version 2 of our API",
+            "endpoint": "v2_spec",
+            "route": "/v2/spec",
+            "rule_filter": lambda rule: rule.endpoint.startswith("should_be_v2_only"),
+            "definition_filter": lambda definition: ("v2_model" in definition.tags),
+        },
+    ],
 }
 
 swag = Swagger(app)  # you can pass config here Swagger(config={})
@@ -61,14 +55,13 @@ swag = Swagger(app)  # you can pass config here Swagger(config={})
 
 @app.after_request
 def allow_origin(response):
-    response.headers['Access-Control-Allow-Origin'] = 'http://example.com'
-    response.headers['Access-Control-Allow-Credentials'] = 'true'
+    response.headers["Access-Control-Allow-Origin"] = "http://example.com"
+    response.headers["Access-Control-Allow-Credentials"] = "true"
 
     return response
 
 
 class UserAPI(MethodView):
-
     def get(self, team_id):
         """
         Get a list of users
@@ -96,7 +89,7 @@ class UserAPI(MethodView):
             "users": [
                 {"name": "Steven Wilson", "team": team_id},
                 {"name": "Mikael Akerfeldt", "team": team_id},
-                {"name": "Daniel Gildenlow", "team": team_id}
+                {"name": "Daniel Gildenlow", "team": team_id},
             ]
         }
         return jsonify(data)
@@ -135,97 +128,117 @@ class UserAPI(MethodView):
                     $ref: '#/definitions/User'
           import: "docs/not_found.yaml"
         """
-        return jsonify(
-            {"data": request.json, "status": "New user created"}
-        ), 201
+        return jsonify({"data": request.json, "status": "New user created"}), 201
 
 
-view = UserAPI.as_view('users')
+view = UserAPI.as_view("users")
 app.add_url_rule(
-    '/v1/users/<int:team_id>',
+    "/v1/users/<int:team_id>",
     view_func=view,
-    methods=['GET'],
-    endpoint='should_be_v1_only'
+    methods=["GET"],
+    endpoint="should_be_v1_only",
 )
 app.add_url_rule(
-    '/v1/users',
-    view_func=view,
-    methods=['POST'],
-    endpoint='should_be_v1_only_post'
+    "/v1/users", view_func=view, methods=["POST"], endpoint="should_be_v1_only_post"
 )
 
 # LOADING SPECS FROM EXTERNAL FILE
 
 
-@app.route('/v1/decorated/<username>', endpoint='should_be_v1_only_username')
-@swag_from('docs/username_specs.yml')
+@app.route("/v1/decorated/<username>", endpoint="should_be_v1_only_username")
+@swag_from("docs/username_specs.yml")
 def fromfile_decorated(username):
-    return jsonify({'username': username})
+    return jsonify({"username": username})
 
-@app.route('/v1/decorated_no_descr/<username>', endpoint='should_be_v1_only_username_no_descr')
-@swag_from('docs/username_specs_no_descr.yml')
+
+@app.route(
+    "/v1/decorated_no_descr/<username>", endpoint="should_be_v1_only_username_no_descr"
+)
+@swag_from("docs/username_specs_no_descr.yml")
 def fromfile_decorated_no_descr(username):
-    return jsonify({'username': username})
+    return jsonify({"username": username})
 
-@app.route('/v1/decorated_no_sep/<username>', endpoint='should_be_v1_only_username_no_sep')
-@swag_from('docs/username_specs_no_sep.yml')
+
+@app.route(
+    "/v1/decorated_no_sep/<username>", endpoint="should_be_v1_only_username_no_sep"
+)
+@swag_from("docs/username_specs_no_sep.yml")
 def fromfile_decorated_no_sep(username):
-    return jsonify({'username': username})
+    return jsonify({"username": username})
 
-@app.route('/v1/decorated_bom/<username>', endpoint='should_be_v1_only_username_bom')
-@swag_from('docs/username_specs_bom.yml')
+
+@app.route("/v1/decorated_bom/<username>", endpoint="should_be_v1_only_username_bom")
+@swag_from("docs/username_specs_bom.yml")
 def fromfile_decorated_bom(username):
-    return jsonify({'username': username})
+    return jsonify({"username": username})
 
-@app.route('/v1/decorated_utf16/<username>', endpoint='should_be_v1_only_username_utf16')
-@swag_from('docs/username_specs_utf16.yml')
+
+@app.route(
+    "/v1/decorated_utf16/<username>", endpoint="should_be_v1_only_username_utf16"
+)
+@swag_from("docs/username_specs_utf16.yml")
 def fromfile_decorated_utf16(username):
-    return jsonify({'username': username})
+    return jsonify({"username": username})
 
-@app.route('/v1/decorated_utf32/<username>', endpoint='should_be_v1_only_username_utf32')
-@swag_from('docs/username_specs_utf32.yml')
+
+@app.route(
+    "/v1/decorated_utf32/<username>", endpoint="should_be_v1_only_username_utf32"
+)
+@swag_from("docs/username_specs_utf32.yml")
 def fromfile_decorated_utf32(username):
-    return jsonify({'username': username})
+    return jsonify({"username": username})
 
 
 try:
     from pathlib import Path
-    @app.route('/v1/decorated_pathlib_path/<username>',
-               endpoint='should_be_v1_only_username_pathlib_path')
-    @swag_from(Path('docs/username_specs.yml'))
+
+    @app.route(
+        "/v1/decorated_pathlib_path/<username>",
+        endpoint="should_be_v1_only_username_pathlib_path",
+    )
+    @swag_from(Path("docs/username_specs.yml"))
     def fromfile_decorated(username):
-        return jsonify({'username': username})
+        return jsonify({"username": username})
+
 except ImportError:
     pass
 
 # OR
 
 
-@app.route('/v1/fileindoc/<username>', endpoint='should_be_v1_only_username_1')
+@app.route("/v1/fileindoc/<username>", endpoint="should_be_v1_only_username_1")
 def fromfile_indocstring(username):
     """
     file: docs/username_specs.yml
     """
-    return jsonify({'username': username})
+    return jsonify({"username": username})
 
-@app.route('/v1/fileindoc_no_descr/<username>', endpoint='should_be_v1_only_username_no_descr_1')
+
+@app.route(
+    "/v1/fileindoc_no_descr/<username>",
+    endpoint="should_be_v1_only_username_no_descr_1",
+)
 def fromfile_indocstring_no_descr(username):
     """
     file: docs/username_specs_no_descr.yml
     """
-    return jsonify({'username': username})
+    return jsonify({"username": username})
 
-@app.route('/v1/fileindoc_no_sep/<username>', endpoint='should_be_v1_only_username_no_sep_1')
+
+@app.route(
+    "/v1/fileindoc_no_sep/<username>", endpoint="should_be_v1_only_username_no_sep_1"
+)
 def fromfile_indocstring_no_sep(username):
     """
     file: docs/username_specs_no_sep.yml
     """
-    return jsonify({'username': username})
+    return jsonify({"username": username})
 
 
 # DEFINITIONS FROM OBJECTS
 
-@swag.definition('Hack', tags=['v2_model'])
+
+@swag.definition("Hack", tags=["v2_model"])
 def hack(subitems):
     """
     Hack Object
@@ -239,13 +252,10 @@ def hack(subitems):
         items:
           $ref: '#/definitions/SubItem'
     """
-    return {
-        'hack': "string",
-        'subitems': [subitem.dump() for subitem in subitems]
-    }
+    return {"hack": "string", "subitems": [subitem.dump() for subitem in subitems]}
 
 
-@swag.definition('SubItem', tags=['v2_model'])
+@swag.definition("SubItem", tags=["v2_model"])
 class SubItem(object):
     """
     SubItem Object
@@ -258,6 +268,7 @@ class SubItem(object):
         type: integer
         description: Blu
     """
+
     def __init__(self, bla, blu):
         self.bla = str(bla)
         self.blu = int(blu)
@@ -283,7 +294,7 @@ def bla():
     return jsonify(hack(subitems))
 
 
-@swag.definition('rec_query_context', tags=['v2_model'])
+@swag.definition("rec_query_context", tags=["v2_model"])
 class RecQueryContext(object):
     """
     Recommendation Query Context
@@ -299,18 +310,19 @@ class RecQueryContext(object):
         schema:
           $ref: '#/definitions/rec_query_context_last_event'
     """
+
     def __init__(self, origin, last_event=None):
         self.origin = origin
         self.last_event = last_event
 
     def dump(self):
-        data = {'origin': self.origin}
+        data = {"origin": self.origin}
         if self.last_event:
-            data.update({'last_event': self.last_event.dump()})
+            data.update({"last_event": self.last_event.dump()})
         return data
 
 
-@swag.definition('rec_query_context_last_event', tags=['v2_model'])
+@swag.definition("rec_query_context_last_event", tags=["v2_model"])
 class RecQueryContextLastEvent(object):
     """
     RecQueryContext Last Event Definition
@@ -324,6 +336,7 @@ class RecQueryContextLastEvent(object):
         schema:
           $ref: '#/definitions/rec_query_context_last_event_data'
     """
+
     def __init__(self, event=None, data=None):
         self.event = event
         self.data = data
@@ -331,13 +344,13 @@ class RecQueryContextLastEvent(object):
     def dump(self):
         data = {}
         if self.event:
-            data.update({'event': self.event})
+            data.update({"event": self.event})
         if self.data:
-            data.update({'data': self.data.dump()})
+            data.update({"data": self.data.dump()})
         return data
 
 
-@swag.definition('rec_query_context_last_event_data', tags=['v2_model'])
+@swag.definition("rec_query_context_last_event_data", tags=["v2_model"])
 class RecQueryContextLastEventData(object):
     """
     RecQueryContextLastEvent Data Object
@@ -362,8 +375,15 @@ class RecQueryContextLastEventData(object):
       context:
         $ref: '#/definitions/rec_query_context'
     """
-    def __init__(self, candidate_id=None, opening_id=None, company_id=None,
-                 datetime=None, recruiter_id=None):
+
+    def __init__(
+        self,
+        candidate_id=None,
+        opening_id=None,
+        company_id=None,
+        datetime=None,
+        recruiter_id=None,
+    ):
         self.candidate_id = candidate_id
         self.opening_id = opening_id
         self.company_id = company_id
@@ -372,15 +392,23 @@ class RecQueryContextLastEventData(object):
 
     def dump(self):
         data = {}
-        for var in ['candidate_id', 'opening_id', 'company_id', 'datetime',
-                    'recruiter_id']:
+        for var in [
+            "candidate_id",
+            "opening_id",
+            "company_id",
+            "datetime",
+            "recruiter_id",
+        ]:
             if var in vars(self):
                 data.update({var: vars(self)[var]})
         return data
 
 
-@app.route("/v2/recommendation/<target_type>/<item_type>", methods=['POST'],
-           endpoint="should_be_v2_only_recommendation")
+@app.route(
+    "/v2/recommendation/<target_type>/<item_type>",
+    methods=["POST"],
+    endpoint="should_be_v2_only_recommendation",
+)
 def recommend(target_type, item_type):
     """
     Recommendation
@@ -437,9 +465,7 @@ def recommend(target_type, item_type):
          description: No recommendation found
     """
 
-    data = {
-        "opening_id": 12312313434
-    }
+    data = {"opening_id": 12312313434}
     return jsonify(data)
 
 
@@ -461,6 +487,7 @@ def hello():
       https://github.com/overflowdigital/flask-openapi</a>
     </p>
     """
+
 
 if __name__ == "__main__":
     app.run(debug=True)

@@ -16,7 +16,7 @@ swag = Swagger(app)
 # Definitions can be registered as objects or functions.
 # Docstring lines (before '---') are used as the description.
 # YAML after '---' defines the Swagger definition schema.
-@swag.definition('return_test_1')
+@swag.definition("return_test_1")
 class ReturnTest(object):
     """
     test return
@@ -35,7 +35,7 @@ class ReturnTest(object):
         return {"result": "test1" * self.size}
 
 
-@swag.definition('return_test_2')
+@swag.definition("return_test_2")
 def return_test(size):
     """
     another test return
@@ -55,7 +55,7 @@ def return_test(size):
 # The first line of the docstring is used as the summary/
 # The following lines (before '---') are used as the description.
 # YAML after '---' defines the Swagger path schema.
-@app.route("/recs", methods=['GET'])
+@app.route("/recs", methods=["GET"])
 def recs():
     """
     A simple test API
@@ -75,12 +75,12 @@ def recs():
         schema:
           $ref: '#/definitions/return_test_1'
     """
-    message = ReturnTest(request.args.get('size', 1)).dump()
+    message = ReturnTest(request.args.get("size", 1)).dump()
     return jsonify(message)
 
 
 class Foo(View):
-    methods = ['GET', 'POST']
+    methods = ["GET", "POST"]
 
     def dispatch_request(self):
         """
@@ -101,11 +101,11 @@ class Foo(View):
             schema:
               $ref: '#/definitions/return_test_2'
         """
-        message = return_test(request.args.get('size', 1))
+        message = return_test(request.args.get("size", 1))
         return jsonify(message)
 
 
-app.add_url_rule('/dispatch_request', view_func=Foo.as_view('foo'))
+app.add_url_rule("/dispatch_request", view_func=Foo.as_view("foo"))
 
 if __name__ == "__main__":
     app.run(debug=True)
