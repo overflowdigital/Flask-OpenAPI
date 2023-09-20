@@ -3,7 +3,11 @@ __version__ = "1.3.2"
 # Based on works of Bruno Rocha and the Flasgger open source community
 
 
-from jsonschema import ValidationError  # noqa
+from jsonschema import ValidationError
+
+from .core.validation import validate
+
+from .core.decorators import swag_from  # noqa
 
 from .base import (
     BR_SANITIZER,
@@ -14,4 +18,4 @@ from .base import (
 )
 from .constants import OPTIONAL_FIELDS  # noqa
 from .marshmallow_apispec import APISpec, fields, Schema, SwaggerView  # noqa
-from .utils import apispec_to_template, swag_from, validate  # noqa
+from .core.specs import apispec_to_template  # noqa

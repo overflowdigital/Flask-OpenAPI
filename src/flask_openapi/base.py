@@ -32,6 +32,14 @@ from flask.views import MethodView
 from werkzeug.datastructures import Authorization
 from markupsafe import Markup
 
+from .utils.version import is_openapi3
+
+from .core.decorators import swag_annotation
+from .core.parser import convert_responses_to_openapi3, extract_definitions, extract_schema, parse_definition_docstring, parse_imports
+
+from flask_openapi.core.specs import get_schema_specs, get_specs
+from .core.validation import validate
+
 try:
     from flask_restful.reqparse import RequestParser
 except ImportError:
@@ -41,18 +49,8 @@ from mistune import markdown
 
 from . import __version__
 from .constants import OAS3_SUB_COMPONENTS, OPTIONAL_FIELDS, OPTIONAL_OAS3_FIELDS
-from .utils import (
-    convert_responses_to_openapi3,
-    extract_definitions,
-    extract_schema,
-    get_schema_specs,
-    get_specs,
+from .core.flask import (
     get_vendor_extension_fields,
-    is_openapi3,
-    parse_definition_docstring,
-    parse_imports,
-    swag_annotation,
-    validate,
 )
 
 

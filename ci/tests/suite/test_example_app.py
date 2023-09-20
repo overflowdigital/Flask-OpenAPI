@@ -5,7 +5,7 @@ from flask import Flask, jsonify, request
 from flask.views import MethodView
 
 from flask_openapi import Swagger
-from flask_openapi.utils import swag_from
+from flask_openapi.core.decorators import swag_from
 
 
 app = Flask(__name__)

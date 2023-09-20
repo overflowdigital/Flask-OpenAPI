@@ -7,7 +7,7 @@ except ImportError:
 from flask import Flask
 from flask import jsonify
 from flask_openapi import Swagger
-from flask_openapi import swag_from
+from flask_openapi.core.decorators import swag_from
 
 app = Flask(__name__)
 swag = Swagger(app)

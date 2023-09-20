@@ -8,7 +8,7 @@ try:
 except ImportError:
     import httplib as HTTPStatus
 from flask_openapi import Swagger
-from flask_openapi.utils import swag_from
+from flask_openapi.core.decorators import swag_from
 
 
 swagger_config = {
