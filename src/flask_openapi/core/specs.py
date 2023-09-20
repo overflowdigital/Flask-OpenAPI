@@ -7,8 +7,8 @@ from flask_openapi.core.parser import parse_docstring
 from flask_openapi.utils.constants import OPTIONAL_FIELDS
 from flask_openapi.utils.flask import (has_valid_dispatch_view_docs,
                                        is_valid_method_view)
-from flask_openapi.utils.paths import get_swag_path_from_doc_dir
-from flask_openapi.utils.typing import ordered_dict_to_dict
+from flask_openapi.utils.views import get_swag_path_from_doc_dir
+from flask_openapi.utils.types import ordered_dict_to_dict
 from flask_openapi.utils.version import is_openapi3
 
 try:

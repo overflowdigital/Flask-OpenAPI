@@ -7,7 +7,7 @@ import yaml
 from flask import request
 
 from flask_openapi.utils.files import load_from_file
-from flask_openapi.utils.paths import get_path_from_doc, get_root_path
+from flask_openapi.utils.views import get_path_from_doc, get_root_path
 from flask_openapi.utils.version import is_openapi3
 
 
