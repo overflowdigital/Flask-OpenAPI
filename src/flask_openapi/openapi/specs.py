@@ -110,7 +110,7 @@ def get_operations(
     else:
         update_schemas = swag.get("definitions", {})
 
-    if type(update_schemas) == list and type(update_schemas[0]) == dict:
+    if isinstance(update_schemas, list) and isinstance(update_schemas[0], dict):
         (update_schemas,) = update_schemas
 
     definitions.update(update_schemas)

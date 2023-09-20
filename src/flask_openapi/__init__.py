@@ -1,5 +1,5 @@
 # DO NOT CHANGE MANUALLY THIS IS CHANGED IN THE PIPELINES
-__version__ = "1.4.0"
+__version__ = "2.0.0"
 
 import flask_openapi.compat.marshmallow as marshmallow_shim  # noqa
 from flask_openapi.core import OpenAPI  # noqa

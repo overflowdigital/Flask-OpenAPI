@@ -327,7 +327,7 @@ class Swagger:
                     )
 
             # TODO support anyOf and oneOf in the future
-            if (json_schema is not None) and type(json_schema) == dict:
+            if (json_schema is not None) and isinstance(json_schema, dict):
 
                 schemas[location] = json_schema
                 self.set_schemas(schemas, location, definitions)
