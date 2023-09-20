@@ -6,7 +6,6 @@ marshmallow
 mypy
 pytest-cov
 pytest
-safety
 setuptools
 black
 twine

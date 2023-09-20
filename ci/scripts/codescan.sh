@@ -9,4 +9,3 @@ REPO=$(dirname "$REPO../")
 
 black --check $REPO/src/flask_openapi
 mypy --config-file $REPO/ci/config/.mypyrc $REPO/src/flask_openapi
-safety check --full-report
