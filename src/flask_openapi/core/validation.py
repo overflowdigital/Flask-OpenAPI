@@ -1,17 +1,16 @@
-from flask_openapi.core.files import load_from_file
-from flask_openapi.core.parser import extract_definitions, extract_schema
-from flask_openapi.utils import __replace_ref
-
+import copy
+import inspect
+import os
+import sys
 
 import jsonschema
 import yaml
 from flask import Response, abort, request
 
+from flask_openapi.core.files import load_from_file
+from flask_openapi.core.parser import extract_definitions, extract_schema
+from flask_openapi.utils import __replace_ref
 
-import copy
-import inspect
-import os
-import sys
 
 def __replace_ref(schema, relative_path, swag):
     """TODO: add dev docs

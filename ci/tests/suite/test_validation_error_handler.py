@@ -1,7 +1,7 @@
 import jsonschema
+from flask import Flask
 from jsonschema import ValidationError
 from werkzeug.exceptions import abort
-from flask import Flask
 
 try:
     from http import HTTPStatus
@@ -11,9 +11,9 @@ try:
     import simplejson as json
 except ImportError:
     import json
-from flask import jsonify
-from flask import Response
-from flask import request
+
+from flask import Response, jsonify, request
+
 from flask_openapi import Swagger
 
 

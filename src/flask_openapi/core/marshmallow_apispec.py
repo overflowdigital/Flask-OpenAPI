@@ -1,8 +1,9 @@
 # coding: utf-8
 import inspect
 
-import flask_openapi
 from flask.views import MethodView
+
+import flask_openapi
 
 try:
     import marshmallow
@@ -134,7 +135,6 @@ def convert_schemas(d, definitions=None):
                     new_v.append(item)
             v = new_v
         if inspect.isclass(v) and issubclass(v, Schema):
-
             if Schema is None:
                 raise RuntimeError("Please install marshmallow and apispec")
 

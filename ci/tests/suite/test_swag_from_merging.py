@@ -1,5 +1,5 @@
-from flask import Flask
-from flask import jsonify
+from flask import Flask, jsonify
+
 from flask_openapi import Swagger
 from flask_openapi.core.decorators import swag_from
 

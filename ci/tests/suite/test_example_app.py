@@ -7,7 +7,6 @@ from flask.views import MethodView
 from flask_openapi import Swagger
 from flask_openapi.core.decorators import swag_from
 
-
 app = Flask(__name__)
 
 

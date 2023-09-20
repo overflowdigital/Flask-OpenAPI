@@ -13,32 +13,24 @@ import os
 import re
 from collections import defaultdict
 from functools import partial, wraps
+from json import JSONEncoder
 from typing import Optional
 
 import yaml
-from flask import (
-    abort,
-    Blueprint,
-    current_app,
-    jsonify,
-    redirect,
-    render_template,
-    request,
-    Response,
-    url_for,
-)
-from json import JSONEncoder
+from flask import (Blueprint, Response, abort, current_app, jsonify, redirect,
+                   render_template, request, url_for)
 from flask.views import MethodView
-from werkzeug.datastructures import Authorization
 from markupsafe import Markup
-
-from .utils.version import is_openapi3
-
-from .core.decorators import swag_annotation
-from .core.parser import convert_responses_to_openapi3, extract_definitions, extract_schema, parse_definition_docstring, parse_imports
+from werkzeug.datastructures import Authorization
 
 from flask_openapi.core.specs import get_schema_specs, get_specs
+
+from .core.decorators import swag_annotation
+from .core.parser import (convert_responses_to_openapi3, extract_definitions,
+                          extract_schema, parse_definition_docstring,
+                          parse_imports)
 from .core.validation import validate
+from .utils.version import is_openapi3
 
 try:
     from flask_restful.reqparse import RequestParser
@@ -48,10 +40,9 @@ import jsonschema
 from mistune import markdown
 
 from . import __version__
-from .constants import OAS3_SUB_COMPONENTS, OPTIONAL_FIELDS, OPTIONAL_OAS3_FIELDS
-from .core.flask import (
-    get_vendor_extension_fields,
-)
+from .core.flask import get_vendor_extension_fields
+from .utils.constants import (OAS3_SUB_COMPONENTS, OPTIONAL_FIELDS,
+                              OPTIONAL_OAS3_FIELDS)
 
 
 def NO_SANITIZER(text):
@@ -200,7 +191,6 @@ class SwaggerDefinition(object):
 
 
 class Swagger(object):
-
     DEFAULT_ENDPOINT = "apispec_1"
     DEFAULT_CONFIG = {
         "headers": [],
@@ -476,7 +466,6 @@ class Swagger(object):
                 dest[key].update(source)
 
         def get_operations(swag, path_verb=None):
-
             if is_openapi3(openapi_version):
                 source_components = swag.get("components", {})
                 update_schemas = source_components.get("schemas", {})
@@ -856,7 +845,6 @@ class Swagger(object):
 
             # TODO support anyOf and oneOf in the future
             if (json_schema is not None) and type(json_schema) == dict:
-
                 schemas[location] = json_schema
                 self.set_schemas(schemas, location, definitions)
 

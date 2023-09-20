@@ -7,13 +7,8 @@ except ImportError:
     import httplib as HTTPStatus
 
 from flask import Blueprint, Flask, jsonify, request
-from flask_openapi.core import (
-    fields,
-    Schema,
-    Swagger,
-    SwaggerView,
-    parser,
-)
+
+from flask_openapi.core import Schema, Swagger, SwaggerView, fields, parser
 from flask_openapi.core.decorators import swag_from
 from flask_openapi.core.validation import validate
 

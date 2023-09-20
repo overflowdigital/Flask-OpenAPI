@@ -1,17 +1,13 @@
-from collections import defaultdict
-import re
-
-from flask import request
-from flask_openapi.core.files import load_from_file
-from flask_openapi.utils.paths import get_path_from_doc, get_root_path
-
-
-import yaml
-
-
 import inspect
 import os
+import re
+from collections import defaultdict
 
+import yaml
+from flask import request
+
+from flask_openapi.core.files import load_from_file
+from flask_openapi.utils.paths import get_path_from_doc, get_root_path
 from flask_openapi.utils.version import is_openapi3
 
 
@@ -64,7 +60,6 @@ def parse_docstring(obj, process_doc, endpoint=None, verb=None, swag_path=None):
         full_doc = inspect.getdoc(obj)
 
     if full_doc:
-
         if full_doc.startswith("file:"):
             if not hasattr(obj, "root_path"):
                 obj.root_path = root_path
@@ -108,7 +103,6 @@ def parse_definition_docstring(obj, process_doc, doc_dir=None):
         full_doc = inspect.getdoc(obj)
 
     if full_doc:
-
         if full_doc.startswith("file:"):
             if not hasattr(obj, "root_path"):
                 obj.root_path = get_root_path(obj)

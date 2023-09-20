@@ -19,8 +19,9 @@ In this example the login credentials to view the Swagger docs are as follows:
 Failing to provide the right credentials results in a 401 Unauthorized
 response from all the Flask-OpenAPI endpoints.
 """
-from flask import Flask, request, redirect, Response, jsonify
 from functools import wraps
+
+from flask import Flask, Response, jsonify, redirect, request
 
 from flask_openapi import Swagger
 

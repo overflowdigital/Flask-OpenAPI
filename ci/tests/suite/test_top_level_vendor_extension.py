@@ -2,8 +2,9 @@
 Ensure that top-level vendor extension config is preserved
 """
 
-from flask_openapi import Swagger
 from flask import Flask, jsonify
+
+from flask_openapi import Swagger
 
 app = Flask(__name__)
 app.config["SWAGGER"] = {

@@ -1,16 +1,13 @@
-from flask import request
-from flask_openapi.constants import DEFAULT_FIELDS
-from flask_openapi.marshmallow_apispec import Schema
-from flask_openapi.core.validation import validate
-from flask_openapi.utils.paths import get_root_path
-
-
-from six import string_types
-
-
 import os
 from functools import wraps
 
+from flask import request
+from six import string_types
+
+from flask_openapi.core.marshmallow_apispec import Schema
+from flask_openapi.core.validation import validate
+from flask_openapi.utils.constants import DEFAULT_FIELDS
+from flask_openapi.utils.paths import get_root_path
 
 
 def swag_from(
@@ -96,7 +93,6 @@ def swag_from(
             return is_str_path
 
     def decorator(function):
-
         if is_path(specs):
             set_from_filepath(function)
             # function must have or a single swag_path or a list of them
@@ -131,9 +127,7 @@ def validate_annotation(an, var):
     def decorator(f):
         @wraps(f)
         def wrapper(*args, **kwargs):
-
             if an.swag_validate:
-
                 payload = None
 
                 if an.swag_in == "query":
@@ -161,7 +155,6 @@ def validate_annotation(an, var):
 def swag_annotation(f):
     @wraps(f)
     def wrapper(*args, **kwargs):
-
         if not kwargs.pop("swag", False):
             return f(*args, **kwargs)
 
@@ -172,7 +165,6 @@ def swag_annotation(f):
             specs[key] = kwargs.pop(key, value)
 
         for variable, annotation in function.__annotations__.items():
-
             if issubclass(annotation, Schema):
                 annotation = annotation()
                 data = annotation.to_specs_dict()

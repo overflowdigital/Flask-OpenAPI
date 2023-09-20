@@ -1,4 +1,5 @@
 import time
+
 import jsonschema
 
 try:
@@ -9,9 +10,9 @@ try:
     from http import HTTPStatus
 except ImportError:
     import httplib as HTTPStatus
-from flask import Flask
-from flask import jsonify
-from flask import request
+
+from flask import Flask, jsonify, request
+
 from flask_openapi import Swagger
 
 

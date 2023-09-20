@@ -5,17 +5,10 @@ __version__ = "1.3.2"
 
 from jsonschema import ValidationError
 
-from .core.validation import validate
-
+from .base import BR_SANITIZER, MK_SANITIZER, NO_SANITIZER, Flasgger, Swagger
 from .core.decorators import swag_from  # noqa
-
-from .base import (
-    BR_SANITIZER,
-    Flasgger,
-    MK_SANITIZER,
-    NO_SANITIZER,
-    Swagger,
-)
-from .constants import OPTIONAL_FIELDS  # noqa
-from .marshmallow_apispec import APISpec, fields, Schema, SwaggerView  # noqa
+from .core.marshmallow_apispec import (APISpec, Schema, SwaggerView,  # noqa
+                                       fields)
 from .core.specs import apispec_to_template  # noqa
+from .core.validation import validate
+from .utils.constants import OPTIONAL_FIELDS  # noqa

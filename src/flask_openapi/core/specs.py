@@ -1,16 +1,15 @@
 from copy import deepcopy
-from flask_openapi.constants import OPTIONAL_FIELDS
-
 
 from flask import current_app
-from flask_openapi.core.flask import has_valid_dispatch_view_docs
-from flask_openapi.utils.paths import get_swag_path_from_doc_dir
-from flask_openapi.utils.version import is_openapi3
 
-from flask_openapi.marshmallow_apispec import SwaggerView, convert_schemas
+from flask_openapi.core.flask import (has_valid_dispatch_view_docs,
+                                      is_valid_method_view)
+from flask_openapi.core.marshmallow_apispec import SwaggerView, convert_schemas
 from flask_openapi.core.parser import parse_docstring
+from flask_openapi.utils.constants import OPTIONAL_FIELDS
+from flask_openapi.utils.paths import get_swag_path_from_doc_dir
 from flask_openapi.utils.typing import ordered_dict_to_dict
-from flask_openapi.core.flask import is_valid_method_view
+from flask_openapi.utils.version import is_openapi3
 
 try:
     from flask_mongorest import methods as fmr_methods
@@ -38,7 +37,6 @@ def merge_specs(target, source):
 def get_specs(
     rules, ignore_verbs, optional_fields, sanitizer, openapi_version, doc_dir=None
 ):
-
     specs = []
     for rule in rules:
         endpoint = current_app.view_functions[rule.endpoint]
@@ -68,7 +66,6 @@ def get_specs(
 
         verbs = []
         for verb, method in methods.items():
-
             klass = method.__dict__.get("view_class", None)
             if not is_mv and klass and hasattr(klass, "verb"):
                 method = getattr(klass, "verb", None)

@@ -2,6 +2,7 @@
 In this example `openapi` version is used instead of `swagger` version.
 """
 from flask import Flask
+
 from flask_openapi import Swagger
 
 app = Flask(__name__)

@@ -3,6 +3,7 @@ This tests the use of `decorator` package with Flasgger
 """
 from decorator import decorator
 from flask import Flask, jsonify
+
 from flask_openapi import Swagger
 
 app = Flask(__name__)

@@ -1,4 +1,5 @@
 import pytest
+
 from flask_openapi.base import Swagger
 
 

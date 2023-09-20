@@ -4,7 +4,7 @@ import click
 from flask import current_app
 from flask.cli import with_appcontext
 
-from .utils.version import is_openapi3
+from ..utils.version import is_openapi3
 
 
 @click.command()
