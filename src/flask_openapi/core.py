@@ -78,21 +78,13 @@ class Swagger:
         self.decorators: list | None = decorators
         self.format_checker: Callable = format_checker or jsonschema.FormatChecker()
 
-        self.default_validation_function: Callable = (
-            lambda data, schema: jsonschema.validate(
-                data, schema, format_checker=self.format_checker
-            )
+        self.default_validation_function: Callable = lambda data, schema: jsonschema.validate(
+            data, schema, format_checker=self.format_checker
         )
-        self.default_error_handler: Callable = lambda error, _, __: abort(
-            400, error.message
-        )
+        self.default_error_handler: Callable = lambda error, _, __: abort(400, error.message)
 
-        self.validation_function: Callable = (
-            validation_function or self.default_validation_function
-        )
-        self.validation_error_handler: Callable = (
-            validation_error_handler or self.default_error_handler
-        )
+        self.validation_function: Callable = validation_function or self.default_validation_function
+        self.validation_error_handler: Callable = validation_error_handler or self.default_error_handler
         self.apispecs: dict[str, dict] = {}  # cached apispecs
         self.parse: bool = parse
 
@@ -134,9 +126,7 @@ class Swagger:
         """Used for class based definitions"""
         definition_filter = definition_filter or (lambda tag: True)
         return {
-            definition.name: definition.obj
-            for definition in self.definition_models
-            if definition_filter(definition)
+            definition.name: definition.obj for definition in self.definition_models if definition_filter(definition)
         }
 
     def definition(self, name, tags=None) -> Callable:
@@ -175,12 +165,8 @@ class Swagger:
                 __name__,
                 url_prefix=self.config.get("url_prefix", None),
                 subdomain=self.config.get("subdomain", None),
-                template_folder=self.config.get(
-                    "template_folder", "swagger_ui/v{0}/templates".format(uiversion)
-                ),
-                static_folder=self.config.get(
-                    "static_folder", "swagger_ui/v{0}/static".format(uiversion)
-                ),
+                template_folder=self.config.get("template_folder", "swagger_ui/v{0}/templates".format(uiversion)),
+                static_folder=self.config.get("static_folder", "swagger_ui/v{0}/static".format(uiversion)),
                 static_url_path=self.config.get("static_url_path", None),
             )
 
@@ -188,9 +174,7 @@ class Swagger:
             blueprint.add_url_rule(
                 specs_route,
                 "apidocs",
-                view_func=wrap_view(
-                    APIDocsView().as_view("apidocs", view_args=dict(config=self.config))
-                ),
+                view_func=wrap_view(APIDocsView().as_view("apidocs", view_args=dict(config=self.config))),
             )
 
             if uiversion < 3:
@@ -210,9 +194,7 @@ class Swagger:
                 view_func=lambda: redirect(url_for("flask_openapi.apidocs")),
             )
         else:
-            blueprint = Blueprint(
-                self.config.get("endpoint", "flask_openapi"), __name__
-            )
+            blueprint = Blueprint(self.config.get("endpoint", "flask_openapi"), __name__)
 
         for spec in self.config["specs"]:
             self.endpoints.append(spec["endpoint"])
@@ -277,9 +259,7 @@ class Swagger:
                     return
 
                 parsers = defaultdict(RequestParser)
-                schemas = defaultdict(
-                    lambda: {"type": "object", "properties": defaultdict(dict)}
-                )
+                schemas = defaultdict(lambda: {"type": "object", "properties": defaultdict(dict)})
                 self.update_schemas_parsers(doc, schemas, parsers, definitions)
                 self.schemas[path_key] = schemas
                 self.parsers[path_key] = parsers
@@ -316,9 +296,7 @@ class Swagger:
                     parsers[location].add_argument(
                         name,
                         type=self.SCHEMA_TYPES[
-                            value["schema"].get("type", None)
-                            if "schema" in value
-                            else value.get("type", None)
+                            value["schema"].get("type", None) if "schema" in value else value.get("type", None)
                         ],
                         required=value.get("required", False),
                         # Parsed in body
@@ -344,9 +322,7 @@ class Swagger:
                         parsers[location].add_argument(
                             name,
                             type=self.SCHEMA_TYPES[
-                                param["schema"].get("type", None)
-                                if "schema" in param
-                                else param.get("type", None)
+                                param["schema"].get("type", None) if "schema" in param else param.get("type", None)
                             ],
                             required=param.get("required", False),
                             location=self.SCHEMA_LOCATIONS[param["in"]],
@@ -363,9 +339,7 @@ class Swagger:
         else:
             schemas[location]["definitions"] = dict(definitions)
 
-    def validate(
-        self, schema_id, validation_function=None, validation_error_handler=None
-    ) -> Callable:
+    def validate(self, schema_id, validation_function=None, validation_error_handler=None) -> Callable:
         """
         A decorator that is used to validate incoming requests data
         against a schema
@@ -435,9 +409,7 @@ class Swagger:
         if schema_specs is None:
             raise KeyError("Specified schema_id '{0}' not found".format(schema_id))
 
-        for schema in (
-            parameter.get("schema") for parameter in schema_specs["parameters"]
-        ):
+        for schema in (parameter.get("schema") for parameter in schema_specs["parameters"]):
             if schema is not None and schema.get("id").lower() == schema_id:
                 return schema
 

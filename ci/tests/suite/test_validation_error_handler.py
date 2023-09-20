@@ -194,9 +194,7 @@ def test_swag(client, specs_data):
 
     super_invalid_film = {"title": "The Last Airbender", "release_date": 2010}
 
-    with client.post(
-        "/film", data=json.dumps(invalid_film), content_type="application/json"
-    ) as response:
+    with client.post("/film", data=json.dumps(invalid_film), content_type="application/json") as response:
         assert response.status_code == HTTPStatus.BAD_REQUEST
 
         received = json.loads(response.data.decode("utf-8"))
@@ -211,9 +209,7 @@ def test_swag(client, specs_data):
     ) as response:
         assert response.status_code == HTTPStatus.NOT_FOUND
 
-    with client.post(
-        "/retry/film", data=json.dumps(invalid_film), content_type="application/json"
-    ) as response:
+    with client.post("/retry/film", data=json.dumps(invalid_film), content_type="application/json") as response:
         assert response.status_code == HTTPStatus.OK
 
     with client.post(

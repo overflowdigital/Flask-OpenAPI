@@ -65,9 +65,7 @@ class PostAPIView(ModelAPIView):
 app = Flask(__name__)
 swag = Swagger(app)
 
-app.add_url_rule(
-    "/user/<team_id>", view_func=PostAPIView.as_view("user"), methods=["GET"]
-)
+app.add_url_rule("/user/<team_id>", view_func=PostAPIView.as_view("user"), methods=["GET"])
 
 if __name__ == "__main__":
     app.run(debug=True)

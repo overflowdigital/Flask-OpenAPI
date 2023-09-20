@@ -68,7 +68,7 @@ def validate(
         abort(Response("No data to validate", status=400))
 
     # not used anymore but kept to reuse with marshmallow
-    endpoint: str = request.endpoint or ''
+    endpoint: str = request.endpoint or ""
     verb: str = request.method.lower()
     endpoint = endpoint.lower().replace(".", "_")
 
@@ -88,7 +88,7 @@ def validate(
             final_filepath = filepath
         full_doc: str = load_from_file(final_filepath)
         yaml_start: int = full_doc.find("---")
-        swag = yaml.safe_load(full_doc[yaml_start if yaml_start >= 0 else 0:])
+        swag = yaml.safe_load(full_doc[yaml_start if yaml_start >= 0 else 0 :])
     else:
         swag = copy.deepcopy(specs)
 
@@ -96,9 +96,7 @@ def validate(
 
     definitions: dict = {}
     main_def: dict = {}
-    raw_definitions: list = extract_definitions(
-        params, endpoint=endpoint, verb=verb, openapi_version=openapi_version
-    )
+    raw_definitions: list = extract_definitions(params, endpoint=endpoint, verb=verb, openapi_version=openapi_version)
 
     if schema_id is None:
         for param in params:
@@ -170,11 +168,7 @@ def __replace_ref(schema, relative_path, swag) -> dict:
                 content = swag
                 for id in value.split("/")[1:]:
                     content = content[id]
-                return (
-                    __replace_ref(content, relative_path, swag)
-                    if isinstance(content, dict)
-                    else content
-                )
+                return __replace_ref(content, relative_path, swag) if isinstance(content, dict) else content
 
             if len(value) > 0 and value[0] == "/":
                 file_ref_path = absolute_path + value

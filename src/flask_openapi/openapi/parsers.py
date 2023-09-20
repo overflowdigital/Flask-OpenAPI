@@ -12,15 +12,13 @@ from flask_openapi.utils.files import get_path_from_doc, get_root_path, load_fro
 import yaml
 
 
-def parse_docstring(
-    obj, process_doc, endpoint=None, verb=None, swag_path=None
-) -> tuple:
+def parse_docstring(obj, process_doc, endpoint=None, verb=None, swag_path=None) -> tuple:
     """
     Gets swag data for method/view docstring
     """
     first_line, other_lines, swag = None, None, None
 
-    full_doc = ''
+    full_doc = ""
     if not swag_path:
         swag_path = getattr(obj, "swag_path", None)
     swag_type: Any | str = getattr(obj, "swag_type", "yml")
@@ -40,7 +38,7 @@ def parse_docstring(
         # TODO: handle multiple root_paths
         # to support `import: ` from multiple places
     else:
-        full_doc = inspect.getdoc(obj) or ''
+        full_doc = inspect.getdoc(obj) or ""
 
     if full_doc:
 
@@ -60,8 +58,8 @@ def parse_docstring(
             line_feed: int = full_doc.find("\n")
             if line_feed != -1:
                 first_line = process_doc(full_doc[:line_feed])
-                other_lines = process_doc(full_doc[line_feed + 1:yaml_sep])
-                swag = yaml.safe_load(full_doc[yaml_sep + 4:])
+                other_lines = process_doc(full_doc[line_feed + 1 : yaml_sep])
+                swag = yaml.safe_load(full_doc[yaml_sep + 4 :])
         else:
             if from_file:
                 swag = yaml.safe_load(full_doc)
@@ -77,14 +75,14 @@ def parse_definition_docstring(obj, process_doc, doc_dir=None) -> tuple:
     """
     doc_lines, swag = None, None
 
-    full_doc = ''
+    full_doc = ""
     swag_path: Any | None = getattr(obj, "swag_path", None)
     swag_type: Any | str = getattr(obj, "swag_type", "yml")
 
     if swag_path is not None:
         full_doc = load_from_file(swag_path, swag_type)
     else:
-        full_doc = inspect.getdoc(obj) or ''
+        full_doc = inspect.getdoc(obj) or ""
 
     if full_doc:
 
@@ -125,17 +123,15 @@ def parse_imports(full_doc, root_path=None):
     return full_doc
 
 
-def extract_definitions(
-    alist, level=None, endpoint=None, verb=None, prefix_ids=False, openapi_version=None
-) -> list:
+def extract_definitions(alist, level=None, endpoint=None, verb=None, prefix_ids=False, openapi_version=None) -> list:
     """
     Since we couldn't be bothered to register models elsewhere
     our definitions need to be extracted from the parameters.
     We require an 'id' field for the schema to be correctly
     added to the definitions list.
     """
-    endpoint = endpoint or request.endpoint or ''
-    verb = verb or request.method.lower() or ''
+    endpoint = endpoint or request.endpoint or ""
+    verb = verb or request.method.lower() or ""
     endpoint = endpoint.lower().replace(".", "_")
 
     def _extract_array_defs(source) -> list:
@@ -147,9 +143,7 @@ def extract_definitions(
         ret: list = []
         items = source.get("items")
         if items is not None and "schema" in items:
-            ret += extract_definitions(
-                [items], level + 1, endpoint, verb, prefix_ids, openapi_version
-            )
+            ret += extract_definitions([items], level + 1, endpoint, verb, prefix_ids, openapi_version)
         return ret
 
     # for tracking level of recursion
@@ -166,9 +160,7 @@ def extract_definitions(
             if schema_id is not None:
                 # add endpoint_verb to schema id to avoid conflicts
                 if prefix_ids:
-                    schema["id"] = schema_id = "{}_{}_{}".format(
-                        endpoint, verb, schema_id
-                    )
+                    schema["id"] = schema_id = "{}_{}_{}".format(endpoint, verb, schema_id)
                 # ^ api['SWAGGER']['prefix_ids'] = True
                 # ... for backwards compatibility with <= 0.5.14
 

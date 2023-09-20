@@ -48,9 +48,7 @@ def test_swag(client, specs_data):
 
         response_data = json.loads(response.data)
 
-        assert response_data.get("basePath") == "/api/", (
-            "wrong basePath: %r" % response_data
-        )
+        assert response_data.get("basePath") == "/api/", "wrong basePath: %r" % response_data
 
         paths = response_data.get("paths")
         assert "/get_cost" in paths, "get_cost NOK: %r" % response_data
@@ -64,9 +62,7 @@ def test_swag(client, specs_data):
         ),
     )
 
-    with client.post(
-        "/api/get_cost", data=json.dumps(req_data), content_type="application/json"
-    ) as response:
+    with client.post("/api/get_cost", data=json.dumps(req_data), content_type="application/json") as response:
         assert response.status_code == HTTPStatus.OK, "bad status: %r" % response.data
 
 

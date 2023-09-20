@@ -8,9 +8,7 @@ import re
 from typing import Any
 
 
-def get_swag_path_from_doc_dir(
-    method: Any, view_class: Any, doc_dir: str, endpoint: Any
-) -> str:
+def get_swag_path_from_doc_dir(method: Any, view_class: Any, doc_dir: str, endpoint: Any) -> str:
     file_path: str = ""
     func = method.__func__ if hasattr(method, "__func__") else method
     if view_class:
@@ -86,9 +84,7 @@ def load_from_file(swag_path: str, swag_type="yml", root_path=None) -> str:
                 return yaml_file.read()
         except IOError:  # pragma: no cover
             swag_path = swag_path.replace("/", os.sep).replace("\\", os.sep)
-            path: list[str] = swag_path.replace(
-                (root_path or os.path.dirname(__file__)), ""
-            ).split(os.sep)[1:]
+            path: list[str] = swag_path.replace((root_path or os.path.dirname(__file__)), "").split(os.sep)[1:]
             package_spec: ModuleSpec | None = importlib.util.find_spec(path[0])
             if package_spec and package_spec.has_location and package_spec.origin:
                 # Improvement idea: Use package_spec.submodule_search_locations
@@ -100,10 +96,8 @@ def load_from_file(swag_path: str, swag_type="yml", root_path=None) -> str:
             with open(swag_path) as yaml_file:
                 return yaml_file.read()
     except TypeError:
-        logging.warning(
-            f"File path {swag_path} is either doesnt exist or is in the wrong type"
-        )
-        return ''
+        logging.warning(f"File path {swag_path} is either doesnt exist or is in the wrong type")
+        return ""
 
 
 def detect_by_bom(path, default="utf-8") -> str:

@@ -12,7 +12,8 @@ def has_valid_dispatch_view_docs(endpoint) -> bool:
     """
     klass = endpoint.__dict__.get("view_class", None)
     return (
-        klass and hasattr(klass, "dispatch_request")
+        klass
+        and hasattr(klass, "dispatch_request")
         and hasattr(endpoint, "methods")
         and getattr(klass, "dispatch_request").__doc__
     )  # noqa

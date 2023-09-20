@@ -24,15 +24,7 @@ def generate_api_schema(file: IO, endpoint: str) -> dict:
     except RuntimeError as e:
         click.echo(e, err=True)
         click.echo(
-            "Possible values for endpoint are: {}".format(
-                ", ".join(
-                    [
-                        spec["endpoint"]
-                        for spec in current_app.swag.config["specs"]
-                        if "endpoint" in spec
-                    ]
-                )
-            ),
+            f"Possible values for endpoint are: {', '.join([spec['endpoint'] for spec in current_app.swag.config['specs'] if 'endpoint' in spec ])}",
             err=True,
         )
         raise click.Abort

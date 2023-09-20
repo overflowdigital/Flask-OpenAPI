@@ -138,9 +138,7 @@ app.add_url_rule(
     methods=["GET"],
     endpoint="should_be_v1_only",
 )
-app.add_url_rule(
-    "/v1/users", view_func=view, methods=["POST"], endpoint="should_be_v1_only_post"
-)
+app.add_url_rule("/v1/users", view_func=view, methods=["POST"], endpoint="should_be_v1_only_post")
 
 # LOADING SPECS FROM EXTERNAL FILE
 
@@ -151,17 +149,13 @@ def fromfile_decorated(username):
     return jsonify({"username": username})
 
 
-@app.route(
-    "/v1/decorated_no_descr/<username>", endpoint="should_be_v1_only_username_no_descr"
-)
+@app.route("/v1/decorated_no_descr/<username>", endpoint="should_be_v1_only_username_no_descr")
 @swag_from("docs/username_specs_no_descr.yml")
 def fromfile_decorated_no_descr(username):
     return jsonify({"username": username})
 
 
-@app.route(
-    "/v1/decorated_no_sep/<username>", endpoint="should_be_v1_only_username_no_sep"
-)
+@app.route("/v1/decorated_no_sep/<username>", endpoint="should_be_v1_only_username_no_sep")
 @swag_from("docs/username_specs_no_sep.yml")
 def fromfile_decorated_no_sep(username):
     return jsonify({"username": username})
@@ -173,17 +167,13 @@ def fromfile_decorated_bom(username):
     return jsonify({"username": username})
 
 
-@app.route(
-    "/v1/decorated_utf16/<username>", endpoint="should_be_v1_only_username_utf16"
-)
+@app.route("/v1/decorated_utf16/<username>", endpoint="should_be_v1_only_username_utf16")
 @swag_from("docs/username_specs_utf16.yml")
 def fromfile_decorated_utf16(username):
     return jsonify({"username": username})
 
 
-@app.route(
-    "/v1/decorated_utf32/<username>", endpoint="should_be_v1_only_username_utf32"
-)
+@app.route("/v1/decorated_utf32/<username>", endpoint="should_be_v1_only_username_utf32")
 @swag_from("docs/username_specs_utf32.yml")
 def fromfile_decorated_utf32(username):
     return jsonify({"username": username})
@@ -225,9 +215,7 @@ def fromfile_indocstring_no_descr(username):
     return jsonify({"username": username})
 
 
-@app.route(
-    "/v1/fileindoc_no_sep/<username>", endpoint="should_be_v1_only_username_no_sep_1"
-)
+@app.route("/v1/fileindoc_no_sep/<username>", endpoint="should_be_v1_only_username_no_sep_1")
 def fromfile_indocstring_no_sep(username):
     """
     file: docs/username_specs_no_sep.yml

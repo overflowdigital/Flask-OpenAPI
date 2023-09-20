@@ -19,7 +19,7 @@ def get_specs_data(mod):
     """
     # for each example app in /examples folder
     client = mod.app.test_client()
-    print(f'Running {mod}')
+    print(f"Running {mod}")
     # init swag if not yet inititalized (no-routes example)
     specs_route = None
     specs_data = {}
@@ -97,8 +97,7 @@ def pytest_generate_tests(metafunc):
 
     if "test_data" in metafunc.fixturenames:
         test_data = [
-            (mod, mod.app.test_client(), get_specs_data(mod), get_test_metadata(mod))
-            for mod in get_examples()
+            (mod, mod.app.test_client(), get_specs_data(mod), get_test_metadata(mod)) for mod in get_examples()
         ]
 
         metafunc.parametrize("test_data", test_data, ids=lambda x: x[0].__name__)

@@ -17,12 +17,7 @@ from werkzeug.datastructures import Authorization
 
 
 def _is_auth(auth: Optional[Authorization], username: str, password: str) -> bool:
-    return (
-        auth is not None
-        and auth.type == "basic"
-        and auth.username == username
-        and auth.password == password
-    )
+    return auth is not None and auth.type == "basic" and auth.username == username and auth.password == password
 
 
 def create_spec(spec: dict[str, str], endpoint: str) -> dict[str, str]:
@@ -43,9 +38,7 @@ def enrich_context(data: dict, config: dict) -> dict:
     data["flask_openapi_config"] = config
     data["json"] = json
     data["flask_openapi_version"] = __version__
-    data["favicon"] = config.get(
-        "favicon", url_for("flask_openapi.static", filename=DEFAULT_FAVICON)
-    )
+    data["favicon"] = config.get("favicon", url_for("flask_openapi.static", filename=DEFAULT_FAVICON))
     data["swagger_ui_bundle_js"] = config.get(
         "swagger_ui_bundle_js",
         url_for("flask_openapi.static", filename=DEFAULT_BUNDLE_JS),
@@ -54,12 +47,8 @@ def enrich_context(data: dict, config: dict) -> dict:
         "swagger_ui_standalone_preset_js",
         url_for("flask_openapi.static", filename=DEFAULT_PRESET_JS),
     )
-    data["jquery_js"] = config.get(
-        "jquery_js", url_for("flask_openapi.static", filename=DEFAULT_JQUERY)
-    )
-    data["swagger_ui_css"] = config.get(
-        "swagger_ui_css", url_for("flask_openapi.static", filename=DEFAULT_CSS)
-    )
+    data["jquery_js"] = config.get("jquery_js", url_for("flask_openapi.static", filename=DEFAULT_JQUERY))
+    data["swagger_ui_css"] = config.get("swagger_ui_css", url_for("flask_openapi.static", filename=DEFAULT_CSS))
 
     return data
 
@@ -84,13 +73,8 @@ class APIDocsView(MethodView):
 
         if is_auth:
             base_endpoint: str = self.config.get("endpoint", "flask_openapi")
-            specs: list[dict[str, str]] = [
-                create_spec(spec, base_endpoint)
-                for spec in self.config.get("specs", {})
-            ]
-            urls: list[dict[str, str]] = [
-                create_url(spec) for spec in specs if spec["name"]
-            ]
+            specs: list[dict[str, str]] = [create_spec(spec, base_endpoint) for spec in self.config.get("specs", {})]
+            urls: list[dict[str, str]] = [create_url(spec) for spec in specs if spec["name"]]
             data: dict = {
                 "specs": specs,
                 "urls": urls,
@@ -100,9 +84,7 @@ class APIDocsView(MethodView):
             if request.args.get("json"):
                 return jsonify(data)
             else:
-                return render_template(
-                    "flask_openapi/index.html", **enrich_context(data, self.config)
-                )
+                return render_template("flask_openapi/index.html", **enrich_context(data, self.config))
         else:
             return (
                 "Unauthorized",

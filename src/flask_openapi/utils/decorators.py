@@ -161,9 +161,7 @@ def swag_annotation(f) -> Callable:
                 specs["parameters"].append(m)
 
             elif issubclass(annotation, str):
-                specs["parameters"].append(
-                    {"name": variable, "in": "path", "type": "string", "required": True}
-                )
+                specs["parameters"].append({"name": variable, "in": "path", "type": "string", "required": True})
 
         function.specs_dict = specs
         _args: list = list(args)
