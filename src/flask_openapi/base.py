@@ -23,14 +23,14 @@ from flask.views import MethodView
 from markupsafe import Markup
 from werkzeug.datastructures import Authorization
 
+from flask_openapi.core.decorators import swag_annotation
+from flask_openapi.core.parser import (convert_responses_to_openapi3,
+                                       extract_definitions, extract_schema,
+                                       parse_definition_docstring,
+                                       parse_imports)
 from flask_openapi.core.specs import get_schema_specs, get_specs
-
-from .core.decorators import swag_annotation
-from .core.parser import (convert_responses_to_openapi3, extract_definitions,
-                          extract_schema, parse_definition_docstring,
-                          parse_imports)
-from .core.validation import validate
-from .utils.version import is_openapi3
+from flask_openapi.core.validation import validate
+from flask_openapi.utils.version import is_openapi3
 
 try:
     from flask_restful.reqparse import RequestParser
@@ -39,10 +39,11 @@ except ImportError:
 import jsonschema
 from mistune import markdown
 
-from . import __version__
-from .core.flask import get_vendor_extension_fields
-from .utils.constants import (OAS3_SUB_COMPONENTS, OPTIONAL_FIELDS,
-                              OPTIONAL_OAS3_FIELDS)
+from flask_openapi import __version__
+from flask_openapi.utils.constants import (OAS3_SUB_COMPONENTS,
+                                           OPTIONAL_FIELDS,
+                                           OPTIONAL_OAS3_FIELDS)
+from flask_openapi.utils.flask import get_vendor_extension_fields
 
 
 def NO_SANITIZER(text):
