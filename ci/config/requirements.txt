@@ -1,12 +1,9 @@
 build
 decorator
-flake8
 flask-restful
 flex
 marshmallow
 mypy
-pep8
-pylint
 pytest-cov
 pytest
 safety
