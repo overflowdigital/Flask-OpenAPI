@@ -12,7 +12,9 @@ from flask_openapi.utils.files import get_path_from_doc, get_root_path, load_fro
 import yaml
 
 
-def parse_docstring(obj, process_doc, endpoint=None, verb=None, swag_path=None) -> tuple:
+def parse_docstring(
+    obj, process_doc, endpoint=None, verb=None, swag_path=None
+) -> tuple:
     """
     Gets swag data for method/view docstring
     """
@@ -41,7 +43,6 @@ def parse_docstring(obj, process_doc, endpoint=None, verb=None, swag_path=None) 
         full_doc = inspect.getdoc(obj) or ""
 
     if full_doc:
-
         if full_doc.startswith("file:"):
             if not hasattr(obj, "root_path"):
                 obj.root_path = root_path
@@ -85,7 +86,6 @@ def parse_definition_docstring(obj, process_doc, doc_dir=None) -> tuple:
         full_doc = inspect.getdoc(obj) or ""
 
     if full_doc:
-
         if full_doc.startswith("file:"):
             if not hasattr(obj, "root_path"):
                 obj.root_path = get_root_path(obj)
@@ -123,7 +123,9 @@ def parse_imports(full_doc, root_path=None):
     return full_doc
 
 
-def extract_definitions(alist, level=None, endpoint=None, verb=None, prefix_ids=False, openapi_version=None) -> list:
+def extract_definitions(
+    alist, level=None, endpoint=None, verb=None, prefix_ids=False, openapi_version=None
+) -> list:
     """
     Since we couldn't be bothered to register models elsewhere
     our definitions need to be extracted from the parameters.
@@ -143,7 +145,9 @@ def extract_definitions(alist, level=None, endpoint=None, verb=None, prefix_ids=
         ret: list = []
         items = source.get("items")
         if items is not None and "schema" in items:
-            ret += extract_definitions([items], level + 1, endpoint, verb, prefix_ids, openapi_version)
+            ret += extract_definitions(
+                [items], level + 1, endpoint, verb, prefix_ids, openapi_version
+            )
         return ret
 
     # for tracking level of recursion
@@ -160,7 +164,9 @@ def extract_definitions(alist, level=None, endpoint=None, verb=None, prefix_ids=
             if schema_id is not None:
                 # add endpoint_verb to schema id to avoid conflicts
                 if prefix_ids:
-                    schema["id"] = schema_id = "{}_{}_{}".format(endpoint, verb, schema_id)
+                    schema["id"] = schema_id = "{}_{}_{}".format(
+                        endpoint, verb, schema_id
+                    )
                 # ^ api['SWAGGER']['prefix_ids'] = True
                 # ... for backwards compatibility with <= 0.5.14
 

@@ -96,7 +96,9 @@ def validate(
 
     definitions: dict = {}
     main_def: dict = {}
-    raw_definitions: list = extract_definitions(params, endpoint=endpoint, verb=verb, openapi_version=openapi_version)
+    raw_definitions: list = extract_definitions(
+        params, endpoint=endpoint, verb=verb, openapi_version=openapi_version
+    )
 
     if schema_id is None:
         for param in params:
@@ -168,7 +170,11 @@ def __replace_ref(schema, relative_path, swag) -> dict:
                 content = swag
                 for id in value.split("/")[1:]:
                     content = content[id]
-                return __replace_ref(content, relative_path, swag) if isinstance(content, dict) else content
+                return (
+                    __replace_ref(content, relative_path, swag)
+                    if isinstance(content, dict)
+                    else content
+                )
 
             if len(value) > 0 and value[0] == "/":
                 file_ref_path = absolute_path + value

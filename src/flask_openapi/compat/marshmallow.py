@@ -145,7 +145,6 @@ def convert_schemas(d: dict, definitions: Optional[dict] = None) -> dict:
                     new_v.append(item)
             v = new_v
         if inspect.isclass(v) and issubclass(v, Schema):
-
             if Schema is None:
                 raise RuntimeError("Please install marshmallow and apispec")
 

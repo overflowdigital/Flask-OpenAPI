@@ -31,7 +31,9 @@ class Meow(MethodView):
     pass
 
 
-app.add_url_rule("/meow/<int:param>/", view_func=Meow.as_view("meow"), methods=["DELETE"])
+app.add_url_rule(
+    "/meow/<int:param>/", view_func=Meow.as_view("meow"), methods=["DELETE"]
+)
 
 
 app.add_url_rule("/testview", view_func=TestView.as_view("testview"), methods=["GET"])

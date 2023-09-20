@@ -47,7 +47,6 @@ def swag_from(
     """
 
     def resolve_path(function, filepath) -> str | Path:
-
         if isinstance(filepath, Path):
             filepath = str(filepath)
 
@@ -93,7 +92,6 @@ def swag_from(
             return is_str_path
 
     def decorator(function) -> Callable:
-
         if is_path(specs):
             set_from_filepath(function)
             # function must have or a single swag_path or a list of them
@@ -115,7 +113,7 @@ def swag_from(
                     schema_id or definition,
                     validation_function=validation_function,
                     validation_error_handler=validation_error_handler,
-                    **validate_args
+                    **validate_args,
                 )
             return function(*args, **kwargs)
 
@@ -127,7 +125,6 @@ def swag_from(
 def swag_annotation(f) -> Callable:
     @wraps(f)
     def wrapper(*args, **kwargs):
-
         if not kwargs.pop("swag", False):
             return f(*args, **kwargs)
 
@@ -138,7 +135,6 @@ def swag_annotation(f) -> Callable:
             specs[key] = kwargs.pop(key, value)
 
         for variable, annotation in function.__annotations__.items():
-
             if issubclass(annotation, Schema):
                 annotation = annotation()
                 data: dict = annotation.to_specs_dict()
@@ -161,7 +157,9 @@ def swag_annotation(f) -> Callable:
                 specs["parameters"].append(m)
 
             elif issubclass(annotation, str):
-                specs["parameters"].append({"name": variable, "in": "path", "type": "string", "required": True})
+                specs["parameters"].append(
+                    {"name": variable, "in": "path", "type": "string", "required": True}
+                )
 
         function.specs_dict = specs
         _args: list = list(args)
@@ -177,9 +175,7 @@ def validate_annotation(an, var) -> Callable:
     def decorator(f) -> Callable:
         @wraps(f)
         def wrapper(*args, **kwargs) -> Any:
-
             if an.swag_validate:
-
                 payload: dict | None = None
 
                 if an.swag_in == "query":

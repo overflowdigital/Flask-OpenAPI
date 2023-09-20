@@ -11,7 +11,9 @@ import yaml
 
 
 def load_swagger_file(app: Flask, filename: str) -> Any:
-    loader: Callable = lambda stream: yaml.safe_load(parse_imports(stream.read(), filename))  # noqa
+    loader: Callable = lambda stream: yaml.safe_load(
+        parse_imports(stream.read(), filename)
+    )  # noqa
 
     if not filename.startswith("/"):
         filename = os.path.join(app.root_path, filename)
