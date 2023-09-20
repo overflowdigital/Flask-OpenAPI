@@ -7,7 +7,7 @@ from six import string_types
 from flask_openapi.core.marshmallow_apispec import Schema
 from flask_openapi.core.validation import validate
 from flask_openapi.utils.constants import DEFAULT_FIELDS
-from flask_openapi.utils.views import get_root_path
+from flask_openapi.utils.paths import get_root_path
 
 
 def swag_from(

@@ -8,9 +8,10 @@ except ImportError:
 
 from flask import Blueprint, Flask, jsonify, request
 
-from flask_openapi import Schema, Swagger, SwaggerView, fields, parser
+from flask_openapi import Schema, Swagger, SwaggerView, fields
 from flask_openapi.core.decorators import swag_from
 from flask_openapi.core.validation import validate
+from flask_openapi.core.parser import extract_schema
 
 # Examples include intentionally invalid defaults to demonstrate validation.
 _TEST_META_SKIP_FULL_VALIDATION = True
@@ -347,7 +348,7 @@ def test_swag(client, specs_data):
 
     assert paths is not None and len(paths) > 0
 
-    definitions = parser.extract_schema(apispec)
+    definitions = extract_schema(apispec)
 
     assert definitions is not None
     assert definitions.get("User") is not None

@@ -1,66 +1,37 @@
-import inspect
-import logging
-import os
-import re
+from flask.views import MethodView
 
 
-def remove_suffix(fpath):  # pragma: no cover
-    """Remove all file ending suffixes"""
-    return os.path.splitext(fpath)[0]
-
-
-def is_python_file(fpath):  # pragma: no cover
-    """Naive Python module filterer"""
-    return fpath.endswith(".py") and "__" not in fpath
-
-
-def get_path_from_doc(full_doc):
+def has_valid_dispatch_view_docs(endpoint):
     """
-    If `file:` is provided import the file.
+    Return True if dispatch_request is swaggable
     """
-    swag_path = full_doc.replace("file:", "").strip()
-    swag_type = swag_path.split(".")[-1]
-    return swag_path, swag_type
+    klass = endpoint.__dict__.get("view_class", None)
+    return (
+        klass
+        and hasattr(klass, "dispatch_request")
+        and hasattr(endpoint, "methods")
+        and getattr(klass, "dispatch_request").__doc__
+    )
 
 
-def get_root_path(obj):
+def get_vendor_extension_fields(mapping):
     """
-    Get file path for object and returns its dirname
+    Identify vendor extension fields and extract them into a new dictionary.
+    Examples:
+        >>> get_vendor_extension_fields({'test': 1})
+        {}
+        >>> get_vendor_extension_fields({'test': 1, 'x-test': 2})
+        {'x-test': 2}
     """
+    return {k: v for k, v in mapping.items() if k.startswith("x-")}
+
+
+def is_valid_method_view(endpoint):
+    """
+    Return True if obj is MethodView
+    """
+    klass = endpoint.__dict__.get("view_class", None)
     try:
-        filename = os.path.abspath(obj.__globals__["__file__"])
-    except (KeyError, AttributeError):
-        if getattr(obj, "__wrapped__", None):
-            # decorator package has been used in view
-            return get_root_path(obj.__wrapped__)
-        filename = inspect.getfile(obj)
-    return os.path.dirname(filename)
-
-
-def get_swag_path_from_doc_dir(
-    method: any, view_class: any, doc_dir: str, endpoint: any
-):
-    file_path = ""
-    func = method.__func__ if hasattr(method, "__func__") else method
-    if view_class:
-        file_path = os.path.join(doc_dir, endpoint.__name__, method.__name__ + ".yml")
-    else:
-        file_path = os.path.join(doc_dir, endpoint.__name__ + ".yml")
-    if file_path and os.path.isfile(file_path):
-        setattr(func, "swag_type", "yml")
-        setattr(func, "swag_path", file_path)
-    else:
-        # HACK: If the doc_dir doesn't quite match the filepath we take the doc_dir
-        # and the current filepath without the /tmp
-        file_path = getattr(func, "swag_path", None)
-        if file_path and not os.path.isfile(file_path):
-            regex = re.compile(r"(api.+)")
-            try:
-                file_path = doc_dir + regex.search(file_path)[0]
-                if os.path.isfile(file_path):
-                    setattr(func, "swag_type", "yml")
-                    setattr(func, "swag_path", file_path)
-            except Exception:
-                logging.exception(f"{file_path} is not a file")
-
-    return file_path
+        return issubclass(klass, MethodView)
+    except TypeError:
+        return False

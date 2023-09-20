@@ -43,7 +43,7 @@ from flask_openapi import __version__
 from flask_openapi.utils.constants import (OAS3_SUB_COMPONENTS,
                                            OPTIONAL_FIELDS,
                                            OPTIONAL_OAS3_FIELDS)
-from flask_openapi.utils.flask import get_vendor_extension_fields
+from flask_openapi.utils.views import get_vendor_extension_fields
 
 
 def NO_SANITIZER(text):
