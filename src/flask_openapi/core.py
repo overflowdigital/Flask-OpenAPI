@@ -47,7 +47,7 @@ class SwaggerDefinition:
 class Swagger:
     def __init__(
         self,
-        app: Flask = None,
+        app: Optional[Flask] = None,
         config: dict = {},
         sanitizer: Optional[Callable] = None,
         template: dict = {},
@@ -99,7 +99,7 @@ class Swagger:
         if app:
             self.init_app(app)
 
-    def init_app(self, app: Flask, decorators: list = None) -> None:
+    def init_app(self, app: Flask, decorators: Optional[list] = None) -> None:
         """Initialize the app with Swagger plugin"""
         self.decorators = decorators or self.decorators
         self.app: Flask = app
