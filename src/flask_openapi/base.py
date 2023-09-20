@@ -21,7 +21,6 @@ from flask import (
     Blueprint,
     current_app,
     jsonify,
-    Markup,
     redirect,
     render_template,
     request,
@@ -31,6 +30,7 @@ from flask import (
 from json import JSONEncoder
 from flask.views import MethodView
 from werkzeug.datastructures import Authorization
+from markupsafe import Markup
 
 try:
     from flask_restful.reqparse import RequestParser
@@ -49,7 +49,6 @@ from .utils import (
     get_specs,
     get_vendor_extension_fields,
     is_openapi3,
-    LazyString,
     parse_definition_docstring,
     parse_imports,
     swag_annotation,
@@ -978,10 +977,3 @@ class Swagger(object):
 
 # backwards compatibility
 Flasgger = Swagger  # noqa
-
-
-class LazyJSONEncoder(JSONEncoder):
-    def default(self, obj):
-        if isinstance(obj, LazyString):
-            return str(obj)
-        return super(LazyJSONEncoder, self).default(obj)
