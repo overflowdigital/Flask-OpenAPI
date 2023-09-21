@@ -42,7 +42,7 @@ platforms = ["any"]
 where = ['src']
 include = ['flask_openapi*']
 
-[tool.setuptools.package-data]
+[tools.setuptools.package-data]
 "*" = [
     "*.html",
     "*.js",
@@ -58,5 +58,5 @@ include = ['flask_openapi*']
     "*.map",
 ]
 
-[tool.setuptools.dynamic]
+[tools.setuptools.dynamic]
 version = { attr = "flask_openapi.__version__" }

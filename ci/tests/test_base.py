@@ -1,6 +1,6 @@
 import pytest
 
-from flask_openapi.base import Swagger
+from flask_openapi.openapi import Swagger
 
 
 def test_init_config(monkeypatch):
