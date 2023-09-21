@@ -50,9 +50,9 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Setup Worker
+        run: ci/scripts/setup_worker.sh
       - name: Build Package and Verify
         run: ci/scripts/build.sh
-        run: ci/scripts/setup_worker.sh
       - name: Run Unit Tests
         run: ci/scripts/test_runner.sh
       - name: Upload Test Report
