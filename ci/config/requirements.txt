@@ -9,4 +9,5 @@ safety
 setuptools
 twine
 wheel
+flask_restful
 -e .
