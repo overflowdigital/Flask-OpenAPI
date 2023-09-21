@@ -7,7 +7,7 @@ import jsonschema
 import yaml
 from flask import Response, abort, request
 
-from flask_openapi.core.parser import extract_definitions, extract_schema
+from flask_openapi.core.parser import parse_definitions, parse_schema
 from flask_openapi.utils.files import load_from_file
 
 
@@ -139,7 +139,7 @@ def validate(
 
     definitions = {}
     main_def = {}
-    raw_definitions = extract_definitions(
+    raw_definitions = parse_definitions(
         params, endpoint=endpoint, verb=verb, openapi_version=openapi_version
     )
 
@@ -163,8 +163,8 @@ def validate(
             definitions[defi["id"]] = defi
 
     # support definitions informed in dict
-    if schema_id in extract_schema(swag):
-        main_def = extract_schema(swag).get(schema_id)
+    if schema_id in parse_schema(swag):
+        main_def = parse_schema(swag).get(schema_id)
 
     # Doensn't need to alter 'definitions' according to open api
     # Since it main_def exists only in this function

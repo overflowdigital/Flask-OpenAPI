@@ -120,7 +120,7 @@ def parse_definition_docstring(obj, process_doc, doc_dir=None):
     return doc_lines, swag
 
 
-def extract_definitions(
+def parse_definitions(
     alist, level=None, endpoint=None, verb=None, prefix_ids=False, openapi_version=None
 ):
     """
@@ -142,7 +142,7 @@ def extract_definitions(
         ret = []
         items = source.get("items")
         if items is not None and "schema" in items:
-            ret += extract_definitions(
+            ret += parse_definitions(
                 [items], level + 1, endpoint, verb, prefix_ids, openapi_version
             )
         return ret
@@ -190,7 +190,7 @@ def extract_definitions(
             # this occurs recursively
             properties = schema.get("properties")
             if properties is not None:
-                defs += extract_definitions(
+                defs += parse_definitions(
                     properties.values(),
                     level + 1,
                     endpoint,
@@ -206,7 +206,7 @@ def extract_definitions(
     return defs
 
 
-def extract_schema(spec: dict) -> defaultdict:
+def parse_schema(spec: dict) -> defaultdict:
     """
     Returns schema resources according to openapi version
     """

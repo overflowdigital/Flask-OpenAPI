@@ -25,7 +25,7 @@ from werkzeug.datastructures import Authorization
 
 from flask_openapi.core.decorators import swag_annotation
 from flask_openapi.core.parser import (convert_responses_to_openapi3,
-                                       extract_definitions, extract_schema,
+                                       parse_definitions, parse_schema,
                                        parse_definition_docstring,
                                        parse_imports)
 from flask_openapi.core.specs import get_schema_specs, get_specs
@@ -436,7 +436,7 @@ class Swagger(object):
             data.update(self.template)
 
         paths = data["paths"]
-        definitions = extract_schema(data)
+        definitions = parse_schema(data)
         ignore_verbs = set(self.config.get("ignore_verbs", ("HEAD", "OPTIONS")))
 
         # technically only responses is non-optional
@@ -488,7 +488,7 @@ class Swagger(object):
                 (update_schemas,) = update_schemas
             definitions.update(update_schemas)
             defs = []  # swag.get('definitions', [])
-            defs += extract_definitions(
+            defs += parse_definitions(
                 defs,
                 endpoint=rule.endpoint,
                 verb=verb,
@@ -502,7 +502,7 @@ class Swagger(object):
                 if len(params) == 0 and verb.lower() in http_methods:
                     params = verb_swag.get("parameters", [])
 
-            defs += extract_definitions(
+            defs += parse_definitions(
                 params,
                 endpoint=rule.endpoint,
                 verb=verb,
@@ -513,7 +513,7 @@ class Swagger(object):
             request_body = swag.get("requestBody")
             if request_body:
                 content = request_body.get("content", {})
-                extract_definitions(
+                parse_definitions(
                     list(content.values()),
                     endpoint=rule.endpoint,
                     verb=verb,
@@ -524,7 +524,7 @@ class Swagger(object):
             callbacks = swag.get("callbacks", {})
             if callbacks:
                 callbacks = {str(key): value for key, value in callbacks.items()}
-                extract_definitions(
+                parse_definitions(
                     list(callbacks.values()),
                     endpoint=rule.endpoint,
                     verb=verb,
@@ -537,7 +537,7 @@ class Swagger(object):
                 responses = swag.get("responses", {})
                 responses = {str(key): value for key, value in responses.items()}
                 if responses is not None:
-                    defs = defs + extract_definitions(
+                    defs = defs + parse_definitions(
                         responses.values(),
                         endpoint=rule.endpoint,
                         verb=verb,
@@ -788,7 +788,7 @@ class Swagger(object):
                     if path in apispec["paths"]:
                         if request.method.lower() in apispec["paths"][path]:
                             doc = apispec["paths"][path][request.method.lower()]
-                            definitions = extract_schema(apispec)
+                            definitions = parse_schema(apispec)
                             break
                 if not doc:
                     return
