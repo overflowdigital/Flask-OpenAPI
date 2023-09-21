@@ -9,8 +9,6 @@ on:
 jobs:
   static_checks:
     name: Static Checks
-    needs: pre_release_check
-    if: needs.pre_release_check.outputs.should_run == 'true'
     permissions:
       actions: read
       contents: read
@@ -27,8 +25,6 @@ jobs:
     
   unit_tests:
     name: Unit Tests
-    needs: pre_release_check
-    if: needs.pre_release_check.outputs.should_run == 'true'
     permissions:
       actions: read
       contents: read
@@ -56,8 +52,7 @@ jobs:
 
   build_release:
     name: Build Release
-    needs: [pre_release_check, static_checks, unit_tests]
-    if: needs.pre_release_check.outputs.should_run == 'true'
+    needs: [static_checks, unit_tests]
     permissions:
       actions: read
       contents: read
