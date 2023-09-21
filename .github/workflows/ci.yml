@@ -4,13 +4,11 @@ on:
     branches:
     - master
   push:
-    branches:
-    - master
   schedule:
     - cron: "00 09 * * *"
 jobs:
-  continuous_integration:
-    name: Continuous Integration
+  static_checks:
+    name: Static Checks
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -20,6 +18,15 @@ jobs:
         run: ci/scripts/build.sh
       - name: Perform Static Code Analysis
         run: ci/scripts/codescan.sh
+  unit_tests:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup Worker
+        run: ci/scripts/setup_worker.sh
+      - name: Build Package and Verify
+        run: ci/scripts/build.sh
       - name: Run Unit Tests
         run: ci/scripts/test_runner.sh
       - name: Upload Test Report
