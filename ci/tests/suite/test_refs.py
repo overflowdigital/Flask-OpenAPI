@@ -4,8 +4,10 @@
 Example to test cascading $refs and basePath
 """
 
-from flask import Flask, jsonify, Blueprint
-from flask_openapi import swag_from, Swagger
+from flask import Blueprint, Flask, jsonify
+
+from flask_openapi import Swagger
+from flask_openapi.core.decorators import swag_from
 
 try:
     import simplejson as json

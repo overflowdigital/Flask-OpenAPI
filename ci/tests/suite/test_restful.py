@@ -5,7 +5,8 @@ requires: `pip install flask-restful`
 from flask import Flask
 from flask_restful import Api, Resource, abort, reqparse
 
-from flask_openapi import Swagger, swag_from
+from flask_openapi import Swagger
+from flask_openapi.core.decorators import swag_from
 
 app = Flask(__name__)
 api = Api(app)

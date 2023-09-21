@@ -4,7 +4,7 @@ Example using a dictionary as specification instead of YAML
 from flask import Flask, jsonify
 
 from flask_openapi import Swagger
-from flask_openapi.utils import swag_from
+from flask_openapi.core.decorators import swag_from
 
 app = Flask(__name__)
 app.config["SWAGGER"] = {"title": "Colors API", "uiversion": 2}

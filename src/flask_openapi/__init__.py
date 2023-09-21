@@ -3,15 +3,13 @@ __version__ = "1.3.2"
 # Based on works of Bruno Rocha and the Flasgger open source community
 
 
-from jsonschema import ValidationError  # noqa
+from jsonschema import ValidationError
 
-from .base import (
-    BR_SANITIZER,
-    Flasgger,
-    MK_SANITIZER,
-    NO_SANITIZER,
-    Swagger,
-)
-from .constants import OPTIONAL_FIELDS  # noqa
-from .marshmallow_apispec import APISpec, fields, Schema, SwaggerView  # noqa
-from .utils import apispec_to_template, swag_from, validate  # noqa
+from flask_openapi.openapi import (Flasgger, Swagger, OpenAPI)
+from flask_openapi.core.decorators import swag_from
+from flask_openapi.core.marshmallow_apispec import (APISpec, Schema,
+                                                    SwaggerView, fields)
+from flask_openapi.core.specs import apispec_to_template
+from flask_openapi.core.validation import validate
+from flask_openapi.utils.constants import OPTIONAL_FIELDS
+from flask_openapi.utils.sanitizers import BR_SANITIZER, MK_SANITIZER, NO_SANITIZER

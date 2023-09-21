@@ -3,8 +3,10 @@ In this example `openapi` version is used instead of `swagger` version.
 This example will test validation when post
 """
 from flask import Flask, jsonify, request
-from flask_openapi import Swagger, swag_from
 from flask_restful import Api, Resource
+
+from flask_openapi import Swagger
+from flask_openapi.core.decorators import swag_from
 
 app = Flask(__name__)
 api = Api(app)
