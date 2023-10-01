@@ -1,5 +1,7 @@
 # DO NOT CHANGE MANUALLY THIS IS CHANGED IN THE PIPELINES
-__version__ = "1.3.2"
+# 9.9.9 is required to build locally (bit of a hack)
+__version__ = "9.9.9"
+
 # Based on works of Bruno Rocha and the Flasgger open source community
 
 

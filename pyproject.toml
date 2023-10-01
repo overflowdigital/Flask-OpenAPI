@@ -6,21 +6,21 @@ build-backend = "setuptools.build_meta"
 name = "Flask-OpenAPI3-UI"
 dynamic = ["version"]
 license = { file = "LICENSE" }
-requires-python = ">=3.6.1"
+requires-python = ">=3.8.0"
+description = "Next generation OpenAPI v3 Integration for Flask based APIs. Based on Flasgger."
+readme = "README.md"
+keywords = ['flask', 'swagger', 'openapi', 'python', 'api', 'rest', 'openapi3']
 authors = [{ name = "Overflow Digital", email = "team@overflow.digital" }]
 maintainers = [
     { name = "Katerina Tiddy", email = "katerina@overflow.digital" },
     { name = "Joshua Thompson-Lindley", email = "joshua@overflow.digital" },
 ]
-description = "Next generation OpenAPI v3 Integration for Flask based APIs. Based on Flasgger."
-readme = "README.md"
 classifiers = [
     "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Developers",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.6",
+    "Programming Language :: Python :: 3.8",
 ]
-keywords = ['flask', 'swagger', 'openapi', 'python', 'api', 'rest', 'openapi3']
 dependencies = [
     "Flask>=2.1.2",
     "PyYAML>=6.0",
@@ -42,7 +42,7 @@ platforms = ["any"]
 where = ['src']
 include = ['flask_openapi*']
 
-[tools.setuptools.package-data]
+[tool.setuptools.package-data]
 "*" = [
     "*.html",
     "*.js",
@@ -58,5 +58,5 @@ include = ['flask_openapi*']
     "*.map",
 ]
 
-[tools.setuptools.dynamic]
+[tool.setuptools.dynamic]
 version = { attr = "flask_openapi.__version__" }

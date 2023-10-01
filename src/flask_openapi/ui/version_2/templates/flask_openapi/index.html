@@ -57,7 +57,7 @@
         supportedSubmitMethods: ['get', 'post', 'put', 'delete', 'patch'],
         onComplete: function(swaggerApi, swaggerUi){
           if(typeof initOAuth == "function") {
-              let oauth_config = {{ flasgger_config.get("auth") | safe }};
+              let oauth_config = {{ ui_config.get("auth") | safe }};
               initOAuth(oauth_config);
           }
 
@@ -98,8 +98,8 @@
         onFailure: function(data) {
           log("Unable to Load SwaggerUI");
         },
-        {% if flasgger_config.doc_expansion -%}
-            docExpansion: "{{flasgger_config.doc_expansion | safe }}",
+        {% if ui_config.doc_expansion -%}
+            docExpansion: "{{ui_config.doc_expansion | safe }}",
         {%- else %}
            docExpansion: "none",
         {%- endif %}
@@ -147,6 +147,7 @@
 <div class="swagger-ui-wrap footer">
 <small style="font-size: 60%; color: #ccc;">
 [Powered by <a href="https://github.com/overflowdigital/Flask-OpenAPI">Flask OpenAPI3 UI</a>]
+[UI Version 2.0.0]
 </small>
 </div>
 </body>

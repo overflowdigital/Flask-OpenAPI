@@ -66,7 +66,7 @@ class APIDocsView(MethodView):
                 # calling with ?json returns specs
                 return jsonify(data)
             else:  # pragma: no cover
-                data["flasgger_config"] = self.config
+                data["ui_config"] = self.config
                 data["json"] = json
                 data["flasgger_version"] = __version__
                 data["favicon"] = self.config.get(

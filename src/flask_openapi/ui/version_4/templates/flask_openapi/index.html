@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    {% include 'flask_openapi/head.html' %} 
+    {% include 'flask_openapi/custom_head.html' %}
+  </head>
+  <body>
+    {% include 'flask_openapi/top.html' %}
+    <div id="swagger-ui">
+      <div data-reactroot="" class="swagger-ui">
+          <div class="information-container wrapper">
+            <section class="block col-12">
+              <div class="loading-container"><div class="loading"></div></div>
+            </section>
+          </div>
+      </div>
+    </div>
+    <div id="swagger-ui"></div>
+    {% include 'flask_openapi/body_scripts.html' %}
+    {% include 'flask_openapi/swagger.html' %}
+    {% include 'flask_openapi/footer.html' %}
+  </body>
+</html>
