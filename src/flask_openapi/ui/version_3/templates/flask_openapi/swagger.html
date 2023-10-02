@@ -1,0 +1,111 @@
+<script>
+  window.onload = function() {
+      {% if config.JWT_AUTH_URL_RULE -%}
+      var jwt_token;
+      {%- endif %}
+
+      const ui = SwaggerUIBundle(Object.assign({
+
+        {% if urls %}
+        urls: {{ urls | tojson }},
+        {% else %}
+        url: "{{ specs[0]['url'] }}",
+        {% endif %}
+
+        dom_id: '#swagger-ui',
+        validatorUrl: null,
+        displayOperationId: true,
+        deepLinking: true,
+        jsonEditor: true,
+
+        {% if ui_config.doc_expansion -%}
+        docExpansion: "{{ui_config.doc_expansion | safe }}",
+        {%- endif %}
+
+        apisSorter: "alpha",
+        presets: [
+            SwaggerUIBundle.presets.apis,
+            SwaggerUIStandalonePreset
+        ],
+        plugins: [
+            SwaggerUIBundle.plugins.DownloadUrl
+        ],
+
+        {% if config.JWT_AUTH_URL_RULE -%}
+        requestInterceptor: function(request) {
+            if (jwt_token) {
+                {% if config.JWT_AUTH_HEADER_NAME -%}
+                    var jwtAuthHeaderName = "{{ config.JWT_AUTH_HEADER_NAME }}";
+                {%- else %}
+                    var jwtAuthHeaderName = "Authorization";
+                {%- endif %}
+
+                {% if config.JWT_AUTH_HEADER_TYPE -%}
+                    var jwtAuthHeaderType = "{{ config.JWT_AUTH_HEADER_TYPE }}";
+                {%- else %}
+                    var jwtAuthHeaderType = "Bearer";
+                {%- endif %}
+
+                request.headers[jwtAuthHeaderName] = jwtAuthHeaderType + " " + jwt_token;
+            }
+            return request;
+        },
+        responseInterceptor: function(response) {
+            {% if config.JWT_AUTH_HEADER_TOKEN -%}
+                var jwtAuthHeaderToken = "{{ config.JWT_AUTH_HEADER_TOKEN }}";
+            {%- else %}
+                var jwtAuthHeaderToken = "jwt-token";
+            {%- endif %}
+
+            var tokenField = jwtAuthHeaderToken;
+            var headers = response.headers;
+
+            if (headers.hasOwnProperty(tokenField)) {
+             jwt_token = headers[tokenField];
+            }
+
+            return response;
+        },
+        {%- endif %}
+
+        {% if not ui_config.hide_top_bar -%}
+        layout: "StandaloneLayout",
+        {%- endif %}
+
+      },
+
+      {{ json.dumps(ui_config.get('ui_params', {})) | safe }}
+
+      {% if ui_config.ui_params_text -%}
+      , {{ ui_config.ui_params_text | safe }}
+      {%- endif %}
+      ));
+
+      {% if ui_config.oauth %}
+      ui.initOAuth({{ json.dumps(ui_config['oauth']) | safe }})
+      {%- endif %}
+
+      {% if ui_config.auth %}
+      let auth_config = {{ ui_config.get("auth") | safe }}
+      {%- endif %}
+
+      window.ui = ui
+
+      {% if not ui_config.hide_top_bar -%}
+      $(".topbar-wrapper .link span").replaceWith("<span>{{title}}</span>");
+      {%- endif %}
+
+        {% if ui_config.logo -%}
+        $(".topbar a svg").replaceWith("<img src='{{ui_config.logo}}' alt='{{title}}' height='25'/>");
+        {%- endif %}
+
+        {% if ui_config.hide_url_bar -%}
+        $(".topbar form").remove();
+        $('.information-container.wrapper section div div hgroup a span').replaceWith("<span class='url'>Download API Specification</span>");
+        {%- endif %}
+
+        {% if ui_config.top_bar_color -%}
+        $('.topbar').css('background-color', '{{ui_config.top_bar_color}}');
+        {%- endif %}
+  }
+</script>

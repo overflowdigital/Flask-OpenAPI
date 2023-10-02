@@ -1,0 +1,81 @@
+name: Manually Build Release
+on:
+  workflow_dispatch:
+    inputs:
+      versionNumber:
+        description: "Version number of this release"
+        required: true
+        type: string
+jobs:
+  static_checks:
+    name: Static Checks
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup Worker
+        run: ci/scripts/setup_worker.sh
+      - name: Build Package and Verify
+        run: ci/scripts/build.sh
+      - name: Perform Static Code Analysis
+        run: ci/scripts/codescan.sh
+    
+  unit_tests:
+    name: Unit Tests
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup Worker
+        run: ci/scripts/setup_worker.sh
+      - name: Build Package and Verify
+        run: ci/scripts/build.sh
+      - name: Run Unit Tests
+        run: ci/scripts/test_runner.sh
+      - name: Upload Test Report
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v2
+        with:
+          name: unit-test-report
+          path: |
+            /home/runner/work/Flask-OpenAPI/Flask-OpenAPI/ci/tests/report.xml
+            /home/runner/work/Flask-OpenAPI/Flask-OpenAPI/ci/tests/coverage.xml
+            /home/runner/work/Flask-OpenAPI/Flask-OpenAPI/ci/tests/pytest.log
+          if-no-files-found: ignore
+          retention-days: 1
+
+  build_release:
+    name: Build Release
+    needs: [static_checks, unit_tests]
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup Worker
+        run: ci/scripts/setup_worker.sh
+      - name: Increment Version Number
+        run: ci/scripts/new_version.sh ${{inputs.versionNumber}}
+      - name: Build Package and Verify
+        run: ci/scripts/build.sh
+      - name: Upload release to PyPI
+        run: python3 -m twine upload --username=__token__ --password=${{secrets.PYPI_TOKEN}} dist/*
+      - name: Create GitHub Release
+        run: gh release create v${{inputs.versionNumber}} --latest --generate-notes dist/*
+        env:
+          GITHUB_TOKEN: ${{secrets.GH_TOKEN}}
+      - name: Upload Build Artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: Flask-OpenAPI
+          path: /home/runner/work/Flask-OpenAPI/dist
+          if-no-files-found: ignore
+          retention-days: 1

@@ -1,0 +1,5 @@
+[pytest]
+junit_logging=all
+junit_suite_name=FlaskOpenAPITestSuite
+filterwarnings=
+    ignore:DeprecationWarning

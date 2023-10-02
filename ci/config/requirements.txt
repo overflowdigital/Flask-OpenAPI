@@ -1,0 +1,14 @@
+build
+flake8
+flex
+marshmallow
+mypy
+pytest-cov
+pytest
+safety
+setuptools
+decorator
+twine
+wheel
+flask_restful
+-e .
