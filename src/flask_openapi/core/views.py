@@ -68,6 +68,7 @@ class APIDocsView(MethodView):
             else:  # pragma: no cover
                 data["ui_config"] = self.config
                 data["json"] = json
+                data["title"] = self.config.get("title", "API Docs")
                 data["flasgger_version"] = __version__
                 data["favicon"] = self.config.get(
                     "favicon",

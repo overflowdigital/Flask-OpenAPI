@@ -95,5 +95,20 @@
       {% if not ui_config.hide_top_bar -%}
       $(".topbar-wrapper .link span").replaceWith("<span>{{title}}</span>");
       {%- endif %}
+
+    {% if ui_config.logo -%}
+              $(".topbar a svg").replaceWith("<img src='{{ui_config.ui_customisations.logo}}' alt='{{title}}' height='25'/>");
+    {%- endif %}
+
+    {% if ui_config.hide_url_bar -%}
+              $(".topbar form").remove();
+    {%- endif %}
+
+    {% if ui_config.top_bar_color -%}
+    $('.topbar').css('background-color', '{{ui_config.ui_customisations.top_bar_color}}');
+    {%- endif %}
+
+
+
   }
 </script>
