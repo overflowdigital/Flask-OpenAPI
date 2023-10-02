@@ -558,10 +558,10 @@ class Swagger(object):
                 url_prefix=self.config.get("url_prefix", None),
                 subdomain=self.config.get("subdomain", None),
                 template_folder=self.config.get(
-                    "template_folder", "ui{0}/templates".format(uiversion)
+                    "template_folder", "ui/version_{0}/templates".format(uiversion)
                 ),
                 static_folder=self.config.get(
-                    "static_folder", "ui{0}/static".format(uiversion)
+                    "static_folder", "ui/version_{0}/static".format(uiversion)
                 ),
                 static_url_path=self.config.get("static_url_path", None),
             )

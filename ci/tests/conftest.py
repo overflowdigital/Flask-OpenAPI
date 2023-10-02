@@ -29,12 +29,12 @@ def get_specs_data(mod):
     # get all the specs defined for the example app
     else:
         try:
-            flasgger_config = mod.swag.config
+            ui_config = mod.swag.config
 
-            if flasgger_config.get("swagger_ui") is False:
+            if ui_config.get("swagger_ui") is False:
                 return specs_data
 
-            specs_route = flasgger_config.get("specs_route", "/apidocs/")
+            specs_route = ui_config.get("specs_route", "/apidocs/")
         except AttributeError:
             pass
 
