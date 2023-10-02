@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Change this to whatever python interpreter you use.
-PYTHON_INTERP="/opt/homebrew/python3.10"
+PYTHON_INTERP="/opt/homebrew/bin/python3.10"
 
 REPO="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
 REPO=$(dirname "$REPO../")
