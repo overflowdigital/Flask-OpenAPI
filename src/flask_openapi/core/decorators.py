@@ -199,3 +199,5 @@ def swag_annotation(f):
         return f(*args, **kwargs)
 
     return wrapper
+
+openapi_spec = swag_from

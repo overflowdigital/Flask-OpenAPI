@@ -79,7 +79,6 @@
       {% if ui_config.ui_params_text -%}
       , {{ ui_config.ui_params_text | safe }}
       {%- endif %}
-
       ));
 
       {% if ui_config.oauth %}
@@ -96,19 +95,17 @@
       $(".topbar-wrapper .link span").replaceWith("<span>{{title}}</span>");
       {%- endif %}
 
-    {% if ui_config.logo -%}
-              $(".topbar a img").replaceWith("<img src='{{ui_config.logo}}' alt='{{title}}' height='25'/>");
-    {%- endif %}
+        {% if ui_config.logo -%}
+        $(".topbar a svg").replaceWith("<img src='{{ui_config.logo}}' alt='{{title}}' height='25'/>");
+        {%- endif %}
 
-    {% if ui_config.hide_url_bar -%}
-              $(".topbar form").remove();
-    {%- endif %}
+        {% if ui_config.hide_url_bar -%}
+        $(".topbar form").remove();
+        $('.information-container.wrapper section div div hgroup a span').replaceWith("<span class='url'>Download API Specification</span>");
+        {%- endif %}
 
-    {% if ui_config.top_bar_color -%}
-    $('.topbar').css('background-color', '{{ui_config.top_bar_color}}');
-    {%- endif %}
-
-
-
+        {% if ui_config.top_bar_color -%}
+        $('.topbar').css('background-color', '{{ui_config.top_bar_color}}');
+        {%- endif %}
   }
 </script>
