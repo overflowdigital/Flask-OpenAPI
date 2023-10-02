@@ -97,7 +97,7 @@
       {%- endif %}
 
     {% if ui_config.logo -%}
-              $(".topbar a img").replaceWith("<img src='{{ui_config.ui_customisations.logo}}' alt='{{title}}' height='25'/>");
+              $(".topbar a img").replaceWith("<img src='{{ui_config.logo}}' alt='{{title}}' height='25'/>");
     {%- endif %}
 
     {% if ui_config.hide_url_bar -%}
@@ -105,7 +105,7 @@
     {%- endif %}
 
     {% if ui_config.top_bar_color -%}
-    $('.topbar').css('background-color', '{{ui_config.ui_customisations.top_bar_color}}');
+    $('.topbar').css('background-color', '{{ui_config.top_bar_color}}');
     {%- endif %}
 
 
