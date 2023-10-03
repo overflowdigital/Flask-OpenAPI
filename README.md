@@ -1,47 +1,29 @@
-# Flask-OpenAPI3-UI
+# Flask-OpenAPI
 
-[![Python](https://img.shields.io/badge/python-3.6.1-blue.svg)](https://img.shields.io/badge/python-3.6.1-blue.svg)
+[![Python](https://img.shields.io/badge/python-3.8.0-blue.svg)](https://img.shields.io/badge/python-3.8..0-blue.svg)
 [![PyPi](https://img.shields.io/pypi/v/Flask-OpenAPI3-UI.svg)](https://pypi.python.org/pypi/Flask-OpenAPI3-UI)
 [![PyPi](https://img.shields.io/pypi/dm/Flask-OpenAPI3-UI.svg)](https://pypi.python.org/pypi/Flask-OpenAPI3-UI)
 [![Flask-OpenAPI3-UI](https://snyk.io/advisor/python/Flask-OpenAPI3-UI/badge.svg)](https://snyk.io/advisor/python/Flask-OpenAPI3-UI)
 
-Next generation OpenAPI v3 Integration for Flask based APIs. Based on Flasgger.
+Flask-OpenAPI is a Flask extension that provides integration with OpenAPI v2, v3, and v3.1 specifications easily.
 
-## Install
-```
-pip install Flask-OpenAPI3-UI
-```
+## Features
+- Easy OpenAPI specification definitions with the `openapi_spec` decorator
+- Customisable Swagger UI
+- Supports OpenAPI v2.0, v3.0, and v3.1
+- Supports Swagger UI v2, v3, v4, and v5.
 
-## Usage
-You can start your Swagger spec with any default data providing a template:
-```python
-from flask_openapi import Swagger
+## Getting Started
+To quickly install:
+`pip install Flask-OpenAPI3-UI`
 
-def main():
-  app = create_app()
-  app.config['SWAGGER'] = {
-      "uiversion": 3,
-      "openapi": "3.0.3",
-      "info": {
-          "title": "API documentation",
-          "description": "API docs for ",
-          "version": 1.0.0
-      },
-      "swagger_ui": True,
-      "basePath": "/api",  # base bash for blueprint registration
-      "components": {
-          "securitySchemes": {
-              "bearerAuth": {
-                  "type": "http",
-                  "scheme": "bearer",
-                  "bearerFormat": "JWT"
-              }
-          }
-      },
-      "title": "API docs",
-      "optional_fields": ["components", "tags", "paths"],
-      "doc_dir": "/home/admin/flaskapp/src/api/",
-  }
-  Swagger(app=app)
-```
-And then the template is the default data unless some view changes it. You can also provide all your specs as template and have no views. Or views in external APP.
+See the [Getting Started](https://github.com/overflowdigital/Flask-OpenAPI/wiki) documentation to get installed and setup with your Flask application.
+
+## Contributing
+See the [Contributing Guide](https://github.com/overflowdigital/Flask-OpenAPI/blob/main/CONTRIBUTING.md) for more information on contributing to the project.
+
+## Security
+We take security seriously, please read the [Security Advisory](https://github.com/overflowdigital/Flask-OpenAPI/blob/main/SECURITY.md) for more information.
+
+## Code of Conduct
+We take zero tolerance on attacks on our OSS community, please see the [Code of Conduct](https://github.com/overflowdigital/Flask-OpenAPI/blob/main/CODE_OF_CONDUCT.md) for more information
