@@ -6,8 +6,9 @@ The latest minor release of a major version is supported with necessary security
 
 | Version | Supported          |
 | ------- | ------------------ |
-| 1.3.x   | Currently Supported |
-| <=1.2.x | Deprecated         |
+| 2.x.x   | Supported |
+| 1.8.x   | End of Life |
+| <=1.8.x | Deprecated         |
 
 
 ## Reporting a Vulnerability
