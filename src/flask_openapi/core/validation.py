@@ -14,7 +14,7 @@ from flask_openapi.utils.files import load_from_file
 def __replace_ref(schema: dict, relative_path: str, swag: dict) -> dict:
     """
     Replace $ref in schema
-    
+
     :param schema: schema
     :type schema: dict
 
@@ -146,7 +146,7 @@ def validate(
         abort(Response("No data to validate", status=400))
 
     # not used anymore but kept to reuse with marshmallow
-    endpoint: str = (request.endpoint or '').lower().replace(".", "_")
+    endpoint: str = (request.endpoint or "").lower().replace(".", "_")
     verb: str = request.method.lower()
 
     if filepath:
