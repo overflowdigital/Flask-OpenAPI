@@ -6,8 +6,20 @@ from typing import Literal, Optional
 
 
 def detect_by_bom(path: str, default: str = "utf-8") -> str:
-    with open(path, "rb") as f:
-        raw = f.read(4)
+    """
+    Detect encoding by BOM
+
+    :param path: path to file
+    :type path: str
+
+    :param default: default encoding
+    :type default: str
+
+    :return: encoding
+    :rtype: str
+    """
+    with open(path, "rb") as file:
+        raw: bytes = file.read(4)
 
     encoding_map = (
         ("utf-8-sig", (codecs.BOM_UTF8,)),
