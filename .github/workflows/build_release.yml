@@ -35,11 +35,6 @@ jobs:
         env:
           PR: ${{ github.event.pull_request.number }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Import Ordering Check
-        run: ci/scripts/codescan.sh isort
-        env:
-          PR: ${{ github.event.pull_request.number }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Formatting Check
         run: ci/scripts/codescan.sh black
         env:

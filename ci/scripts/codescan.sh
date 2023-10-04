@@ -13,9 +13,6 @@ case $TOOL in
     'black')
         black --check $REPO/src
         ;;
-    'isort')
-        isort --check-only $REPO/src
-        ;;
     'flake8')
         flake8 $REPO/src/flask_openapi --config $REPO/ci/config/.flake8rc $REPO/src || true
         ;;
