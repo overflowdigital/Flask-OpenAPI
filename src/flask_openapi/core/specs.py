@@ -1,14 +1,15 @@
 from copy import deepcopy
+from typing import Any, Callable, Iterator, Optional, Union
 
 from flask import current_app
-
-from flask_openapi.core.marshmallow_apispec import SwaggerView, convert_schemas
+from flask_openapi.core.marshmallow_apispec import convert_schemas, SwaggerView
 from flask_openapi.core.parser import parse_docstring
 from flask_openapi.utils.constants import OPTIONAL_FIELDS
 from flask_openapi.utils.paths import get_swag_path_from_doc_dir
 from flask_openapi.utils.types import ordered_dict_to_dict
 from flask_openapi.utils.version import is_openapi3
 from flask_openapi.utils.views import has_valid_dispatch_view_docs, is_valid_method_view
+from werkzeug.routing import Rule
 
 try:
     from flask_mongorest import methods as fmr_methods
@@ -16,15 +17,23 @@ except ImportError:
     fmr_methods = None
 
 
-def merge_specs(target, source):
+def merge_specs(target: dict, source: dict):
     """
     Update target dictionary with values from the source, recursively.
     List items will be merged.
+
+    :param target: target dictionary
+    :type target: dict
+
+    :param source: source dictionary
+    :type source: dict
+
+    :return: None
     """
 
     for key, value in source.items():
         if isinstance(value, dict):
-            node = target.setdefault(key, {})
+            node: Any = target.setdefault(key, {})
             merge_specs(node, value)
         elif isinstance(value, list):
             node = target.setdefault(key, [])
@@ -34,38 +43,67 @@ def merge_specs(target, source):
 
 
 def get_specs(
-    rules, ignore_verbs, optional_fields, sanitizer, openapi_version, doc_dir=None
+    rules: Iterator[Rule],
+    ignore_verbs: set[str],
+    optional_fields: list[str],
+    sanitizer: Callable,
+    openapi_version: Union[str, int],
+    doc_dir: Optional[str] = None,
 ):
-    specs = []
+    """
+    Extracts specs from rules
+
+    :param rules: Flask url_map.iter_rules()
+    :type rules: werkzeug.routing.Rule
+
+    :param ignore_verbs: Verbs to ignore
+    :type ignore_verbs: set
+
+    :param optional_fields: Optional fields
+    :type optional_fields: list[str]
+
+    :param sanitizer: Sanitizer function
+    :type sanitizer: Callable
+
+    :param openapi_version: OpenAPI version
+    :type openapi_version: str
+
+    :param doc_dir: Directory containing docstrings
+    :type doc_dir: str
+    """
+    specs: list = []
+
     for rule in rules:
-        endpoint = current_app.view_functions[rule.endpoint]
-        methods = dict()
-        is_mv = is_valid_method_view(endpoint)
+        endpoint: Callable = current_app.view_functions[rule.endpoint]
+        methods: dict = {}
+        is_mv: bool = is_valid_method_view(endpoint)
 
-        for verb in rule.methods.difference(ignore_verbs):
-            if not is_mv and has_valid_dispatch_view_docs(endpoint):
-                endpoint.methods = endpoint.methods or ["GET"]
-                if verb in endpoint.methods:
-                    methods[verb.lower()] = endpoint
-            elif getattr(endpoint, "methods", None) is not None:
-                if isinstance(endpoint.methods, set):
+        if rule.methods:
+            for verb in rule.methods.difference(ignore_verbs):
+                if not is_mv and has_valid_dispatch_view_docs(endpoint):
+                    endpoint.methods = endpoint.methods or ["GET"]
                     if verb in endpoint.methods:
-                        verb = verb.lower()
-                        methods[verb] = getattr(endpoint.view_class, verb)
-                elif fmr_methods is not None:  # flask-mongorest
-                    endpoint_methods = set(m.method for m in endpoint.methods)
-                    if verb in endpoint_methods:
-                        proxy_verb = rule.endpoint.replace(endpoint.__name__, "")
-                        if proxy_verb:
-                            methods[verb.lower()] = getattr(fmr_methods, proxy_verb)
+                        methods[verb.lower()] = endpoint
+                elif getattr(endpoint, "methods", None) is not None:
+                    if isinstance(endpoint.methods, set):
+                        if verb in endpoint.methods:
+                            verb = verb.lower()
+                            methods[verb] = getattr(endpoint.view_class, verb)
+                    elif fmr_methods is not None:  # flask-mongorest
+                        endpoint_methods: set = set(m.method for m in endpoint.methods)
+                        if verb in endpoint_methods:
+                            proxy_verb = rule.endpoint.replace(endpoint.__name__, "")
+                            if proxy_verb:
+                                methods[verb.lower()] = getattr(fmr_methods, proxy_verb)
+                    else:
+                        raise TypeError
                 else:
-                    raise TypeError
-            else:
-                methods[verb.lower()] = endpoint
+                    methods[verb.lower()] = endpoint
 
-        verbs = []
+        verbs: list = []
+
         for verb, method in methods.items():
-            klass = method.__dict__.get("view_class", None)
+            klass: Optional[Callable] = method.__dict__.get("view_class", None)
             if not is_mv and klass and hasattr(klass, "verb"):
                 method = getattr(klass, "verb", None)
             elif klass and hasattr(klass, "dispatch_request"):
@@ -78,26 +116,26 @@ def get_specs(
                     continue
                 raise RuntimeError("Cannot detect view_func for rule {0}".format(rule))
 
-            swag = {}
-            swag_def = {}
+            swag: dict = {}
+            swag_def: dict = {}
 
-            swagged = False
+            swagged: bool = False
 
             if getattr(method, "specs_dict", None):
-                definition = {}
+                definition: dict = {}
                 merge_specs(
                     swag, convert_schemas(deepcopy(method.specs_dict), definition)
                 )
                 swag_def = definition
                 swagged = True
 
-            view_class = getattr(endpoint, "view_class", None)
-            if view_class and issubclass(view_class, SwaggerView):
-                apispec_swag = {}
+            view_class: Optional[Callable] = getattr(endpoint, "view_class", None)
+            if view_class and issubclass(view_class, SwaggerView):  # type: ignore
+                apispec_swag: dict = {}
 
                 # Don't need to alter definitions here
                 # Since it only stays in apispec_attrs
-                apispec_attrs = optional_fields + [
+                apispec_attrs: list[str] = optional_fields + [
                     "parameters",
                     "definitions",
                     "responses",
@@ -105,12 +143,12 @@ def get_specs(
                     "description",
                 ]
                 for attr in apispec_attrs:
-                    value = getattr(view_class, attr)
+                    value: str = getattr(view_class, attr)
                     if value:
                         apispec_swag[attr] = value
                 # Don't need to change 'definitions' here
                 # Since it would be appended later according to openapi
-                apispec_definitions = apispec_swag.get("definitions", {})
+                apispec_definitions: dict = apispec_swag.get("definitions", {})
                 swag.update(convert_schemas(apispec_swag, apispec_definitions))
                 swag_def = apispec_definitions
 

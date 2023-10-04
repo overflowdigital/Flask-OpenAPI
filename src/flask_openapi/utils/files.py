@@ -75,20 +75,22 @@ def load_from_file(
 
         except IOError:
             path = path.replace("/", os.sep).replace("\\", os.sep)
-            path = path.replace((root_path or os.path.dirname(__file__)), "").split(
-                os.sep
-            )[1:]
+            split_path: list[str] = path.replace(
+                (root_path or os.path.dirname(__file__)), ""
+            ).split(os.sep)[1:]
 
-            package_spec: Any = importlib.util.find_spec(path[0])
+            package_spec: Any = importlib.util.find_spec(split_path[0])
 
             if package_spec.has_location:
                 site_package: str = package_spec.origin.replace("/__init__.py", "")
             else:
                 raise RuntimeError("Package does not have origin")
 
-            path = os.path.join(site_package, os.sep.join(path[1:]))
+            path = os.path.join(site_package, os.sep.join(split_path[1:]))
 
             with open(path) as yaml_file:
                 return yaml_file.read()
     except TypeError:
         logging.warning(f"File path {path} either doesnt exist or is in the wrong type")
+
+    return ""

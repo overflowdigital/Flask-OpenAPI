@@ -2,12 +2,11 @@ import os
 from functools import wraps
 
 from flask import request
-from six import string_types
-
 from flask_openapi.core.marshmallow_apispec import Schema
 from flask_openapi.core.validation import validate
 from flask_openapi.utils.constants import DEFAULT_FIELDS
 from flask_openapi.utils.paths import get_root_path
+from six import string_types
 
 
 def swag_from(
@@ -114,7 +113,7 @@ def swag_from(
                     schema_id or definition,
                     validation_function=validation_function,
                     validation_error_handler=validation_error_handler,
-                    **validate_args,
+                    **validate_args,  # type: ignore
                 )
             return function(*args, **kwargs)
 
@@ -192,8 +191,8 @@ def swag_annotation(f):
                 )
 
         function.specs_dict = specs
-        args = list(args)
-        args[2] = function
+        args = list(args)  # type: ignore
+        args[2] = function  # type: ignore
         args = tuple(args)
 
         return f(*args, **kwargs)

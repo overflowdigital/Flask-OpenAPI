@@ -1,14 +1,14 @@
-from typing import Any
+from typing import Any, Callable
 
 from flask.views import MethodView
 
 
-def has_valid_dispatch_view_docs(endpoint: Any) -> bool:
+def has_valid_dispatch_view_docs(endpoint: Callable) -> bool:
     """
     Return True if dispatch_request is swaggable
 
     :param endpoint: endpoint
-    :type endpoint: Any
+    :type endpoint: Callable
 
     :return: True if dispatch_request is swaggable
     :rtype: bool
@@ -40,12 +40,12 @@ def get_vendor_extension_fields(mapping: dict) -> dict[str, Any]:
     return {k: v for k, v in mapping.items() if k.startswith("x-")}
 
 
-def is_valid_method_view(endpoint: Any) -> bool:
+def is_valid_method_view(endpoint: Callable) -> bool:
     """
     Return True if obj is MethodView
 
     :param endpoint: endpoint
-    :type endpoint: Any
+    :type endpoint: Callable
 
     :return: True if obj is MethodView
     :rtype: bool
