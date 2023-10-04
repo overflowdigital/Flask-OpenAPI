@@ -2,87 +2,61 @@ import codecs
 import importlib
 import logging
 import os
-from typing import Any, Literal, Optional
 
 
-def detect_by_bom(path: str, default: str = "utf-8") -> str:
-    """
-    Detect file encoding by BOM (Byte Order Mark)
-
-    :param path: path to file
-    :type path: str
-
-    :param default: default encoding if no BOM found
-    :type default: str
-
-    :return: encoding name
-    :rtype: str
-    """
-    with open(path, "rb") as file:
-        raw: bytes = file.read(4)
-
-    encoding_bom_map: tuple = (
-        ("utf-8-sig", (codecs.BOM_UTF8)),
+def detect_by_bom(path, default="utf-8"):
+    with open(path, "rb") as f:
+        raw = f.read(4)  # will read less if the file is smaller
+    for enc, boms in (
+        ("utf-8-sig", (codecs.BOM_UTF8,)),
         ("utf-16", (codecs.BOM_UTF16_LE, codecs.BOM_UTF16_BE)),
         ("utf-32", (codecs.BOM_UTF32_LE, codecs.BOM_UTF32_BE)),
-    )
-
-    for encoding, boms in encoding_bom_map:
+    ):
         if any(raw.startswith(bom) for bom in boms):
-            return encoding
-
+            return enc
     return default
 
 
-def load_from_file(path: str, file_type: Literal["yml", "yaml"] = "yml", root_path: Optional[str] = None) -> str:
+def load_from_file(swag_path, swag_type="yml", root_path=None):
     """
-    Load swagger file from path
-
-    :param path: path to swagger file
-    :type path: str
-
-    :param file_type: type of swagger file
-    :type file_type: Literal['yml', 'yaml']
-
-    :param root_path: root path to swagger file
-    :type root_path: Optional[str]
-
-    :return: Swagger file content
-    :rtype: str
+    Load specs from YAML file
     """
-
-    if file_type not in ("yaml", "yml"):
+    if swag_type not in ("yaml", "yml"):
         raise AttributeError("Currently only yaml or yml supported")
+        # TODO: support JSON
 
     try:
-        encoding: str = detect_by_bom(path)
-
-        with codecs.open(path, encoding=encoding) as yaml_file:
+        enc = detect_by_bom(swag_path)
+        with codecs.open(swag_path, encoding=enc) as yaml_file:
             return yaml_file.read()
-
     except IOError:
-        path = os.path.join(root_path or os.path.dirname(__file__), path)
-
+        # not in the same dir, add dirname
+        swag_path = os.path.join(root_path or os.path.dirname(__file__), swag_path)
         try:
-            encoding = detect_by_bom(path)
-
-            with codecs.open(path, encoding=encoding) as yaml_file:
+            enc = detect_by_bom(swag_path)
+            with codecs.open(swag_path, encoding=enc) as yaml_file:
                 return yaml_file.read()
-
-        except IOError:
-            path = path.replace("/", os.sep).replace("\\", os.sep)
-            path = path.replace((root_path or os.path.dirname(__file__)), "").split(os.sep)[1:]
-
-            package_spec: Any = importlib.util.find_spec(path[0])
-
+        except IOError:  # pragma: no cover
+            # if package dir
+            # see https://github.com/rochacbruno/flasgger/pull/104
+            # Still not able to reproduce this case
+            # test are in examples/package_example
+            # need more detail on how to reproduce IOError here
+            swag_path = swag_path.replace("/", os.sep).replace("\\", os.sep)
+            path = swag_path.replace(
+                (root_path or os.path.dirname(__file__)), ""
+            ).split(os.sep)[1:]
+            package_spec = importlib.util.find_spec(path[0])
             if package_spec.has_location:
-                site_package: str = package_spec.origin.replace("/__init__.py", "")
+                # Improvement idea: Use package_spec.submodule_search_locations
+                # if we're sure there's only going to be one search location.
+                site_package = package_spec.origin.replace("/__init__.py", "")
             else:
                 raise RuntimeError("Package does not have origin")
-
-            path = os.path.join(site_package, os.sep.join(path[1:]))
-
-            with open(path) as yaml_file:
+            swag_path = os.path.join(site_package, os.sep.join(path[1:]))
+            with open(swag_path) as yaml_file:
                 return yaml_file.read()
     except TypeError:
-        logging.warning(f"File path {path} either doesnt exist or is in the wrong type")
+        logging.warning(
+            f"File path {swag_path} is either doesnt exist or is in the wrong type"
+        )
