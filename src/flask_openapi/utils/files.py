@@ -75,9 +75,9 @@ def load_from_file(
 
         except IOError:
             path = path.replace("/", os.sep).replace("\\", os.sep)
-            split_path: list[str] = path.replace((root_path or os.path.dirname(__file__)), "").split(
-                os.sep
-            )[1:]
+            split_path: list[str] = path.replace(
+                (root_path or os.path.dirname(__file__)), ""
+            ).split(os.sep)[1:]
 
             package_spec: Any = importlib.util.find_spec(split_path[0])
 
@@ -92,5 +92,5 @@ def load_from_file(
                 return yaml_file.read()
     except TypeError:
         logging.warning(f"File path {path} either doesnt exist or is in the wrong type")
-    
+
     return ""

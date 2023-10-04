@@ -2,7 +2,7 @@ import inspect
 import os
 import re
 from collections import defaultdict
-from typing import Any, Callable, Literal, NoReturn, Optional, Union
+from typing import Any, Callable, Literal, Optional, Union
 
 import yaml
 from flask import request
@@ -45,7 +45,13 @@ def parse_imports(doc_string: str, root_path: Optional[str] = None):
     return doc_string
 
 
-def parse_docstring(obj: Any, process_doc: Callable, endpoint: Optional[str] = None, verb: Optional[str] = None, swag_path: Optional[str] = None) -> tuple[str, str, dict]:
+def parse_docstring(
+    obj: Any,
+    process_doc: Callable,
+    endpoint: Optional[str] = None,
+    verb: Optional[str] = None,
+    swag_path: Optional[str] = None,
+) -> tuple[str, str, dict]:
     """
     Gets swag data for method/view docstring
 
@@ -68,10 +74,10 @@ def parse_docstring(obj: Any, process_doc: Callable, endpoint: Optional[str] = N
     :rtype: Tuple[str, str, dict]
     """
 
-    first_line: str = ''
-    other_lines: str = ''
+    first_line: str = ""
+    other_lines: str = ""
     swag: dict = {}
-    full_doc: str = ''
+    full_doc: str = ""
 
     if not swag_path:
         swag_path = getattr(obj, "swag_path", None)
@@ -138,16 +144,16 @@ def parse_definition_docstring(obj: Any, process_doc: Callable) -> tuple[str, di
     :return: doc_lines, swag
     :rtype: Tuple[str, dict]
     """
-    doc_lines: str = ''
+    doc_lines: str = ""
     swag: dict = {}
-    full_doc: str = ''
-    swag_path: str = getattr(obj, "swag_path", '')
+    full_doc: str = ""
+    swag_path: str = getattr(obj, "swag_path", "")
     swag_type: Literal["yml", "yaml"] = getattr(obj, "swag_type", "yml")
 
     if swag_path:
         full_doc = load_from_file(swag_path, swag_type)
     else:
-        full_doc = inspect.getdoc(obj) or ''
+        full_doc = inspect.getdoc(obj) or ""
 
     if full_doc:
         if full_doc.startswith("file:"):
@@ -168,7 +174,12 @@ def parse_definition_docstring(obj: Any, process_doc: Callable) -> tuple[str, di
 
 
 def parse_definitions(
-    alist: list[dict], level: int = 0, endpoint: Optional[str] = None, verb: Optional[str] = None, prefix_ids: bool = False, openapi_version: Optional[Union[str, int]] = None
+    alist: list[dict],
+    level: int = 0,
+    endpoint: Optional[str] = None,
+    verb: Optional[str] = None,
+    prefix_ids: bool = False,
+    openapi_version: Optional[Union[str, int]] = None,
 ) -> list[dict]:
     """
     Since we couldn't be bothered to register models elsewhere
@@ -199,7 +210,7 @@ def parse_definitions(
     """
 
     endpoint = endpoint or request.endpoint.lower()  # type: ignore
-    verb = verb or request.method.lower() or ''  # type: ignore
+    verb = verb or request.method.lower() or ""  # type: ignore
     endpoint = endpoint.replace(".", "_")
 
     def _extract_array_defs(source: dict) -> list[dict]:
@@ -214,7 +225,6 @@ def parse_definitions(
                 [items], level + 1, endpoint, verb, prefix_ids, openapi_version
             )
         return ret
-
 
     defs: list[dict] = list()
 
@@ -232,7 +242,7 @@ def parse_definitions(
                     schema["id"] = schema_id = f"{endpoint}_{verb}_{schema_id}"
 
                 defs.append(schema)
-                ref_path: str = ''
+                ref_path: str = ""
 
                 if is_openapi3(openapi_version):
                     ref_path = "#/components/schemas/"
@@ -246,7 +256,6 @@ def parse_definitions(
                 else:
                     item.update(ref)
                     del item["schema"]
-
 
             properties: Any = schema.get("properties")
 
@@ -303,7 +312,9 @@ def convert_references_to_openapi3(obj: Any) -> None:
             convert_references_to_openapi3(val)
 
 
-def convert_response_definitions_to_openapi3(response: dict, media_types: list[str]) -> None:
+def convert_response_definitions_to_openapi3(
+    response: dict, media_types: list[str]
+) -> None:
     """
     Convert response definitions to openapi3 format
 

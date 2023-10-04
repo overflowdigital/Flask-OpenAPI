@@ -33,7 +33,7 @@ def is_python_file(path: str) -> bool:
     return path.endswith(".py") and "__" not in path
 
 
-def get_path_from_doc(full_doc: str) -> tuple[str, Literal['yml', 'yaml']]:
+def get_path_from_doc(full_doc: str) -> tuple[str, Literal["yml", "yaml"]]:
     """
     Get path and type from doc
 
@@ -45,7 +45,9 @@ def get_path_from_doc(full_doc: str) -> tuple[str, Literal['yml', 'yaml']]:
     """
 
     swag_path: str = full_doc.replace("file:", "").strip()
-    swag_type: Literal['yml', 'yaml'] = cast(Literal['yml', 'yaml'], swag_path.split(".")[-1])
+    swag_type: Literal["yml", "yaml"] = cast(
+        Literal["yml", "yaml"], swag_path.split(".")[-1]
+    )
 
     return swag_path, swag_type
 
