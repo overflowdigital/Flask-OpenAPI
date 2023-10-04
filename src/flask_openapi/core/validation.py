@@ -5,8 +5,7 @@ import sys
 
 import jsonschema
 import yaml
-from flask import Response, abort, request
-
+from flask import abort, request, Response
 from flask_openapi.core.parser import parse_definitions, parse_schema
 from flask_openapi.utils.files import load_from_file
 
@@ -190,4 +189,4 @@ def validate(
         if validation_error_handler is not None:
             validation_error_handler(err, data, main_def)
         else:
-            abort(Response(str(err), status=400))
+            abort(Response("Fatal error", status=400))
