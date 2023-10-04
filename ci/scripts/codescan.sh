@@ -10,7 +10,7 @@ REPO="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
 REPO=$(dirname "$REPO../")
 REPO=$(dirname "$REPO../")
 
-diff_files=$(gh pr view $PR --json files --jq '.files.[].path')
+diff_files=$(gh pr view $PR --json files --jq '.files | map(select(.path | endswith(".py"))) | .[].path')
 
 
 echo "Running against files: $diff_files"
