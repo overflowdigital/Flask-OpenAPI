@@ -31,7 +31,11 @@ def __replace_ref(schema, relative_path, swag):
                 content = swag
                 for id in value.split("/")[1:]:
                     content = content[id]
-                return __replace_ref(content, relative_path, swag) if isinstance(content, dict) else content
+                return (
+                    __replace_ref(content, relative_path, swag)
+                    if isinstance(content, dict)
+                    else content
+                )
 
             if len(value) > 0 and value[0] == "/":
                 file_ref_path = absolute_path + value
@@ -135,7 +139,9 @@ def validate(
 
     definitions = {}
     main_def = {}
-    raw_definitions = parse_definitions(params, endpoint=endpoint, verb=verb, openapi_version=openapi_version)
+    raw_definitions = parse_definitions(
+        params, endpoint=endpoint, verb=verb, openapi_version=openapi_version
+    )
 
     if schema_id is None:
         for param in params:

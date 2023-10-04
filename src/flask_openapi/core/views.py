@@ -1,11 +1,13 @@
-import json
-from typing import Optional
+from flask_openapi import __version__
+
 
 from flask import Response, jsonify, render_template, request, url_for
 from flask.views import MethodView
 from werkzeug.datastructures import Authorization
 
-from flask_openapi import __version__
+
+import json
+from typing import Optional
 
 
 class APIDocsView(MethodView):
@@ -50,7 +52,11 @@ class APIDocsView(MethodView):
                 }
                 for spec in self.config.get("specs", [])
             ]
-            urls = [{"name": spec["name"], "url": spec["url"]} for spec in specs if spec["name"]]
+            urls = [
+                {"name": spec["name"], "url": spec["url"]}
+                for spec in specs
+                if spec["name"]
+            ]
             data = {
                 "specs": specs,
                 "urls": urls,
@@ -64,7 +70,6 @@ class APIDocsView(MethodView):
                 data["json"] = json
                 data["title"] = self.config.get("title", "API Docs")
                 data["flasgger_version"] = __version__
-                data["api_doc"] = specs[0]["url"]
                 data["favicon"] = self.config.get(
                     "favicon",
                     url_for("flask_openapi.static", filename="favicon-32x32.png"),
