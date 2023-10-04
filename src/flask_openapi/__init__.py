@@ -8,9 +8,11 @@ __version__ = "9.9.9"
 from jsonschema import ValidationError
 
 from flask_openapi.core.decorators import openapi_spec, swag_from
-from flask_openapi.core.marshmallow_apispec import APISpec, Schema, SwaggerView, fields
+from flask_openapi.core.marshmallow_apispec import (APISpec, Schema,
+                                                    SwaggerView, fields)
 from flask_openapi.core.specs import apispec_to_template
 from flask_openapi.core.validation import validate
 from flask_openapi.openapi import Flasgger, OpenAPI, Swagger
 from flask_openapi.utils.constants import OPTIONAL_FIELDS
-from flask_openapi.utils.sanitizers import BR_SANITIZER, MK_SANITIZER, NO_SANITIZER
+from flask_openapi.utils.sanitizers import (BR_SANITIZER, MK_SANITIZER,
+                                            NO_SANITIZER)
