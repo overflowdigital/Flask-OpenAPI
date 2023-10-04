@@ -454,7 +454,7 @@ class Swagger(object):
 
         http_methods = ["get", "post", "put", "delete", "patch"]
         for rule, verbs in specs:
-            operations = dict()
+            operations {}
             for verb, swag in verbs:
                 if swag.get("paths"):
                     try:

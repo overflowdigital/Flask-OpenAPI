@@ -2,7 +2,6 @@
 import inspect
 from typing import Any, Callable, Optional, Type
 
-import flask_openapi.core.specs as specs
 from flask import Flask
 from flask.views import MethodView
 from flask_openapi.core.validation import validate
@@ -66,8 +65,10 @@ class APISpec(BaseAPISpec):
         """
         if Schema is None:
             raise RuntimeError("Please install marshmallow and apispec")
+        
+        from flask_openapi.core.specs import apispec_to_template
 
-        return specs.apispec_to_template(
+        return apispec_to_template(
             app, self, definitions=definitions, paths=paths
         )
 

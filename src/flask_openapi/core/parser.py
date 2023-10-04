@@ -226,7 +226,7 @@ def parse_definitions(
             )
         return ret
 
-    defs: list[dict] = list()
+    defs: list[dict] = []
 
     for item in alist:
         if not getattr(item, "get"):

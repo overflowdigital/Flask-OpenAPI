@@ -66,11 +66,12 @@ def get_specs(
     :param doc_dir: Directory containing docstrings
     :type doc_dir: str
     """
-    specs = []
+    specs: list = []
+
     for rule in rules:
-        endpoint = current_app.view_functions[rule.endpoint]
-        methods = dict()
-        is_mv = is_valid_method_view(endpoint)
+        endpoint: Callable = current_app.view_functions[rule.endpoint]
+        methods: dict = {}
+        is_mv: bool = is_valid_method_view(endpoint)
 
         for verb in rule.methods.difference(ignore_verbs):
             if not is_mv and has_valid_dispatch_view_docs(endpoint):
