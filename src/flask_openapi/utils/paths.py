@@ -72,7 +72,9 @@ def get_root_path(obj: Any) -> str:
     return os.path.dirname(filename)
 
 
-def get_swag_path_from_doc_dir(method: Any, view_class: Any, doc_dir: str, endpoint: Any) -> str:
+def get_swag_path_from_doc_dir(
+    method: Any, view_class: Any, doc_dir: str, endpoint: Any
+) -> str:
     """
     Get swagger path from doc dir
 
