@@ -1,14 +1,15 @@
 from copy import deepcopy
+from typing import Any, Callable, Optional, Union
 
 from flask import current_app
-
-from flask_openapi.core.marshmallow_apispec import SwaggerView, convert_schemas
+from flask_openapi.core.marshmallow_apispec import convert_schemas, SwaggerView
 from flask_openapi.core.parser import parse_docstring
 from flask_openapi.utils.constants import OPTIONAL_FIELDS
 from flask_openapi.utils.paths import get_swag_path_from_doc_dir
 from flask_openapi.utils.types import ordered_dict_to_dict
 from flask_openapi.utils.version import is_openapi3
 from flask_openapi.utils.views import has_valid_dispatch_view_docs, is_valid_method_view
+from werkzeug.routing import Rule
 
 try:
     from flask_mongorest import methods as fmr_methods
@@ -16,15 +17,23 @@ except ImportError:
     fmr_methods = None
 
 
-def merge_specs(target, source):
+def merge_specs(target: dict, source: dict):
     """
     Update target dictionary with values from the source, recursively.
     List items will be merged.
+
+    :param target: target dictionary
+    :type target: dict
+
+    :param source: source dictionary
+    :type source: dict
+
+    :return: None
     """
 
     for key, value in source.items():
         if isinstance(value, dict):
-            node = target.setdefault(key, {})
+            node: Any = target.setdefault(key, {})
             merge_specs(node, value)
         elif isinstance(value, list):
             node = target.setdefault(key, [])
@@ -34,8 +43,29 @@ def merge_specs(target, source):
 
 
 def get_specs(
-    rules, ignore_verbs, optional_fields, sanitizer, openapi_version, doc_dir=None
+    rules: Rule, ignore_verbs: set[str], optional_fields: list[str], sanitizer: Callable, openapi_version: Union[str ,int], doc_dir: Optional[str]=None
 ):
+    """
+    Extracts specs from rules
+
+    :param rules: Flask url_map.iter_rules()
+    :type rules: werkzeug.routing.Rule
+
+    :param ignore_verbs: Verbs to ignore
+    :type ignore_verbs: set
+
+    :param optional_fields: Optional fields
+    :type optional_fields: list[str]
+
+    :param sanitizer: Sanitizer function
+    :type sanitizer: Callable
+
+    :param openapi_version: OpenAPI version
+    :type openapi_version: str
+
+    :param doc_dir: Directory containing docstrings
+    :type doc_dir: str
+    """
     specs = []
     for rule in rules:
         endpoint = current_app.view_functions[rule.endpoint]
