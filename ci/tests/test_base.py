@@ -13,7 +13,7 @@ def test_init_config(monkeypatch):
     assert t.config == Swagger.DEFAULT_CONFIG
 
     # Empty dict passed to arguments will be overriden with default_config
-    empty_dict {}
+    empty_dict = {}
     t = Swagger(config=empty_dict, merge=False)
     assert t.config == Swagger.DEFAULT_CONFIG
     assert t.config is not empty_dict
@@ -33,7 +33,7 @@ def test_init_config(monkeypatch):
     assert all(t.config[k] == v for k, v in Swagger.DEFAULT_CONFIG.items())
 
     # Config will be merged
-    empty_dict {}
+    empty_dict = {}
     t = Swagger(config=empty_dict, merge=True)
     assert t.config == Swagger.DEFAULT_CONFIG
 

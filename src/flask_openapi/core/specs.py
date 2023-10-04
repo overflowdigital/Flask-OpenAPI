@@ -84,7 +84,7 @@ def get_specs(
                         verb = verb.lower()
                         methods[verb] = getattr(endpoint.view_class, verb)
                 elif fmr_methods is not None:  # flask-mongorest
-                    endpoint_methods = set(m.method for m in endpoint.methods)
+                    endpoint_methods: set = set(m.method for m in endpoint.methods)
                     if verb in endpoint_methods:
                         proxy_verb = rule.endpoint.replace(endpoint.__name__, "")
                         if proxy_verb:
@@ -94,9 +94,10 @@ def get_specs(
             else:
                 methods[verb.lower()] = endpoint
 
-        verbs = []
+        verbs: list = []
+
         for verb, method in methods.items():
-            klass = method.__dict__.get("view_class", None)
+            klass: Optional[Callable] = method.__dict__.get("view_class", None)
             if not is_mv and klass and hasattr(klass, "verb"):
                 method = getattr(klass, "verb", None)
             elif klass and hasattr(klass, "dispatch_request"):
@@ -109,22 +110,22 @@ def get_specs(
                     continue
                 raise RuntimeError("Cannot detect view_func for rule {0}".format(rule))
 
-            swag = {}
-            swag_def = {}
+            swag: dict = {}
+            swag_def: dict = {}
 
-            swagged = False
+            swagged: bool = False
 
             if getattr(method, "specs_dict", None):
-                definition = {}
+                definition: dict = {}
                 merge_specs(
                     swag, convert_schemas(deepcopy(method.specs_dict), definition)
                 )
                 swag_def = definition
                 swagged = True
 
-            view_class = getattr(endpoint, "view_class", None)
+            view_class: Optional[Callable] = getattr(endpoint, "view_class", None)
             if view_class and issubclass(view_class, SwaggerView):
-                apispec_swag = {}
+                apispec_swag: dict = {}
 
                 # Don't need to alter definitions here
                 # Since it only stays in apispec_attrs

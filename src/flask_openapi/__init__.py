@@ -8,7 +8,6 @@ __version__ = "9.9.9"
 from flask_openapi.core.decorators import openapi_spec, swag_from  # noqa: F401
 from flask_openapi.core.marshmallow_apispec import (  # noqa: F401
     APISpec,
-    fields,
     Schema,
     SwaggerView,
 )
