@@ -9,6 +9,8 @@ REPO="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
 REPO=$(dirname "$REPO../")
 REPO=$(dirname "$REPO../")
 
+case "Running $TOOL on $REPO"
+
 case $TOOL in
     'black')
         black --check $REPO/src
