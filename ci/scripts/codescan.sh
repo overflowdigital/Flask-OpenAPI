@@ -9,15 +9,17 @@ REPO="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
 REPO=$(dirname "$REPO../")
 REPO=$(dirname "$REPO../")
 
+echo "Running $TOOL on $REPO"
+
 case $TOOL in
     'black')
         black --check $REPO/src
         ;;
     'flake8')
-        flake8 $REPO/src/flask_openapi --config $REPO/ci/config/.flake8rc $REPO/src || true
+        flake8 $REPO/src/flask_openapi --config $REPO/ci/config/.flake8rc $REPO/src
         ;;
     'mypy')
-        mypy --config-file $REPO/ci/config/.mypyrc $REPO/src/flask_openapi $REPO/src || true
+        mypy --config-file $REPO/ci/config/.mypyrc $REPO/src || true
         ;;
     'safety')
         safety check --full-report --file $REPO/requirements.txt

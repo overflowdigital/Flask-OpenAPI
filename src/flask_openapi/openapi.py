@@ -13,11 +13,9 @@ import os
 import re
 from collections import defaultdict
 from functools import partial, wraps
-from json import JSONEncoder
 
 import yaml
-from flask import Blueprint, abort, current_app, redirect, request, url_for
-
+from flask import abort, Blueprint, current_app, redirect, request, url_for
 from flask_openapi.core.decorators import swag_annotation
 from flask_openapi.core.parser import (
     convert_responses_to_openapi3,
@@ -37,8 +35,6 @@ try:
 except ImportError:
     RequestParser = None
 import jsonschema
-
-from flask_openapi import __version__
 from flask_openapi.utils.constants import (
     OAS3_SUB_COMPONENTS,
     OPTIONAL_FIELDS,
@@ -350,7 +346,7 @@ class Swagger(object):
             else:  # openapi2
                 update_schemas = swag.get("definitions", {})
 
-            if type(update_schemas) == list and type(update_schemas[0]) == dict:
+            if isinstance(update_schemas, list) and isinstance(update_schemas[0], dict):
                 # pop, assert single element
                 (update_schemas,) = update_schemas
             definitions.update(update_schemas)
@@ -712,7 +708,7 @@ class Swagger(object):
                     )
 
             # TODO support anyOf and oneOf in the future
-            if (json_schema is not None) and type(json_schema) == dict:
+            if json_schema and isinstance(json_schema, dict):
                 schemas[location] = json_schema
                 self.set_schemas(schemas, location, definitions)
 
