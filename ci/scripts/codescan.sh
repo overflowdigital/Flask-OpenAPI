@@ -5,7 +5,8 @@ set -e
 
 TOOL=$1
 
-source get_path.sh
+PWD=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+source $PWD/get_path.sh
 
 # Run the tool on the repository based on the argument.
 case $TOOL in
