@@ -1,11 +1,12 @@
 #!/bin/bash
+# Sets up the worker environment.
 
 set -e
-set -x
 
-REPO="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
-REPO=$(dirname "$REPO../")
-REPO=$(dirname "$REPO../")
+source ./get_path.sh
+
+sudo apt update
+sudo apt upgrade -y
 
 python3 -m pip install --upgrade pip
 python3 -m pip install -r $REPO/ci/config/requirements.txt

@@ -18,24 +18,21 @@ jobs:
         run: ci/scripts/build.sh
       - name: Typing Check
         run: ci/scripts/codescan.sh mypy
-        env:
-          PR: ${{ github.event.pull_request.number }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Code Quality Check
         run: ci/scripts/codescan.sh flake8
-        env:
-          PR: ${{ github.event.pull_request.number }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Dependency Security Check
         run: ci/scripts/codescan.sh safety
-        env:
-          PR: ${{ github.event.pull_request.number }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Formatting Check
         run: ci/scripts/codescan.sh black
-        env:
-          PR: ${{ github.event.pull_request.number }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Upload Codescan Report
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v3
+        with:
+          name: codescan-test-report
+          path: |
+            /home/runner/work/Flask-OpenAPI/Flask-OpenAPI/ci/codescan_logs/*.log
+          if-no-files-found: ignore
+          retention-days: 1
 
   unit_tests:
     name: Unit Tests
