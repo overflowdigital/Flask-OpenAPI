@@ -18,8 +18,7 @@ swag = Swagger(app)
 @swag_from("docs/officer_specs.yml")
 def create_officer(priority):
     return (
-        "Request for officer creation successfully received"
-        " (priority: %i)".format(priority),
+        "Request for officer creation successfully received" " (priority: %i)".format(priority),
         HTTPStatus.OK,
     )
 

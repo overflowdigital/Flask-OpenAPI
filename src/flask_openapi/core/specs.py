@@ -5,11 +5,11 @@ from flask import current_app
 from flask_openapi.core.marshmallow_apispec import SwaggerView, convert_schemas
 from flask_openapi.core.parser import parse_docstring
 from flask_openapi.utils.constants import OPTIONAL_FIELDS
-from flask_openapi.utils.views import (has_valid_dispatch_view_docs,
-                                       is_valid_method_view)
 from flask_openapi.utils.paths import get_swag_path_from_doc_dir
 from flask_openapi.utils.types import ordered_dict_to_dict
 from flask_openapi.utils.version import is_openapi3
+from flask_openapi.utils.views import (has_valid_dispatch_view_docs,
+                                       is_valid_method_view)
 
 try:
     from flask_mongorest import methods as fmr_methods
@@ -34,9 +34,7 @@ def merge_specs(target, source):
             target[key] = value
 
 
-def get_specs(
-    rules, ignore_verbs, optional_fields, sanitizer, openapi_version, doc_dir=None
-):
+def get_specs(rules, ignore_verbs, optional_fields, sanitizer, openapi_version, doc_dir=None):
     specs = []
     for rule in rules:
         endpoint = current_app.view_functions[rule.endpoint]
@@ -86,9 +84,7 @@ def get_specs(
 
             if getattr(method, "specs_dict", None):
                 definition = {}
-                merge_specs(
-                    swag, convert_schemas(deepcopy(method.specs_dict), definition)
-                )
+                merge_specs(swag, convert_schemas(deepcopy(method.specs_dict), definition))
                 swag_def = definition
                 swagged = True
 
@@ -119,9 +115,7 @@ def get_specs(
 
             swag_path = None
             if doc_dir:
-                swag_path = get_swag_path_from_doc_dir(
-                    method, view_class, doc_dir, endpoint
-                )
+                swag_path = get_swag_path_from_doc_dir(method, view_class, doc_dir, endpoint)
 
             doc_summary, doc_description, doc_swag = parse_docstring(
                 method,

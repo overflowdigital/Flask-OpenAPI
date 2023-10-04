@@ -58,9 +58,7 @@ class APISpec(BaseAPISpec):
         if Schema is None:
             raise RuntimeError("Please install marshmallow and apispec")
 
-        return flask_openapi.utils.apispec_to_template(
-            app, self, definitions=definitions, paths=paths
-        )
+        return flask_openapi.utils.apispec_to_template(app, self, definitions=definitions, paths=paths)
 
 
 class SwaggerView(MethodView):

@@ -120,9 +120,7 @@ def parse_definition_docstring(obj, process_doc, doc_dir=None):
     return doc_lines, swag
 
 
-def parse_definitions(
-    alist, level=None, endpoint=None, verb=None, prefix_ids=False, openapi_version=None
-):
+def parse_definitions(alist, level=None, endpoint=None, verb=None, prefix_ids=False, openapi_version=None):
     """
     Since we couldn't be bothered to register models elsewhere
     our definitions need to be extracted from the parameters.
@@ -142,9 +140,7 @@ def parse_definitions(
         ret = []
         items = source.get("items")
         if items is not None and "schema" in items:
-            ret += parse_definitions(
-                [items], level + 1, endpoint, verb, prefix_ids, openapi_version
-            )
+            ret += parse_definitions([items], level + 1, endpoint, verb, prefix_ids, openapi_version)
         return ret
 
     # for tracking level of recursion
@@ -161,9 +157,7 @@ def parse_definitions(
             if schema_id is not None:
                 # add endpoint_verb to schema id to avoid conflicts
                 if prefix_ids:
-                    schema["id"] = schema_id = "{}_{}_{}".format(
-                        endpoint, verb, schema_id
-                    )
+                    schema["id"] = schema_id = "{}_{}_{}".format(endpoint, verb, schema_id)
                 # ^ api['SWAGGER']['prefix_ids'] = True
                 # ... for backwards compatibility with <= 0.5.14
 

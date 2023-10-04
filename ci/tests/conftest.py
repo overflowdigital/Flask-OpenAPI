@@ -96,8 +96,7 @@ def pytest_generate_tests(metafunc):
 
     if "test_data" in metafunc.fixturenames:
         test_data = [
-            (mod, mod.app.test_client(), get_specs_data(mod), get_test_metadata(mod))
-            for mod in get_examples()
+            (mod, mod.app.test_client(), get_specs_data(mod), get_test_metadata(mod)) for mod in get_examples()
         ]
 
         metafunc.parametrize("test_data", test_data, ids=lambda x: x[0].__name__)

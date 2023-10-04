@@ -10,8 +10,8 @@ from flask import Blueprint, Flask, jsonify, request
 
 from flask_openapi import Schema, Swagger, SwaggerView, fields
 from flask_openapi.core.decorators import swag_from
-from flask_openapi.core.validation import validate
 from flask_openapi.core.parser import parse_schema
+from flask_openapi.core.validation import validate
 
 # Examples include intentionally invalid defaults to demonstrate validation.
 _TEST_META_SKIP_FULL_VALIDATION = True
@@ -358,30 +358,22 @@ def test_swag(client, specs_data):
         assert paths.get(expected_path) is not None
 
         for invalid_user in invalid_users:
-            response = client.post(
-                expected_path, data=invalid_user, content_type="application/json"
-            )
+            response = client.post(expected_path, data=invalid_user, content_type="application/json")
             assert response.status_code == HTTPStatus.BAD_REQUEST
 
         for valid_user in valid_users:
-            response = client.post(
-                expected_path, data=valid_user, content_type="application/json"
-            )
+            response = client.post(expected_path, data=valid_user, content_type="application/json")
             assert response.status_code == HTTPStatus.OK
 
     for expected_path in expected_officer_paths:
         assert paths.get(expected_path) is not None
 
         for invalid_officer in invalid_officers:
-            response = client.post(
-                expected_path, data=invalid_officer, content_type="application/json"
-            )
+            response = client.post(expected_path, data=invalid_officer, content_type="application/json")
             assert response.status_code == HTTPStatus.BAD_REQUEST
 
         for valid_officer in valid_officers:
-            response = client.post(
-                expected_path, data=valid_officer, content_type="application/json"
-            )
+            response = client.post(expected_path, data=valid_officer, content_type="application/json")
             assert response.status_code == HTTPStatus.OK
 
 

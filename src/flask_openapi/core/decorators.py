@@ -187,9 +187,7 @@ def swag_annotation(f):
                 specs["parameters"].append(m)
 
             elif issubclass(annotation, str):
-                specs["parameters"].append(
-                    {"name": variable, "in": "path", "type": "string", "required": True}
-                )
+                specs["parameters"].append({"name": variable, "in": "path", "type": "string", "required": True})
 
         function.specs_dict = specs
         args = list(args)
@@ -199,5 +197,6 @@ def swag_annotation(f):
         return f(*args, **kwargs)
 
     return wrapper
+
 
 openapi_spec = swag_from

@@ -205,9 +205,7 @@ def test_swag(client, specs_data):
         "address": "MGM, 245 N. Beverly Drive, Beverly Hills, CA 90210",
     }
 
-    with client.post(
-        "/cat", data=json.dumps(cat), content_type="application/json"
-    ) as response:
+    with client.post("/cat", data=json.dumps(cat), content_type="application/json") as response:
         assert response.status_code == HTTPStatus.OK
 
         received = json.loads(response.data.decode("utf-8"))
@@ -219,9 +217,7 @@ def test_swag(client, specs_data):
         except AttributeError:
             assert received.items() < cat.items()
 
-    with client.post(
-        "/timestamped/cat", data=json.dumps(cat), content_type="application/json"
-    ) as response:
+    with client.post("/timestamped/cat", data=json.dumps(cat), content_type="application/json") as response:
         assert response.status_code == HTTPStatus.OK
 
         received = json.loads(response.data.decode("utf-8"))
@@ -233,9 +229,7 @@ def test_swag(client, specs_data):
         except AttributeError:
             assert received.items() > cat.items()
 
-    with client.post(
-        "/special/cat", data=json.dumps(cat), content_type="application/json"
-    ) as response:
+    with client.post("/special/cat", data=json.dumps(cat), content_type="application/json") as response:
         assert response.status_code == HTTPStatus.OK
 
         received = json.loads(response.data.decode("utf-8"))
@@ -247,9 +241,7 @@ def test_swag(client, specs_data):
         except AttributeError:
             assert received.items() > cat.items()
 
-    with client.post(
-        "/regular/cat", data=json.dumps(cat), content_type="application/json"
-    ) as response:
+    with client.post("/regular/cat", data=json.dumps(cat), content_type="application/json") as response:
         assert response.status_code == HTTPStatus.OK
 
         received = json.loads(response.data.decode("utf-8"))

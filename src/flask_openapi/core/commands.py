@@ -22,13 +22,7 @@ def generate_api_schema(file, endpoint):
         click.echo(e, err=True)
         click.echo(
             "Possible values for endpoint are: {}".format(
-                ", ".join(
-                    [
-                        spec["endpoint"]
-                        for spec in current_app.swag.config["specs"]
-                        if "endpoint" in spec
-                    ]
-                )
+                ", ".join([spec["endpoint"] for spec in current_app.swag.config["specs"] if "endpoint" in spec])
             ),
             err=True,
         )
