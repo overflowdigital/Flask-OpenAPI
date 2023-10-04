@@ -1,5 +1,5 @@
 from copy import deepcopy
-from typing import Any, Callable, Iterable, Iterator, Optional, Union
+from typing import Any, Callable, Iterator, Optional, Union
 
 from flask import current_app
 from flask_openapi.core.marshmallow_apispec import convert_schemas, SwaggerView

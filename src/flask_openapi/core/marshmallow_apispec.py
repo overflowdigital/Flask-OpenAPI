@@ -1,6 +1,6 @@
 # coding: utf-8
 import inspect
-from typing import Any, Callable, Optional, Type
+from typing import Any, Callable, Optional
 
 from flask import Flask
 from flask.views import MethodView
@@ -11,7 +11,7 @@ try:
     import marshmallow
     from apispec import APISpec as BaseAPISpec
     from apispec.ext.marshmallow import openapi
-    from marshmallow import fields
+    from marshmallow import fields  # noqa
 
     openapi_converter: openapi.OpenAPIConverter = openapi.OpenAPIConverter(
         openapi_version="2.0",
@@ -38,8 +38,8 @@ try:
 except ImportError:
     Schema = None  # type: ignore
     fields = None  # type: ignore
-    schema2jsonschema = lambda schema: {}  # type: ignore
-    schema2parameters = lambda schema, location: []  # type: ignore
+    schema2jsonschema = lambda schema: {}  # type: ignore  # noqa
+    schema2parameters = lambda schema, location: []  # type: ignore  # noqa
     BaseAPISpec = object  # type: ignore
 
 
