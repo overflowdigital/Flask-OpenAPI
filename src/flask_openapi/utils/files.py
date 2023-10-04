@@ -2,7 +2,7 @@ import codecs
 import importlib
 import logging
 import os
-from typing import Literal, Optional
+from typing import Any, Literal, Optional
 
 
 def detect_by_bom(path: str, default: str = "utf-8") -> str:

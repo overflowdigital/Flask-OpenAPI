@@ -108,13 +108,16 @@ def get_swag_path_from_doc_dir(
     else:
         # HACK: If the doc_dir doesn't quite match the filepath we take the doc_dir
         # and the current filepath without the /tmp
-        file_path = getattr(func, "swag_path", None)
+        file_path = getattr(func, "swag_path", "")
 
         if file_path and not os.path.isfile(file_path):
             regex = re.compile(r"(api.+)")
 
             try:
-                file_path = doc_dir + regex.search(file_path)[0]
+                matches = regex.search(file_path)
+
+                if matches:
+                    file_path = doc_dir + matches.group(0)
 
                 if os.path.isfile(file_path):
                     setattr(func, "swag_type", "yml")

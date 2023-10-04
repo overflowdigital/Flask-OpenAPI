@@ -1,13 +1,13 @@
 import json
 from collections import OrderedDict
 from copy import deepcopy
-from typing import Any
+from typing import Any, Union
 
 import yaml
 from six import text_type
 
 
-def ordered_dict_to_dict(d: OrderedDict) -> dict:
+def ordered_dict_to_dict(d: Union[dict, OrderedDict]) -> dict:
     """
     Converts inner OrderedDict to bare dict
 
@@ -44,7 +44,7 @@ def json_to_yaml(content: str) -> str:
     return parsed_yaml
 
 
-class StringLike:
+class StringLike():
     """
     Class to mimic the behavior of a regular string. Classes that inherit (or
     mixin) this class must implement the `__str__` magic method. Whatever that
