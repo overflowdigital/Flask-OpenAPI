@@ -44,7 +44,7 @@ def json_to_yaml(content: str) -> str:
     return parsed_yaml
 
 
-class StringLike():
+class StringLike:
     """
     Class to mimic the behavior of a regular string. Classes that inherit (or
     mixin) this class must implement the `__str__` magic method. Whatever that

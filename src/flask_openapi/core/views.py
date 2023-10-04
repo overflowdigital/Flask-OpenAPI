@@ -1,13 +1,11 @@
-from flask_openapi import __version__
-
+import json
+from typing import Optional
 
 from flask import Response, jsonify, render_template, request, url_for
 from flask.views import MethodView
 from werkzeug.datastructures import Authorization
 
-
-import json
-from typing import Optional
+from flask_openapi import __version__
 
 
 class APIDocsView(MethodView):
