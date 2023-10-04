@@ -5,7 +5,7 @@ set -e
 
 TOOL=$1
 
-source ./get_path.sh
+source get_path.sh
 
 # Run the tool on the repository based on the argument.
 case $TOOL in

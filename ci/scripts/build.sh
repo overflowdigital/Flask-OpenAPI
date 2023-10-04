@@ -3,7 +3,7 @@
 
 set -e
 
-source ./get_path.sh
+source get_path.sh
 
 cd $REPO
 python3 -m build

@@ -3,7 +3,7 @@
 
 set -e
 
-source ./get_path.sh
+source get_path.sh
 
 sudo apt update
 sudo apt upgrade -y

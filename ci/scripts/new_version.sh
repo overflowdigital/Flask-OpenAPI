@@ -3,7 +3,7 @@
 
 set -e
 
-source ./get_path.sh
+source get_path.sh
 
 # Get the argument
 ARG=$1

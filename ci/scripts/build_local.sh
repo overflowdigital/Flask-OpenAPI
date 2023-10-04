@@ -6,7 +6,7 @@ set -e
 # Change this to whatever python interpreter you use.
 PYTHON_INTERP="/opt/homebrew/bin/python3.10"
 
-source ./get_path.sh
+source get_path.sh
 
 rm -rf $REPO/dist
 $PYTHON_INTERP -m build
