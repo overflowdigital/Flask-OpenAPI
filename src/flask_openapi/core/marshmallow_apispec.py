@@ -11,9 +11,9 @@ from flask_openapi.utils.constants import OPTIONAL_FIELDS
 try:
     import marshmallow
     from apispec import APISpec as BaseAPISpec
-    from apispec.ext.marshmallow.openapi import OpenAPIConverter
+    from apispec.ext.marshmallow import openapi
 
-    openapi_converter: OpenAPIConverter = OpenAPIConverter(
+    openapi_converter: openapi.OpenAPIConverter = openapi.OpenAPIConverter(
         openapi_version="2.0",
         schema_name_resolver=lambda schema: None,
         spec=BaseAPISpec,  # type: ignore
