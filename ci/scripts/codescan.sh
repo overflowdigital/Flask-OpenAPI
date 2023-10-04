@@ -5,18 +5,13 @@ set -x
 
 TOOL=$1
 
+
 REPO="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
 REPO=$(dirname "$REPO../")
 REPO=$(dirname "$REPO../")
 
-function diff_files_branch() {
-    local branch=${1:-"@{u}"}
-    git diff --name-only --diff-filter=d "${branch}" -- '*.py'
-}
+diff_files=gh pr view $PR --json files --jq '.files.[].path'
 
-function diff_files() {
-    diff_files_branch 2>/dev/null || diff_files_branch origin/main
-}
 
 echo "Running against files: $(diff_files)"
 
