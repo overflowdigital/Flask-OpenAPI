@@ -7,12 +7,15 @@ from typing import Literal, Optional
 
 def detect_by_bom(path, default="utf-8"):
     with open(path, "rb") as f:
-        raw = f.read(4)  # will read less if the file is smaller
-    for enc, boms in (
+        raw = f.read(4)
+
+    table = (
         ("utf-8-sig", (codecs.BOM_UTF8,)),
         ("utf-16", (codecs.BOM_UTF16_LE, codecs.BOM_UTF16_BE)),
         ("utf-32", (codecs.BOM_UTF32_LE, codecs.BOM_UTF32_BE)),
-    ):
+    )
+
+    for enc, boms in table:
         if any(raw.startswith(bom) for bom in boms):
             return enc
     return default
