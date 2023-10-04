@@ -1,15 +1,24 @@
+import json
 from collections import OrderedDict
 from copy import deepcopy
+from typing import Any, Union
 
+import yaml
 from six import text_type
 
 
-def ordered_dict_to_dict(d):
+def ordered_dict_to_dict(d: Union[dict, OrderedDict]) -> dict:
     """
     Converts inner OrderedDict to bare dict
+
+    :param d: OrderedDict
+    :type d: Any
+
+    :return: dict
+    :rtype: dict
     """
-    ret = {}
-    new_d = deepcopy(d)
+    ret: dict = {}
+    new_d: Any = deepcopy(d)
     for k, v in new_d.items():
         if isinstance(v, OrderedDict):
             v = dict(v)
@@ -19,14 +28,23 @@ def ordered_dict_to_dict(d):
     return ret
 
 
-def json_to_yaml(content):
+def json_to_yaml(content: str) -> str:
     """
-    TODO: convert json to yaml
+    Convert json to yaml
+
+    :param content: json content
+    :type content: str
+
+    :return: yaml content
+    :rtype: str
     """
-    return content
+    loaded_json: Any = json.loads(content)
+    parsed_yaml: str = yaml.dump(loaded_json)
+
+    return parsed_yaml
 
 
-class StringLike(object):
+class StringLike:
     """
     Class to mimic the behavior of a regular string. Classes that inherit (or
     mixin) this class must implement the `__str__` magic method. Whatever that

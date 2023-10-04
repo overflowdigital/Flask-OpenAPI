@@ -1,4 +1,6 @@
-OPTIONAL_FIELDS = [
+from typing import Any
+
+OPTIONAL_FIELDS: list[str] = [
     "tags",
     "consumes",
     "produces",
@@ -9,9 +11,9 @@ OPTIONAL_FIELDS = [
     "externalDocs",
 ]
 
-OPTIONAL_OAS3_FIELDS = ["components", "servers"]
+OPTIONAL_OAS3_FIELDS: list[str] = ["components", "servers"]
 
-OAS3_SUB_COMPONENTS = [
+OAS3_SUB_COMPONENTS: list[str] = [
     "parameters",
     "securitySchemes",
     "requestBodies",
@@ -23,7 +25,7 @@ OAS3_SUB_COMPONENTS = [
     "schemas",
 ]
 
-DEFAULT_FIELDS = {
+DEFAULT_FIELDS: dict[str, Any] = {
     "tags": [],
     "consumes": ["application/json"],
     "produces": ["application/json"],

@@ -3,6 +3,7 @@ flake8
 flex
 marshmallow
 mypy
+black
 pytest-cov
 pytest
 safety
@@ -11,4 +12,6 @@ decorator
 twine
 wheel
 flask_restful
+types-PyYAML
+types-six
 -e .

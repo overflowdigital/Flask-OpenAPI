@@ -35,8 +35,26 @@ jobs:
         run: ci/scripts/setup_worker.sh
       - name: Build Package and Verify
         run: ci/scripts/build.sh
-      - name: Perform Static Code Analysis
-        run: ci/scripts/codescan.sh
+      - name: Typing Check
+        run: ci/scripts/codescan.sh mypy
+        env:
+          PR: ${{ github.event.pull_request.number }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Code Quality Check
+        run: ci/scripts/codescan.sh flake8
+        env:
+          PR: ${{ github.event.pull_request.number }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Dependency Security Check
+        run: ci/scripts/codescan.sh safety
+        env:
+          PR: ${{ github.event.pull_request.number }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Formatting Check
+        run: ci/scripts/codescan.sh black
+        env:
+          PR: ${{ github.event.pull_request.number }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     
   unit_tests:
     name: Unit Tests

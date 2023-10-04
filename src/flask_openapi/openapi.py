@@ -16,19 +16,19 @@ from functools import partial, wraps
 from json import JSONEncoder
 
 import yaml
-from flask import (Blueprint, abort, current_app, redirect,
-                   request, url_for)
+from flask import Blueprint, abort, current_app, redirect, request, url_for
 
 from flask_openapi.core.decorators import swag_annotation
-from flask_openapi.core.parser import (convert_responses_to_openapi3,
-                                       parse_definitions, parse_schema,
-                                       parse_definition_docstring,
-                                       parse_imports)
+from flask_openapi.core.parser import (
+    convert_responses_to_openapi3,
+    parse_definition_docstring,
+    parse_definitions,
+    parse_imports,
+    parse_schema,
+)
 from flask_openapi.core.specs import get_schema_specs, get_specs
 from flask_openapi.core.validation import validate
-from flask_openapi.core.views import APIDocsView
-from flask_openapi.core.views import OAuthRedirect
-from flask_openapi.core.views import APISpecsView
+from flask_openapi.core.views import APIDocsView, APISpecsView, OAuthRedirect
 from flask_openapi.utils.sanitizers import BR_SANITIZER
 from flask_openapi.utils.version import is_openapi3
 
@@ -39,9 +39,11 @@ except ImportError:
 import jsonschema
 
 from flask_openapi import __version__
-from flask_openapi.utils.constants import (OAS3_SUB_COMPONENTS,
-                                           OPTIONAL_FIELDS,
-                                           OPTIONAL_OAS3_FIELDS)
+from flask_openapi.utils.constants import (
+    OAS3_SUB_COMPONENTS,
+    OPTIONAL_FIELDS,
+    OPTIONAL_OAS3_FIELDS,
+)
 from flask_openapi.utils.views import get_vendor_extension_fields
 
 
