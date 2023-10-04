@@ -4,16 +4,32 @@ import logging
 import os
 
 
-def detect_by_bom(path, default="utf-8"):
-    with open(path, "rb") as f:
-        raw = f.read(4)  # will read less if the file is smaller
-    for enc, boms in (
-        ("utf-8-sig", (codecs.BOM_UTF8,)),
+def detect_by_bom(path: str, default: str = "utf-8") -> str:
+    """
+    Detect file encoding by BOM (Byte Order Mark)
+
+    :param path: path to file
+    :type path: str
+
+    :param default: default encoding if no BOM found
+    :type default: str
+    
+    :return: encoding name
+    :rtype: str
+    """
+    with open(path, "rb") as file:
+        raw: bytes = file.read(4)
+
+    encoding_bom_map: tuple = (
+        ("utf-8-sig", (codecs.BOM_UTF8)),
         ("utf-16", (codecs.BOM_UTF16_LE, codecs.BOM_UTF16_BE)),
         ("utf-32", (codecs.BOM_UTF32_LE, codecs.BOM_UTF32_BE)),
-    ):
+    )
+
+    for encoding, boms in encoding_bom_map:
         if any(raw.startswith(bom) for bom in boms):
-            return enc
+            return encoding
+
     return default
 
 
