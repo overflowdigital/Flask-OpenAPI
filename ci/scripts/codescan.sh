@@ -14,7 +14,7 @@ case $TOOL in
         black --check $REPO/src
         ;;
     'flake8')
-        flake8 $REPO/src/flask_openapi --config $REPO/ci/config/.flake8rc $REPO/src || true
+        flake8 $REPO/src/flask_openapi --config $REPO/ci/config/.flake8rc $REPO/src
         ;;
     'mypy')
         mypy --config-file $REPO/ci/config/.mypyrc $REPO/src/flask_openapi $REPO/src || true
