@@ -15,3 +15,4 @@ wheel
 flask_restful
 types-PyYAML
 types-six
+-e .
