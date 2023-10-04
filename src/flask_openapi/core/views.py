@@ -1,11 +1,10 @@
 import json
 from typing import Optional
 
-from flask import Response, jsonify, render_template, request, url_for
+from flask import jsonify, render_template, request, Response, url_for
 from flask.views import MethodView
-from werkzeug.datastructures import Authorization
-
 from flask_openapi import __version__
+from werkzeug.datastructures import Authorization
 
 
 class APIDocsView(MethodView):
@@ -32,7 +31,7 @@ class APIDocsView(MethodView):
             username: str = self.config.get("pageUsername", "")
             password: str = self.config.get("pagePassword", "")
             is_auth = (
-                request_auth
+                request_auth is not None
                 and request_auth.type == "basic"
                 and request_auth.username == username
                 and request_auth.password == password

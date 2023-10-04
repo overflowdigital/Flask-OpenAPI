@@ -174,7 +174,7 @@ class Swagger(object):
             loader = json.load
         elif filename.endswith(".yml") or filename.endswith(".yaml"):
 
-            def loader(stream):
+            def loader(stream):  # type: ignore
                 return yaml.safe_load(parse_imports(stream.read(), filename))
 
         else:
@@ -185,7 +185,7 @@ class Swagger(object):
                     loader = json.load
                 else:
 
-                    def loader(stream):
+                    def loader(stream):  # type: ignore
                         return yaml.safe_load(parse_imports(stream.read(), filename))
 
         with codecs.open(filename, "r", "utf-8") as f:
@@ -274,7 +274,7 @@ class Swagger(object):
 
         # if True schemaa ids will be prefized by function_method_{id}
         # for backwards compatibility with <= 0.5.14
-        prefix_ids = self.config.get("prefix_ids")
+        prefix_ids = self.config.get("prefix_ids") or False
 
         if self.config.get("host"):
             data["host"] = self.config.get("host")
@@ -350,7 +350,7 @@ class Swagger(object):
                 # pop, assert single element
                 (update_schemas,) = update_schemas
             definitions.update(update_schemas)
-            defs = []  # swag.get('definitions', [])
+            defs: list = []  # swag.get('definitions', [])
             defs += parse_definitions(
                 defs,
                 endpoint=rule.endpoint,
@@ -454,15 +454,15 @@ class Swagger(object):
 
         http_methods = ["get", "post", "put", "delete", "patch"]
         for rule, verbs in specs:
-            operations = {}
+            operations: dict = {}
             for verb, swag in verbs:
                 if swag.get("paths"):
                     try:
-                        for path in swag.get("paths"):  # /projects/{project_id}/alarms:
-                            for path_verb in swag.get("paths").get(path):  # get:
+                        for path in swag.get("paths"):  # type: ignore
+                            for path_verb in swag.get("paths").get(path):  # type: ignore
                                 if path_verb == verb:
                                     get_operations(
-                                        swag.get("paths").get(path).get(path_verb),
+                                        swag.get("paths").get(path).get(path_verb),  # type: ignore
                                         path_verb,
                                     )
                     except AttributeError:
@@ -615,7 +615,7 @@ class Swagger(object):
 
         @app.after_request
         def after_request(response):  # noqa
-            for header, value in self.config.get("headers"):
+            for header, value in self.config.get("headers"):  # type: ignore
                 response.headers[header] = value
             return response
 

@@ -11,6 +11,7 @@ try:
     import marshmallow
     from apispec import APISpec as BaseAPISpec
     from apispec.ext.marshmallow import openapi
+    from marshmallow import fields
 
     openapi_converter: openapi.OpenAPIConverter = openapi.OpenAPIConverter(
         openapi_version="2.0",
@@ -24,10 +25,10 @@ try:
         swag_in: str = "body"
         swag_validate: bool = True
         swag_validation_function: Optional[Callable] = None
-        swag_validation_error_handler: Optional[Callable]= None
+        swag_validation_error_handler: Optional[Callable] = None
         swag_require_data: bool = True
 
-        def to_specs_dict(self) -> dict[str, type['Schema']]:
+        def to_specs_dict(self) -> dict[str, type["Schema"]]:
             specs = {"parameters": self.__class__}
             definitions: dict = {}
             specs.update(convert_schemas(specs, definitions))
@@ -36,6 +37,7 @@ try:
 
 except ImportError:
     Schema = None  # type: ignore
+    fields = None  # type: ignore
     schema2jsonschema = lambda schema: {}  # type: ignore
     schema2parameters = lambda schema, location: []  # type: ignore
     BaseAPISpec = object  # type: ignore
@@ -46,7 +48,12 @@ class APISpec(BaseAPISpec):
     Wrapper around APISpec to add `to_flasgger` method
     """
 
-    def to_flasgger(self, app: Optional[Flask] = None, definitions: Optional[list] = None, paths: Optional[list] = None) -> dict:
+    def to_flasgger(
+        self,
+        app: Optional[Flask] = None,
+        definitions: Optional[list] = None,
+        paths: Optional[list] = None,
+    ) -> dict:
         """
         Converts APISpec dict to flasgger suitable dict
         also adds definitions and paths (optional)
@@ -65,12 +72,10 @@ class APISpec(BaseAPISpec):
         """
         if Schema is None:
             raise RuntimeError("Please install marshmallow and apispec")
-        
+
         from flask_openapi.core.specs import apispec_to_template
 
-        return apispec_to_template(
-            app, self, definitions=definitions, paths=paths
-        )
+        return apispec_to_template(app, self, definitions=definitions, paths=paths)
 
 
 class SwaggerView(MethodView):
@@ -122,7 +127,7 @@ class SwaggerView(MethodView):
 
 
 def convert_schemas(d: dict, definitions: dict = {}) -> dict:
-    """ 
+    """
     Convert Marshmallow schemas to dict definitions
 
     Also updates the optional definitions argument with any definitions
