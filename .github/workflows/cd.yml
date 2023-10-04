@@ -1,7 +1,7 @@
 name: Continuous Deployment
 on:
   schedule:
-    - cron: "00 09 1 * *"
+    - cron: "00 09 * * *"
 jobs:
   pre_release_check:
     name: Check for commits to master
