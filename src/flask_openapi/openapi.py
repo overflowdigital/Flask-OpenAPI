@@ -13,7 +13,6 @@ import os
 import re
 from collections import defaultdict
 from functools import partial, wraps
-from json import JSONEncoder
 
 import yaml
 from flask import abort, Blueprint, current_app, redirect, request, url_for
@@ -36,7 +35,6 @@ try:
 except ImportError:
     RequestParser = None
 import jsonschema
-from flask_openapi import __version__
 from flask_openapi.utils.constants import (
     OAS3_SUB_COMPONENTS,
     OPTIONAL_FIELDS,
