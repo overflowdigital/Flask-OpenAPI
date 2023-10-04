@@ -17,7 +17,7 @@ case $TOOL in
         flake8 $REPO/src/flask_openapi --config $REPO/ci/config/.flake8rc $REPO/src
         ;;
     'mypy')
-        mypy --config-file $REPO/ci/config/.mypyrc $REPO/src/flask_openapi $REPO/src || true
+        mypy --config-file $REPO/ci/config/.mypyrc $REPO/src || true
         ;;
     'safety')
         safety check --full-report --file $REPO/requirements.txt
