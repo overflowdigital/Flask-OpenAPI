@@ -13,20 +13,20 @@ REPO=$(dirname "$REPO../")
 diff_files=$(gh pr view $PR --json files --jq '.files.[].path')
 
 
-echo "Running against files: $(diff_files)"
+echo "Running against files: $diff_files"
 
 case $TOOL in
     'black')
-        black --check $(diff_files)
+        black --check $diff_files
         ;;
     'isort')
-        isort --check-only $(diff_files)
+        isort --check-only $diff_files
         ;;
     'flake8')
-        flake8 $REPO/src/flask_openapi --config $REPO/ci/config/.flake8rc $(diff_files)
+        flake8 $REPO/src/flask_openapi --config $REPO/ci/config/.flake8rc $diff_files
         ;;
     'mypy')
-        mypy --config-file $REPO/ci/config/.mypyrc $REPO/src/flask_openapi $(diff_files)
+        mypy --config-file $REPO/ci/config/.mypyrc $REPO/src/flask_openapi $diff_files
         ;;
     'safety')
         safety check --full-report --file $REPO/requirements.txt
