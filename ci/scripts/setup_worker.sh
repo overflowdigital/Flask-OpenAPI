@@ -11,3 +11,5 @@ sudo apt upgrade -y
 
 python3 -m pip install --upgrade pip
 python3 -m pip install -r $REPO/ci/config/requirements.txt
+
+mkdir -p $REPO/ci/codescan_logs
