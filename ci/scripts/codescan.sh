@@ -11,15 +11,19 @@ source $PWD/get_path.sh
 # Run the tool on the repository based on the argument.
 case $TOOL in
     'black')
+	touch $REPO/ci/codescan_logs/black.log
         black --check $REPO/src > $REPO/ci/codescan_logs/black.log
         ;;
     'flake8')
+	touch $REPO/ci/codescan_logs/flake8.log
         flake8 $REPO/src/flask_openapi --config $REPO/ci/config/.flake8rc $REPO/src > $REPO/ci/codescan_logs/flake8.log
         ;;
     'mypy')
+	touch $REPO/ci/codescan_logs/mypy.log
         mypy --config-file $REPO/ci/config/.mypyrc $REPO/src > $REPO/ci/codescan_logs/mypy.log
         ;;
     'safety')
+	touch $REPO/ci/codescan_logs/safety.log
         safety check --full-report --file $REPO/requirements.txt > $REPO/ci/codescan_logs/safety.log
         ;;
     *)
