@@ -1,11 +1,10 @@
 #!/bin/bash
+# Builds the package and checks it with twine.
 
 set -e
-set -x
 
-REPO="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
-REPO=$(dirname "$REPO../")
-REPO=$(dirname "$REPO../")
+PWD=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+source $PWD/get_path.sh
 
 cd $REPO
 python3 -m build

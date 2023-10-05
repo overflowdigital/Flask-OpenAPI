@@ -1,11 +1,12 @@
 #!/bin/bash
+# Builds the package and installs it locally.
+
+set -e
 
 # Change this to whatever python interpreter you use.
 PYTHON_INTERP="/opt/homebrew/bin/python3.10"
 
-REPO="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
-REPO=$(dirname "$REPO../")
-REPO=$(dirname "$REPO../")
+source get_path.sh
 
 rm -rf $REPO/dist
 $PYTHON_INTERP -m build
