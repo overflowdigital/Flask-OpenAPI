@@ -1,4 +1,4 @@
-from typing import Any, Callable
+from typing import Any, Callable, Dict
 
 from flask.views import MethodView
 
@@ -22,7 +22,7 @@ def has_valid_dispatch_view_docs(endpoint: Callable) -> bool:
     )
 
 
-def get_vendor_extension_fields(mapping: dict) -> dict[str, Any]:
+def get_vendor_extension_fields(mapping: Dict) -> Dict[str, Any]:
     """
     Identify vendor extension fields and extract them into a new dictionary.
     Examples:

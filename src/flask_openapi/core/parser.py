@@ -2,7 +2,7 @@ import inspect
 import os
 import re
 from collections import defaultdict
-from typing import Any, Callable, Literal, Optional, Union
+from typing import Any, Callable, Dict, List, Literal, Optional, Tuple, Union
 
 import yaml
 from flask import request
@@ -51,7 +51,7 @@ def parse_docstring(
     endpoint: Optional[str] = None,
     verb: Optional[str] = None,
     swag_path: Optional[str] = None,
-) -> tuple[str, str, dict]:
+) -> Tuple[str, str, Dict]:
     """
     Gets swag data for method/view docstring
 
@@ -76,14 +76,14 @@ def parse_docstring(
 
     first_line: str = ""
     other_lines: str = ""
-    swag: dict = {}
+    swag: Dict = {}
     full_doc: str = ""
 
     if not swag_path:
         swag_path = getattr(obj, "swag_path", None)
 
     swag_type: Literal["yml", "yaml"] = getattr(obj, "swag_type", "yml")
-    swag_paths: list[str] = getattr(obj, "swag_paths", [])
+    swag_paths: List[str] = getattr(obj, "swag_paths", [])
     root_path: str = get_root_path(obj)
     from_file: bool = False
 
@@ -128,7 +128,7 @@ def parse_docstring(
     return first_line, other_lines, swag
 
 
-def parse_definition_docstring(obj: Any, process_doc: Callable) -> tuple[str, dict]:
+def parse_definition_docstring(obj: Any, process_doc: Callable) -> Tuple[str, Dict]:
     """
     Gets swag data from docstring for class based definitions
 
@@ -145,7 +145,7 @@ def parse_definition_docstring(obj: Any, process_doc: Callable) -> tuple[str, di
     :rtype: Tuple[str, dict]
     """
     doc_lines: str = ""
-    swag: dict = {}
+    swag: Dict = {}
     full_doc: str = ""
     swag_path: str = getattr(obj, "swag_path", "")
     swag_type: Literal["yml", "yaml"] = getattr(obj, "swag_type", "yml")
@@ -174,13 +174,13 @@ def parse_definition_docstring(obj: Any, process_doc: Callable) -> tuple[str, di
 
 
 def parse_definitions(
-    alist: list[dict],
+    alist: List[Dict],
     level: int = 0,
     endpoint: Optional[str] = None,
     verb: Optional[str] = None,
     prefix_ids: bool = False,
     openapi_version: Optional[Union[str, int]] = None,
-) -> list[dict]:
+) -> List[Dict]:
     """
     Since we couldn't be bothered to register models elsewhere
     our definitions need to be extracted from the parameters.
@@ -188,7 +188,7 @@ def parse_definitions(
     added to the definitions list.
 
     :param alist: list of parameters
-    :type alist: list[dict]
+    :type alist: List[dict]
 
     :param level: level of recursion
     :type level: int
@@ -206,19 +206,19 @@ def parse_definitions(
     :type openapi_version: Optional[str]
 
     :return: list of definitions
-    :rtype: list[dict]
+    :rtype: List[dict]
     """
 
     endpoint = endpoint or request.endpoint.lower()  # type: ignore
     verb = verb or request.method.lower() or ""  # type: ignore
     endpoint = endpoint.replace(".", "_")
 
-    def _extract_array_defs(source: dict) -> list[dict]:
+    def _extract_array_defs(source: Dict) -> List[Dict]:
         """
         Extracts definitions identified by `id`
         """
-        ret: list[dict] = []
-        items: Optional[dict] = source.get("items")
+        ret: List[Dict] = []
+        items: Optional[Dict] = source.get("items")
 
         if items and "schema" in items:
             ret += parse_definitions(
@@ -226,13 +226,13 @@ def parse_definitions(
             )
         return ret
 
-    defs: list[dict] = []
+    defs: List[Dict] = []
 
     for item in alist:
         if not getattr(item, "get"):
             raise RuntimeError("definitions must be a list of dicts")
 
-        schema: Optional[dict] = item.get("schema")
+        schema: Optional[Dict] = item.get("schema")
 
         if schema:
             schema_id: Optional[str] = schema.get("id")
@@ -249,7 +249,7 @@ def parse_definitions(
                 else:
                     ref_path = "#/definitions/"
 
-                ref: dict[str, str] = {"$ref": f"{ref_path}{schema_id}"}
+                ref: Dict[str, str] = {"$ref": f"{ref_path}{schema_id}"}
 
                 if level == 0:
                     item["schema"] = ref
@@ -276,7 +276,7 @@ def parse_definitions(
     return defs
 
 
-def parse_schema(spec: dict) -> dict:
+def parse_schema(spec: Dict) -> Dict:
     """
     Returns schema resources according to openapi version
 
@@ -313,7 +313,7 @@ def convert_references_to_openapi3(obj: Any) -> None:
 
 
 def convert_response_definitions_to_openapi3(
-    response: dict, media_types: list[str]
+    response: Dict, media_types: List[str]
 ) -> None:
     """
     Convert response definitions to openapi3 format
@@ -322,7 +322,7 @@ def convert_response_definitions_to_openapi3(
     :type response: dict
 
     :param media_types: media types
-    :type media_types: list[str]
+    :type media_types: List[str]
 
     :return: None
     """
@@ -335,7 +335,7 @@ def convert_response_definitions_to_openapi3(
         del response["schema"]
 
 
-def convert_responses_to_openapi3(responses: dict, media_types: list[str]) -> None:
+def convert_responses_to_openapi3(responses: Dict, media_types: List[str]) -> None:
     """
     Convert responses to openapi3 format
 
@@ -343,7 +343,7 @@ def convert_responses_to_openapi3(responses: dict, media_types: list[str]) -> No
     :type responses: dict
 
     :param media_types: media types
-    :type media_types: list[str]
+    :type media_types: List[str]
 
     :return: None
     """

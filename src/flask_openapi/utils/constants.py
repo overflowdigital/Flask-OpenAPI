@@ -1,6 +1,6 @@
-from typing import Any
+from typing import Any, Dict, List
 
-OPTIONAL_FIELDS: list[str] = [
+OPTIONAL_FIELDS: List[str] = [
     "tags",
     "consumes",
     "produces",
@@ -11,9 +11,9 @@ OPTIONAL_FIELDS: list[str] = [
     "externalDocs",
 ]
 
-OPTIONAL_OAS3_FIELDS: list[str] = ["components", "servers"]
+OPTIONAL_OAS3_FIELDS: List[str] = ["components", "servers"]
 
-OAS3_SUB_COMPONENTS: list[str] = [
+OAS3_SUB_COMPONENTS: List[str] = [
     "parameters",
     "securitySchemes",
     "requestBodies",
@@ -25,7 +25,7 @@ OAS3_SUB_COMPONENTS: list[str] = [
     "schemas",
 ]
 
-DEFAULT_FIELDS: dict[str, Any] = {
+DEFAULT_FIELDS: Dict[str, Any] = {
     "tags": [],
     "consumes": ["application/json"],
     "produces": ["application/json"],
