@@ -14,7 +14,7 @@ ARG=$1
 function replace() {
     VERSION=$1
     echo "Replacing version with: $VERSION"
-    sed -i '' "s/__version__ = .*/__version__ = \""$VERSION"\"/g" "$REPO/src/flask_openapi/__init__.py"
+    sed -i "s/__version__ = .*/__version__ = \""$VERSION"\"/g" "$REPO/src/flask_openapi/__init__.py"
 }
 
 # Check if the argument is empty
