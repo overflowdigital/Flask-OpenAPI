@@ -2,6 +2,7 @@
 # Runs a code scan tool on the repository.
 
 set -e
+set -x
 
 TOOL=$1
 
