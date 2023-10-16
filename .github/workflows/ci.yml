@@ -12,11 +12,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - name: Setup Worker
-        run: ci/scripts/setup_worker.sh
       - uses: actions/setup-python@v4
         with:
           python-version: '3.8' 
+      - name: Setup Worker
+        run: ci/scripts/setup_worker.sh
       - name: Build Package and Verify
         run: ci/scripts/build.sh
       - name: Typing Check
@@ -42,11 +42,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - name: Setup Worker
-        run: ci/scripts/setup_worker.sh
       - uses: actions/setup-python@v4
         with:
           python-version: '3.8' 
+      - name: Setup Worker
+        run: ci/scripts/setup_worker.sh
       - name: Build Package and Verify
         run: ci/scripts/build.sh
       - name: Run Unit Tests
