@@ -1,13 +1,13 @@
 import json
 from collections import OrderedDict
-from copy import deepcopy, Dict
-from typing import Any, Union
+from copy import deepcopy
+from typing import Any, Union, Dict
 
 import yaml
 from six import text_type
 
 
-def ordered_dict_to_dict(d: Union[Dict, OrderedDict]) -> diDictct:
+def ordered_dict_to_dict(d: Union[Dict, OrderedDict]) -> Dict:
     """
     Converts inner OrderedDict to bare dict
 
