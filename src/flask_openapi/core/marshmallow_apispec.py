@@ -1,6 +1,6 @@
 # coding: utf-8
 import inspect
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any, Callable, Dict, List, Optional, Type
 
 from flask import Flask
 from flask.views import MethodView
@@ -28,7 +28,7 @@ try:
         swag_validation_error_handler: Optional[Callable] = None
         swag_require_data: bool = True
 
-        def to_specs_dict(self) -> Dict[str, type["Schema"]]:
+        def to_specs_dict(self) -> Dict[str, Type["Schema"]]:
             specs = {"parameters": self.__class__}
             definitions: Dict = {}
             specs.update(convert_schemas(specs, definitions))

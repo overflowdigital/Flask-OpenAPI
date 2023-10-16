@@ -13,6 +13,7 @@ import os
 import re
 from collections import defaultdict
 from functools import partial, wraps
+from typing import Dict, List
 
 import yaml
 from flask import abort, Blueprint, current_app, redirect, request, url_for
