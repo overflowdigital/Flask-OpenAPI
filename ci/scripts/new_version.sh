@@ -2,6 +2,7 @@
 # This script is used to update the version of the package.
 
 set -e
+set -x
 
 PWD=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 source $PWD/get_path.sh
