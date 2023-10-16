@@ -2,7 +2,7 @@ import codecs
 import importlib
 import logging
 import os
-from typing import Any, Literal, Optional
+from typing import Any, Literal, Optional, List, Tuple
 
 
 def detect_by_bom(path: str, default: str = "utf-8") -> str:
@@ -21,7 +21,7 @@ def detect_by_bom(path: str, default: str = "utf-8") -> str:
     with open(path, "rb") as file:
         raw: bytes = file.read(4)
 
-    encoding_map: tuple = (
+    encoding_map: Tuple = (
         ("utf-8-sig", (codecs.BOM_UTF8,)),
         ("utf-16", (codecs.BOM_UTF16_LE, codecs.BOM_UTF16_BE)),
         ("utf-32", (codecs.BOM_UTF32_LE, codecs.BOM_UTF32_BE)),
@@ -75,7 +75,7 @@ def load_from_file(
 
         except IOError:
             path = path.replace("/", os.sep).replace("\\", os.sep)
-            split_path: list[str] = path.replace(
+            split_path: List[str] = path.replace(
                 (root_path or os.path.dirname(__file__)), ""
             ).split(os.sep)[1:]
 

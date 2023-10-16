@@ -1,6 +1,6 @@
 # coding: utf-8
 import inspect
-from typing import Any, Callable, Optional
+from typing import Any, Callable, Dict, List, Optional, Type
 
 from flask import Flask
 from flask.views import MethodView
@@ -28,9 +28,9 @@ try:
         swag_validation_error_handler: Optional[Callable] = None
         swag_require_data: bool = True
 
-        def to_specs_dict(self) -> dict[str, type["Schema"]]:
+        def to_specs_dict(self) -> Dict[str, Type["Schema"]]:
             specs = {"parameters": self.__class__}
-            definitions: dict = {}
+            definitions: Dict = {}
             specs.update(convert_schemas(specs, definitions))
             specs["definitions"] = definitions  # type: ignore
             return specs
@@ -51,9 +51,9 @@ class APISpec(BaseAPISpec):
     def to_flasgger(
         self,
         app: Optional[Flask] = None,
-        definitions: Optional[list] = None,
-        paths: Optional[list] = None,
-    ) -> dict:
+        definitions: Optional[List] = None,
+        paths: Optional[List] = None,
+    ) -> Dict:
         """
         Converts APISpec dict to flasgger suitable dict
         also adds definitions and paths (optional)
@@ -83,17 +83,17 @@ class SwaggerView(MethodView):
     A Swagger view
     """
 
-    parameters: list = []
-    responses: dict = {}
-    definitions: dict = {}
-    tags: list = []
-    consumes: list[str] = ["application/json"]
-    produces: list[str] = ["application/json"]
-    schemes: list = []
-    security: list = []
+    parameters: List = []
+    responses: Dict = {}
+    definitions: Dict = {}
+    tags: List = []
+    consumes: List[str] = ["application/json"]
+    produces: List[str] = ["application/json"]
+    schemes: List = []
+    security: List = []
     deprecated: bool = False
     operationId: Optional[Any] = None
-    externalDocs: dict = {}
+    externalDocs: Dict = {}
     summary: Optional[Any] = None
     description: Optional[str] = None
     validation: bool = False
@@ -105,8 +105,8 @@ class SwaggerView(MethodView):
         If validation=True perform validation
         """
         if self.validation:
-            specs: dict = {}
-            attrs: list[str] = OPTIONAL_FIELDS + [
+            specs: Dict = {}
+            attrs: List[str] = OPTIONAL_FIELDS + [
                 "parameters",
                 "definitions",
                 "responses",
@@ -115,7 +115,7 @@ class SwaggerView(MethodView):
             ]
             for attr in attrs:
                 specs[attr] = getattr(self, attr)
-            definitions: dict = {}
+            definitions: Dict = {}
             specs.update(convert_schemas(specs, definitions))
             specs["definitions"] = definitions
             validate(
@@ -126,7 +126,7 @@ class SwaggerView(MethodView):
         return super(SwaggerView, self).dispatch_request(*args, **kwargs)
 
 
-def convert_schemas(d: dict, definitions: dict = {}) -> dict:
+def convert_schemas(d: Dict, definitions: Dict = {}) -> Dict:
     """
     Convert Marshmallow schemas to dict definitions
 
@@ -143,13 +143,13 @@ def convert_schemas(d: dict, definitions: dict = {}) -> dict:
     :rtype: dict
     """
     definitions.update(d.get("definitions", {}))
-    new: dict = {}
+    new: Dict = {}
 
     for k, v in d.items():
         if isinstance(v, dict):
             v = convert_schemas(v, definitions)
         if isinstance(v, (list, tuple)):
-            new_v: list = []
+            new_v: List = []
             for item in v:
                 if isinstance(item, dict):
                     new_v.append(convert_schemas(item, definitions))
@@ -161,7 +161,7 @@ def convert_schemas(d: dict, definitions: dict = {}) -> dict:
                 raise RuntimeError("Please install marshmallow and apispec")
 
             definitions[v.__name__] = schema2jsonschema(v)
-            ref: dict[str, str] = {"$ref": "#/definitions/{0}".format(v.__name__)}
+            ref: Dict[str, str] = {"$ref": "#/definitions/{0}".format(v.__name__)}
             if k == "parameters":
                 new[k] = schema2parameters(v, location=v.swag_in)
                 new[k][0]["schema"] = ref

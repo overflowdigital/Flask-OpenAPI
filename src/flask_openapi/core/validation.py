@@ -2,7 +2,7 @@ import copy
 import inspect
 import os
 import sys
-from typing import Any, Callable, Optional, Union
+from typing import Any, Callable, Optional, Union, Dict, List
 
 import jsonschema
 import yaml
@@ -11,7 +11,7 @@ from flask_openapi.core.parser import parse_definitions, parse_schema
 from flask_openapi.utils.files import load_from_file
 
 
-def __replace_ref(schema: dict, relative_path: str, swag: dict) -> dict:
+def __replace_ref(schema: Dict, relative_path: str, swag: Dict) -> Dict:
     """
     Replace $ref in schema
 
@@ -28,14 +28,14 @@ def __replace_ref(schema: dict, relative_path: str, swag: dict) -> dict:
     :rtype: dict
     """
     absolute_path: str = os.path.dirname(sys.argv[0])
-    new_value: dict = {}
+    new_value: Dict = {}
 
     for key, value in schema.items():
         if isinstance(value, dict):
             new_value[key] = __replace_ref(value, relative_path, swag)
         elif key == "$ref":
             if len(value) > 2 and value.startswith("#/"):  # $ref is local
-                content: dict = swag
+                content: Dict = swag
                 for id in value.split("/")[1:]:
                     content = content[id]
                 return (
@@ -77,7 +77,7 @@ def validate(
     filepath: Optional[str] = None,
     root: Optional[str] = None,
     definition: Optional[str] = None,
-    specs: Optional[dict] = None,
+    specs: Optional[Dict] = None,
     validation_function: Optional[Callable] = None,
     validation_error_handler: Optional[Callable] = None,
     require_data: bool = True,
@@ -166,14 +166,14 @@ def validate(
 
         full_doc: str = load_from_file(final_filepath)
         yaml_start: int = full_doc.find("---")
-        swag: dict = yaml.safe_load(full_doc[yaml_start if yaml_start >= 0 else 0 :])
+        swag: Dict = yaml.safe_load(full_doc[yaml_start if yaml_start >= 0 else 0 :])
     else:
         swag = copy.deepcopy(specs or {})
 
-    params: list = [item for item in swag.get("parameters", []) if item.get("schema")]
-    definitions: dict = {}
-    main_def: dict = {}
-    raw_definitions: list[dict] = parse_definitions(
+    params: List = [item for item in swag.get("parameters", []) if item.get("schema")]
+    definitions: Dict = {}
+    main_def: Dict = {}
+    raw_definitions: List[dict] = parse_definitions(
         params, endpoint=endpoint, verb=verb, openapi_version=openapi_version
     )
 

@@ -1,5 +1,5 @@
 from copy import deepcopy
-from typing import Any, Callable, Iterator, Optional, Union
+from typing import Any, Callable, Iterator, Optional, Union, Dict, Set, List
 
 from flask import current_app
 from flask_openapi.core.marshmallow_apispec import convert_schemas, SwaggerView
@@ -17,7 +17,7 @@ except ImportError:
     fmr_methods = None
 
 
-def merge_specs(target: dict, source: dict):
+def merge_specs(target: Dict, source: Dict):
     """
     Update target dictionary with values from the source, recursively.
     List items will be merged.
@@ -44,8 +44,8 @@ def merge_specs(target: dict, source: dict):
 
 def get_specs(
     rules: Iterator[Rule],
-    ignore_verbs: set[str],
-    optional_fields: list[str],
+    ignore_verbs: Set[str],
+    optional_fields: List[str],
     sanitizer: Callable,
     openapi_version: Union[str, int],
     doc_dir: Optional[str] = None,
@@ -60,7 +60,7 @@ def get_specs(
     :type ignore_verbs: set
 
     :param optional_fields: Optional fields
-    :type optional_fields: list[str]
+    :type optional_fields: List[str]
 
     :param sanitizer: Sanitizer function
     :type sanitizer: Callable
@@ -71,11 +71,11 @@ def get_specs(
     :param doc_dir: Directory containing docstrings
     :type doc_dir: str
     """
-    specs: list = []
+    specs: List = []
 
     for rule in rules:
         endpoint: Callable = current_app.view_functions[rule.endpoint]
-        methods: dict = {}
+        methods: Dict = {}
         is_mv: bool = is_valid_method_view(endpoint)
 
         if rule.methods:
@@ -90,7 +90,7 @@ def get_specs(
                             verb = verb.lower()
                             methods[verb] = getattr(endpoint.view_class, verb)
                     elif fmr_methods is not None:  # flask-mongorest
-                        endpoint_methods: set = set(m.method for m in endpoint.methods)
+                        endpoint_methods: Set = set(m.method for m in endpoint.methods)
                         if verb in endpoint_methods:
                             proxy_verb = rule.endpoint.replace(endpoint.__name__, "")
                             if proxy_verb:
@@ -100,7 +100,7 @@ def get_specs(
                 else:
                     methods[verb.lower()] = endpoint
 
-        verbs: list = []
+        verbs: List = []
 
         for verb, method in methods.items():
             klass: Optional[Callable] = method.__dict__.get("view_class", None)
@@ -116,13 +116,13 @@ def get_specs(
                     continue
                 raise RuntimeError("Cannot detect view_func for rule {0}".format(rule))
 
-            swag: dict = {}
-            swag_def: dict = {}
+            swag: Dict = {}
+            swag_def: Dict = {}
 
             swagged: bool = False
 
             if getattr(method, "specs_dict", None):
-                definition: dict = {}
+                definition: Dict = {}
                 merge_specs(
                     swag, convert_schemas(deepcopy(method.specs_dict), definition)
                 )
@@ -131,11 +131,11 @@ def get_specs(
 
             view_class: Optional[Callable] = getattr(endpoint, "view_class", None)
             if view_class and issubclass(view_class, SwaggerView):  # type: ignore
-                apispec_swag: dict = {}
+                apispec_swag: Dict = {}
 
                 # Don't need to alter definitions here
                 # Since it only stays in apispec_attrs
-                apispec_attrs: list[str] = optional_fields + [
+                apispec_attrs: List[str] = optional_fields + [
                     "parameters",
                     "definitions",
                     "responses",
@@ -148,7 +148,7 @@ def get_specs(
                         apispec_swag[attr] = value
                 # Don't need to change 'definitions' here
                 # Since it would be appended later according to openapi
-                apispec_definitions: dict = apispec_swag.get("definitions", {})
+                apispec_definitions: Dict = apispec_swag.get("definitions", {})
                 swag.update(convert_schemas(apispec_swag, apispec_definitions))
                 swag_def = apispec_definitions
 

@@ -13,6 +13,7 @@ import os
 import re
 from collections import defaultdict
 from functools import partial, wraps
+from typing import Dict, List
 
 import yaml
 from flask import abort, Blueprint, current_app, redirect, request, url_for
@@ -350,7 +351,7 @@ class Swagger(object):
                 # pop, assert single element
                 (update_schemas,) = update_schemas
             definitions.update(update_schemas)
-            defs: list = []  # swag.get('definitions', [])
+            defs: List = []  # swag.get('definitions', [])
             defs += parse_definitions(
                 defs,
                 endpoint=rule.endpoint,
@@ -454,7 +455,7 @@ class Swagger(object):
 
         http_methods = ["get", "post", "put", "delete", "patch"]
         for rule, verbs in specs:
-            operations: dict = {}
+            operations: Dict = {}
             for verb, swag in verbs:
                 if swag.get("paths"):
                     try:

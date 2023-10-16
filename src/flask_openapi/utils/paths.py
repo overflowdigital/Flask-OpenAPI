@@ -2,7 +2,7 @@ import inspect
 import logging
 import os
 import re
-from typing import Any, cast, Literal
+from typing import Any, Tuple, cast, Literal
 
 
 def remove_suffix(path: str) -> str:
@@ -33,7 +33,7 @@ def is_python_file(path: str) -> bool:
     return path.endswith(".py") and "__" not in path
 
 
-def get_path_from_doc(full_doc: str) -> tuple[str, Literal["yml", "yaml"]]:
+def get_path_from_doc(full_doc: str) -> Tuple[str, Literal["yml", "yaml"]]:
     """
     Get path and type from doc
 

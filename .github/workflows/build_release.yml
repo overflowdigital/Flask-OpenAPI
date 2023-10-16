@@ -16,6 +16,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.8' 
       - name: Setup Worker
         run: ci/scripts/setup_worker.sh
       - name: Build Package and Verify
@@ -47,6 +50,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.8' 
       - name: Setup Worker
         run: ci/scripts/setup_worker.sh
       - name: Build Package and Verify
@@ -75,6 +81,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.8' 
       - name: Setup Worker
         run: ci/scripts/setup_worker.sh
       - name: Increment Version Number
