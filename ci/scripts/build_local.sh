@@ -4,9 +4,10 @@
 set -e
 
 # Change this to whatever python interpreter you use.
-PYTHON_INTERP="/opt/homebrew/bin/python3.10"
+PYTHON_INTERP="/opt/homebrew/bin/python3.11"
 
-source get_path.sh
+PWD=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+source $PWD/get_path.sh
 
 rm -rf $REPO/dist
 $PYTHON_INTERP -m build

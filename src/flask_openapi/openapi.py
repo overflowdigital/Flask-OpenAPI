@@ -133,9 +133,7 @@ class Swagger(object):
 
         self.validation_function = validation_function or default_validation_function
 
-        self.validation_error_handler = (
-            validation_error_handler or default_error_handler
-        )
+        self.validation_error_handler = validation_error_handler or default_error_handler
         self.apispecs = {}  # cached apispecs
         self.parse = parse
         if app:
@@ -204,9 +202,7 @@ class Swagger(object):
         Returns all werkzeug rules
         """
         rule_filter = rule_filter or (lambda rule: True)
-        app_rules = [
-            rule for rule in current_app.url_map.iter_rules() if rule_filter(rule)
-        ]
+        app_rules = [rule for rule in current_app.url_map.iter_rules() if rule_filter(rule)]
         return app_rules
 
     def get_def_models(self, definition_filter=None):
@@ -214,11 +210,7 @@ class Swagger(object):
         Used for class based definitions
         """
         model_filter = definition_filter or (lambda tag: True)
-        return {
-            definition.name: definition.obj
-            for definition in self.definition_models
-            if model_filter(definition)
-        }
+        return {definition.name: definition.obj for definition in self.definition_models if model_filter(definition)}
 
     def get_apispecs(self, endpoint="apispec_1"):
         if not self.app.debug and endpoint in self.apispecs:
@@ -230,10 +222,7 @@ class Swagger(object):
                 spec = _spec
                 break
         if not spec:
-            raise RuntimeError(
-                "Can`t find specs by endpoint {},"
-                " check your flasgger`s config".format(endpoint)
-            )
+            raise RuntimeError("Can`t find specs by endpoint {}," " check your flasgger`s config".format(endpoint))
 
         data = {
             # try to get from config['SWAGGER']['info']
@@ -244,12 +233,8 @@ class Swagger(object):
             or {
                 "version": spec.get("version", self.config.get("version", "0.0.1")),
                 "title": spec.get("title", self.config.get("title", "A swagger API")),
-                "description": spec.get(
-                    "description", self.config.get("description", "powered by Flasgger")
-                ),
-                "termsOfService": spec.get(
-                    "termsOfService", self.config.get("termsOfService", "/tos")
-                ),
+                "description": spec.get("description", self.config.get("description", "powered by Flasgger")),
+                "termsOfService": spec.get("termsOfService", self.config.get("termsOfService", "/tos")),
             },
             "paths": self.config.get("paths") or defaultdict(dict),
             "definitions": self.config.get("definitions") or defaultdict(dict),
@@ -264,9 +249,7 @@ class Swagger(object):
         if openapi_version:
             data["openapi"] = openapi_version
         else:
-            data["swagger"] = self.config.get("swagger") or self.config.get(
-                "swagger_version", "2.0"
-            )
+            data["swagger"] = self.config.get("swagger") or self.config.get("swagger_version", "2.0")
 
         # Support extension properties in the top level config
         top_level_extension_options = get_vendor_extension_fields(self.config)
@@ -288,9 +271,7 @@ class Swagger(object):
 
         if is_openapi3(openapi_version):
             # enable oas3 fields when openapi_version is 3.*.*
-            optional_oas3_fields = (
-                self.config.get("optional_oas3_fields") or OPTIONAL_OAS3_FIELDS
-            )
+            optional_oas3_fields = self.config.get("optional_oas3_fields") or OPTIONAL_OAS3_FIELDS
             for key in optional_oas3_fields:
                 if self.config.get(key):
                     data[key] = self.config.get(key)
@@ -315,9 +296,7 @@ class Swagger(object):
             doc_dir=self.config.get("doc_dir"),
         )
 
-        for name, def_model in self.get_def_models(
-            spec.get("definition_filter")
-        ).items():
+        for name, def_model in self.get_def_models(spec.get("definition_filter")).items():
             description, swag = parse_definition_docstring(def_model, self.sanitizer)
             if name and swag:
                 if description:
@@ -467,9 +446,7 @@ class Swagger(object):
                                         path_verb,
                                     )
                     except AttributeError:
-                        logging.exception(
-                            f"Swagger doc not in the correct format. {swag}"
-                        )
+                        logging.exception(f"Swagger doc not in the correct format. {swag}")
                 else:
                     get_operations(swag)
 
@@ -514,9 +491,7 @@ class Swagger(object):
         if is_openapi3(openapi_version):
             # Copy definitions to components/schemas
             if definitions:
-                data.setdefault("components", {}).setdefault("schemas", {}).update(
-                    definitions
-                )
+                data.setdefault("components", {}).setdefault("schemas", {}).update(definitions)
 
         return data
 
@@ -556,12 +531,8 @@ class Swagger(object):
                 __name__,
                 url_prefix=self.config.get("url_prefix", None),
                 subdomain=self.config.get("subdomain", None),
-                template_folder=self.config.get(
-                    "template_folder", "ui/version_{0}/templates".format(uiversion)
-                ),
-                static_folder=self.config.get(
-                    "static_folder", "ui/version_{0}/static".format(uiversion)
-                ),
+                template_folder=self.config.get("template_folder", "ui/version_{0}/templates".format(uiversion)),
+                static_folder=self.config.get("static_folder", "ui/version_{0}/static".format(uiversion)),
                 static_url_path=self.config.get("static_url_path", None),
             )
 
@@ -569,12 +540,13 @@ class Swagger(object):
             blueprint.add_url_rule(
                 specs_route,
                 "apidocs",
-                view_func=wrap_view(
-                    APIDocsView().as_view("apidocs", view_args=dict(config=self.config))
-                ),
+                view_func=wrap_view(APIDocsView().as_view("apidocs", view_args=dict(config=self.config))),
             )
 
-            if uiversion < 3:
+            if uiversion == "redoc":
+                redirect_default = "/oauth2-redirect.html"
+
+            elif uiversion < 3:
                 redirect_default = specs_route + "/o2c.html"
             else:
                 redirect_default = "/oauth2-redirect.html"
@@ -591,9 +563,7 @@ class Swagger(object):
                 view_func=lambda: redirect(url_for("flask_openapi.apidocs")),
             )
         else:
-            blueprint = Blueprint(
-                self.config.get("endpoint", "flask_openapi"), __name__
-            )
+            blueprint = Blueprint(self.config.get("endpoint", "flask_openapi"), __name__)
 
         for spec in self.config["specs"]:
             self.endpoints.append(spec["endpoint"])
@@ -658,9 +628,7 @@ class Swagger(object):
                     return
 
                 parsers = defaultdict(RequestParser)
-                schemas = defaultdict(
-                    lambda: {"type": "object", "properties": defaultdict(dict)}
-                )
+                schemas = defaultdict(lambda: {"type": "object", "properties": defaultdict(dict)})
                 self.update_schemas_parsers(doc, schemas, parsers, definitions)
                 self.schemas[path_key] = schemas
                 self.parsers[path_key] = parsers
@@ -698,9 +666,7 @@ class Swagger(object):
                     parsers[location].add_argument(
                         name,
                         type=self.SCHEMA_TYPES[
-                            value["schema"].get("type", None)
-                            if "schema" in value
-                            else value.get("type", None)
+                            value["schema"].get("type", None) if "schema" in value else value.get("type", None)
                         ],
                         required=value.get("required", False),
                         # Parsed in body
@@ -725,9 +691,7 @@ class Swagger(object):
                         parsers[location].add_argument(
                             name,
                             type=self.SCHEMA_TYPES[
-                                param["schema"].get("type", None)
-                                if "schema" in param
-                                else param.get("type", None)
+                                param["schema"].get("type", None) if "schema" in param else param.get("type", None)
                             ],
                             required=param.get("required", False),
                             location=self.SCHEMA_LOCATIONS[param["in"]],
@@ -744,9 +708,7 @@ class Swagger(object):
         else:
             schemas[location]["definitions"] = dict(definitions)
 
-    def validate(
-        self, schema_id, validation_function=None, validation_error_handler=None
-    ):
+    def validate(self, schema_id, validation_function=None, validation_error_handler=None):
         """
         A decorator that is used to validate incoming requests data
         against a schema
@@ -816,9 +778,7 @@ class Swagger(object):
         if schema_specs is None:
             raise KeyError("Specified schema_id '{0}' not found".format(schema_id))
 
-        for schema in (
-            parameter.get("schema") for parameter in schema_specs["parameters"]
-        ):
+        for schema in (parameter.get("schema") for parameter in schema_specs["parameters"]):
             if schema is not None and schema.get("id").lower() == schema_id:
                 return schema
 
