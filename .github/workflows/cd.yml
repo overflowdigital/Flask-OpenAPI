@@ -1,29 +1,11 @@
 name: Continuous Deployment
 on:
-  schedule:
-    - cron: "00 09 * * *"
+  push:
+    branches:
+      - main
 jobs:
-  pre_release_check:
-    name: Check for commits to master
-    permissions:
-      actions: read
-      contents: read
-    runs-on: ubuntu-latest
-    outputs:
-      should_run: ${{ steps.check.outputs.has-new-commits }}
-    steps:
-      - name: Determine if commits have been pushed to master.
-        id: check
-        uses: adriangl/check-new-commits-action@v1
-        with:
-          token: ${{secrets.GH_TOKEN}}
-          seconds: 604800
-          branch: "master"
-
   static_checks:
     name: Static Checks
-    needs: pre_release_check
-    if: needs.pre_release_check.outputs.should_run == 'true'
     permissions:
       actions: read
       contents: read
@@ -58,8 +40,6 @@ jobs:
 
   unit_tests:
     name: Unit Tests
-    needs: pre_release_check
-    if: needs.pre_release_check.outputs.should_run == 'true'
     permissions:
       actions: read
       contents: read
@@ -90,8 +70,7 @@ jobs:
 
   build_release:
     name: Build Release
-    needs: [pre_release_check, static_checks, unit_tests]
-    if: needs.pre_release_check.outputs.should_run == 'true'
+    needs: [static_checks, unit_tests]
     permissions:
       actions: read
       contents: read
